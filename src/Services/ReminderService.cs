@@ -1,34 +1,18 @@
-using System;
 using System.Text.RegularExpressions;
-using System.Threading.Tasks;
-using System.Threading;
-using Discord;
-using Discord.WebSocket;
-using Gommon;
-using Humanizer;
-using Volte.Core.Entities;
-using Volte.Core.Helpers;
+using Optional = Gommon.Optional;
 
 namespace Volte.Services
 {
-    public class ReminderService : IVolteService
+    public partial class ReminderService(
+        DatabaseService _db,
+        DiscordSocketClient _client)
+        : IVolteService
     {
         private static readonly Regex JumpUrl =
-            new Regex(
-                @"https?://(?:(?:ptb|canary)\.)?discord(app)?\.com/channels/(?<GuildId>.+)/(?<ChannelId>\d+)/(?<MessageId>\d+)/?",
-                RegexOptions.Compiled);
+            MessageUrlPattern();
 
         private const int PollRate = 30; //seconds
         private static Timer _checker;
-        private readonly DatabaseService _db;
-        private readonly DiscordShardedClient _client;
-
-        public ReminderService(DatabaseService databaseService,
-            DiscordShardedClient client)
-        {
-            _client = client;
-            _db = databaseService;
-        }
 
         /// <summary>
         ///     Sets the value of private static field <see cref="_checker"/>.
@@ -80,10 +64,9 @@ namespace Volte.Services
                 return;
             }
 
-            var message = await channel.GetMessageAsync(reminder.MessageId);
-            var timestamp = message != null
-                ? Format.Url(reminder.CreationTime.GetDiscordTimestamp(TimestampType.Relative), message.GetJumpUrl())
-                : reminder.CreationTime.GetDiscordTimestamp(TimestampType.Relative);
+            var timestamp = (await channel.GetMessageAsync(reminder.MessageId).AsOptional())
+                .Convert(msg => Format.Url(reminder.CreationTime.GetDiscordTimestamp(TimestampType.Relative), msg.GetJumpUrl()))
+                .OrElseGet(() => reminder.CreationTime.GetDiscordTimestamp(TimestampType.Relative));
 
             await channel.SendMessageAsync(author.Mention, embed: new EmbedBuilder()
                 .WithTitle("Reminder")
@@ -95,8 +78,11 @@ namespace Volte.Services
             _db.TryDeleteReminder(reminder);
         }
 
-        private bool IsMessageUrl(Reminder reminder) => JumpUrl.IsMatch(reminder.ReminderText, out var match) &&
+        private static bool IsMessageUrl(Reminder reminder) => JumpUrl.IsMatch(reminder.ReminderText, out var match) &&
                                                         (match.Groups["GuildId"].Value is "@me" ||
                                                          ulong.TryParse(match.Groups["GuildId"].Value, out _));
+        
+        [GeneratedRegex(@"https?://(?:(?:ptb|canary)\.)?discord(app)?\.com/channels/(?<GuildId>.+)/(?<ChannelId>\d+)/(?<MessageId>\d+)/?", RegexOptions.Compiled)]
+        private static partial Regex MessageUrlPattern();
     }
 }

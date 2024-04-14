@@ -1,44 +1,39 @@
-﻿using System.Collections.Generic;
-using System.Diagnostics;
-using System;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Discord;
-using Gommon;
-using Humanizer;
-using Qmmands;
-using Volte.Commands;
-using Volte.Core;
-using Volte.Core.Entities;
-using Volte.Core.Helpers;
+﻿using Volte.Core;
 
 namespace Volte.Services
 {
-    public sealed class CommandsService : IVolteService
+    public sealed class CommandsService(
+        IServiceProvider _provider,
+        CommandService _commandService,
+        QuoteService _quoteService)
+        : VolteExtension
     {
-        private readonly CommandService _commandService;
-        private readonly QuoteService _quoteService;
-
         public ulong SuccessfulCommandCalls { get; private set; }
         public ulong FailedCommandCalls { get; private set; }
-
-        public CommandsService(CommandService commandService,
-            QuoteService quoteService)
+        
+        public override Task OnInitializeAsync(DiscordSocketClient client)
         {
-            _commandService = commandService;
-            _quoteService = quoteService;
-            SuccessfulCommandCalls = 0;
-            FailedCommandCalls = 0;
+            client.MessageReceived += async socketMessage =>
+            {
+                if (socketMessage.ShouldHandle(out var msg))
+                {
+                    if (msg.Channel is IDMChannel dm)
+                        await dm.SendMessageAsync("Currently, I do not support commands via DM.");
+                    else
+                        await HandleMessageAsync(new MessageReceivedEventArgs(socketMessage, _provider));
+                }
+            };
+
+            return Task.CompletedTask;
         }
 
-        public async Task HandleMessageAsync(MessageReceivedEventArgs args)
+        private async Task HandleMessageAsync(MessageReceivedEventArgs args)
         {
-            var prefixes = new List<string>
-            {
-                args.Data.Configuration.CommandPrefix, $"<@{args.Context.Client.CurrentUser.Id}> ",
+            List<string> prefixes = [
+                args.Data.Configuration.CommandPrefix, 
+                $"<@{args.Context.Client.CurrentUser.Id}> ",
                 $"<@!{args.Context.Client.CurrentUser.Id}> "
-            };
+            ];
 
             if (CommandUtilities.HasAnyPrefix(args.Message.Content, prefixes, StringComparison.OrdinalIgnoreCase, out _,
                 out var cmd))
@@ -46,7 +41,7 @@ namespace Volte.Services
                 var sw = Stopwatch.StartNew();
                 var result = await _commandService.ExecuteAsync(cmd, args.Context);
                 sw.Stop();
-                if (!(result is CommandNotFoundResult))
+                if (result is not CommandNotFoundResult)
                     await OnCommandAsync(new CommandCalledEventArgs(result, args.Context, sw));
             }
             else
@@ -60,7 +55,6 @@ namespace Volte.Services
                         .ReplyToAsync(args.Message);
                 }
                 else if (!await _quoteService.CheckMessageAsync(args))
-                {
                     if (CommandUtilities.HasPrefix(args.Message.Content, '%', out var tagName))
                     {
                         var tag = args.Context.GuildData.Extras.Tags.FirstOrDefault(t =>
@@ -72,11 +66,11 @@ namespace Volte.Services
                             await args.Message.Channel.SendMessageAsync(tag.FormatContent(args.Context));
 
                     }
-                }
+                
             }
         }
 
-        public async Task OnCommandAsync(CommandCalledEventArgs args)
+        private async Task OnCommandAsync(CommandCalledEventArgs args)
         {
             ResultCompletionData data;
             switch (args.Result)
@@ -109,7 +103,7 @@ namespace Volte.Services
                     Logger.Error(LogSource.Service,
                         $"The command {args.Context.Command.Name} didn't return some form of ActionResult. " +
                         "This is developer error. " +
-                        "Please report this to Volte's developers: https://github.com/Ultz/Volte. Thank you!");
+                        "Please report this to my developers: https://github.com/Polyhaze/Volte. Thank you!");
                     return;
                 }
             }

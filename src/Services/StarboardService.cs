@@ -1,33 +1,15 @@
-using System;
-using System.Linq;
 using System.Net;
-using System.Threading.Tasks;
-using Discord;
-using Discord.Net;
-using Discord.WebSocket;
-using Gommon;
-using Volte.Core.Helpers;
-using Volte.Core.Entities;
 
 namespace Volte.Services
 {
-    public sealed class StarboardService : IVolteService
+    public sealed class StarboardService(DatabaseService _db, DiscordSocketClient _client)
+        : VolteExtension
     {
-        private readonly DatabaseService _db;
-        private readonly DiscordShardedClient _client;
-
         // Ensures starboard message creations don't happen twice, and edits are atomic. Also ensures dictionary updates
         // don't happen at the same time.
-        private readonly AsyncDuplicateLock<ulong> _starboardReadWriteLock;
+        private readonly AsyncDuplicateLock<ulong> _starboardReadWriteLock = new();
 
         private readonly Emoji _starEmoji = DiscordHelper.Star.ToEmoji();
-
-        public StarboardService(DatabaseService databaseService, DiscordShardedClient discordShardedClient)
-        {
-            _db = databaseService;
-            _client = discordShardedClient;
-            _starboardReadWriteLock = new AsyncDuplicateLock<ulong>();
-        }
 
         /// <summary>
         /// Verifies if a given reaction operation is for a valid starboard reaction (star emoji, not DM, not made by
@@ -46,7 +28,7 @@ namespace Volte.Services
             starboardChannel = default;
             
             // Ignore reaction events sent in DMs
-            if (!(channel is IGuildChannel guildChannel)) return false;
+            if (channel is not IGuildChannel guildChannel) return false;
 
             // Ignore non-star reactions
             if (reaction.Emote.Name != _starEmoji.Name) return false;
@@ -60,10 +42,19 @@ namespace Volte.Services
             if (!starboard.Enabled) return false;
 
             starboardChannel = _client.GetChannel(starboard.StarboardChannel);
-            return !(starboardChannel is null);
+            return starboardChannel is not null;
         }
 
-        public async Task HandleReactionAddAsync(Cacheable<IUserMessage, ulong> cachedMessage, Cacheable<IMessageChannel, ulong> cachedChannel, SocketReaction reaction)
+        public override Task OnInitializeAsync(DiscordSocketClient client)
+        {
+            client.ReactionAdded += HandleReactionAddAsync;
+            client.ReactionRemoved += HandleReactionRemoveAsync;
+            client.ReactionsCleared += HandleReactionsClearAsync;
+
+            return Task.CompletedTask;
+        }
+
+        private async Task HandleReactionAddAsync(Cacheable<IUserMessage, ulong> cachedMessage, Cacheable<IMessageChannel, ulong> cachedChannel, SocketReaction reaction)
         {
             var channel = await cachedChannel.GetOrDownloadAsync();
             

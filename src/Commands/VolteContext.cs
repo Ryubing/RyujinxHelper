@@ -1,28 +1,16 @@
-﻿using System;
-using System.Text;
-using System.Threading;
-using System.Threading.Tasks;
-using Discord;
-using Discord.WebSocket;
-using Qmmands;
-using Gommon;
-using Humanizer;
-using Volte.Core;
-using Volte.Core.Entities;
-using Volte.Core.Helpers;
-using Volte.Services;
+﻿using Volte.Core;
 
 namespace Volte.Commands
 {
     public sealed class VolteContext : CommandContext
     {
         public static VolteContext Create(SocketMessage msg, IServiceProvider provider) 
-            => new VolteContext(msg, provider);
+            => new(msg, provider);
 
         // ReSharper disable once SuggestBaseTypeForParameter
         private VolteContext(SocketMessage msg, IServiceProvider provider) : base(provider)
         {
-            Client = provider.Get<DiscordShardedClient>();
+            Client = provider.Get<DiscordSocketClient>();
             Guild = msg.Channel.Cast<SocketTextChannel>()?.Guild;
             Interactive = provider.Get<InteractiveService>();
             Channel = msg.Channel.Cast<SocketTextChannel>();
@@ -33,7 +21,7 @@ namespace Volte.Commands
         }
 
 
-        public DiscordShardedClient Client { get; }
+        public DiscordSocketClient Client { get; }
         public SocketGuild Guild { get; }
         public InteractiveService Interactive { get; }
         public SocketTextChannel Channel { get; }
@@ -63,11 +51,11 @@ namespace Volte.Commands
         ///     To disable a timeout, set it to <see cref="Timeout"/>.<see cref="Timeout.InfiniteTimeSpan"/>
         ///     TL;DR: Your <see cref="CommandService"/> must have a <see cref="TypeParser{T}"/> for <typeparamref name="T"/>.
         /// </summary>
-        /// <param name="timeout">The timespan to wait for. Defaults to 15 seconds.</param>
+        /// <param name="timeout">The timespan to wait for. Defaults to 30 seconds.</param>
         /// <typeparam name="T">The type of object to wait for.</typeparam>
         public async ValueTask<(T Result, bool DidTimeout)> GetNextAsync<T>(TimeSpan? timeout = null)
         {
-            timeout ??= 15.Seconds();
+            timeout ??= 30.Seconds();
             var message = await Interactive.NextMessageAsync(this, timeout: timeout);
             if (message is null)
             {
@@ -77,9 +65,9 @@ namespace Volte.Commands
             }
 
             var parserResult = await Services.Get<CommandService>().GetTypeParser<T>().ParseAsync(null, message.Content, this);
-            if (parserResult.IsSuccessful)
-                return (parserResult.Value, false);
-            return (default, false);
+            return parserResult.IsSuccessful 
+                ? (parserResult.Value, false) 
+                : (default, false);
         }
 
         public void Modify(DataEditor modifier)

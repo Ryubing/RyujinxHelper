@@ -9,14 +9,14 @@ namespace Volte.Core.Entities
     public class AddonEnvironment
     {
         public IServiceProvider Services { get; }
-        public DiscordShardedClient Client { get; }
+        public DiscordSocketClient Client { get; }
         public CommandService Commands { get; }
         public DatabaseService Database { get; }
 
         public AddonEnvironment(IServiceProvider provider)
         {
             Services = provider;
-            Client = provider.Get<DiscordShardedClient>();
+            Client = provider.Get<DiscordSocketClient>();
             Commands = provider.Get<CommandService>();
             Database = provider.Get<DatabaseService>();
         }

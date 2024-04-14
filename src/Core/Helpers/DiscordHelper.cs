@@ -148,15 +148,12 @@ namespace Volte.Core.Helpers
             => client.GetUser(Config.Owner);
 
         public static SocketGuild GetPrimaryGuild(this BaseSocketClient client)
-            => client.GetGuild(405806471578648588); //yes hardcoded, the functions that use this guild are not meant for volte selfhosters anyways
+            => client.GetGuild(405806471578648588); // TODO: config option
 
-        public static void RegisterVolteEventHandlers(this DiscordShardedClient client, IServiceProvider provider)
+        public static void RegisterVolteEventHandlers(this DiscordSocketClient client, IServiceProvider provider)
         {
-            var welcome = provider.Get<WelcomeService>();
-            var autorole = provider.Get<AutoroleService>();
-            var mod = provider.Get<ModerationService>();
-            var starboard = provider.Get<StarboardService>();
-
+            provider.GetServices<VolteExtension>().ForEachAsync(ext => ext.OnInitializeAsync(client));
+            
             client.Log += async m =>
             {
                 if (!(m.Message.ContainsIgnoreCase("unknown dispatch") &&
@@ -164,35 +161,16 @@ namespace Volte.Core.Helpers
                     await Task.Run(() => Logger.HandleLogEvent(new LogEventArgs(m)));
             };
 
-            if (provider.TryGet<GuildService>(out var guild))
-                client.JoinedGuild += async g => await guild.OnJoinAsync(new JoinedGuildEventArgs(g));
-            
-
-            client.UserJoined += async user =>
+            client.Ready += async () =>
             {
-                if (Config.EnabledFeatures.Welcome) await welcome.JoinAsync(new UserJoinedEventArgs(user));
-                if (Config.EnabledFeatures.Autorole) await autorole.ApplyRoleAsync(new UserJoinedEventArgs(user));
-                if (provider.Get<DatabaseService>().GetData(user.Guild).Configuration.Moderation.CheckAccountAge &&
-                    Config.EnabledFeatures.ModLog)
-                    await mod.CheckAccountAgeAsync(new UserJoinedEventArgs(user));
-            };
-
-            client.UserLeft += async (eguild, user) =>
-            {
-                if (Config.EnabledFeatures.Welcome) 
-                    await welcome.LeaveAsync(new UserLeftEventArgs(eguild, user));
-            };
-
-            client.ShardReady += async c =>
-            {
-                var guilds = c.Guilds.Count;
-                var users = c.Guilds.SelectMany(x => x.Users).DistinctBy(x => x.Id).Count();
-                var channels = c.Guilds.SelectMany(x => x.Channels).DistinctBy(x => x.Id).Count();
+                var guilds = client.Guilds.Count;
+                var users = client.Guilds.SelectMany(x => x.Users).DistinctBy(x => x.Id).Count();
+                var channels = client.Guilds.SelectMany(x => x.Channels).DistinctBy(x => x.Id).Count();
 
                 Logger.PrintHeader();
                 Logger.Info(LogSource.Volte, "Use this URL to invite me to your guilds:");
-                Logger.Info(LogSource.Volte, $"{c.GetInviteUrl()}");
-                Logger.Info(LogSource.Volte, $"Logged in as {c.CurrentUser}, shard {c.ShardId}");
+                Logger.Info(LogSource.Volte, $"{client.GetInviteUrl()}");
+                Logger.Info(LogSource.Volte, $"Logged in as {client.CurrentUser.Username}#{client.CurrentUser.Discriminator}");
                 Logger.Info(LogSource.Volte, $"Default command prefix is: \"{Config.CommandPrefix}\"");
                 Logger.Info(LogSource.Volte, "Connected to:");
                 Logger.Info(LogSource.Volte, $"     {"guild".ToQuantity(guilds)}");
@@ -203,42 +181,27 @@ namespace Volte.Core.Helpers
 
                 if (streamer is null && type != ActivityType.CustomStatus)
                 {
-                    await c.SetGameAsync(name, null, type);
-                    Logger.Info(LogSource.Volte, $"Set {c.CurrentUser.Username}'s game to \"{Config.Game}\".");
+                    await client.SetGameAsync(name, null, type);
+                    Logger.Info(LogSource.Volte, $"Set {client.CurrentUser.Username}'s game to \"{Config.Game}\".");
                 }
                 else if (type != ActivityType.CustomStatus)
                 {
-                    await c.SetGameAsync(name, Config.FormattedStreamUrl, type);
+                    await client.SetGameAsync(name, Config.FormattedStreamUrl, type);
                     Logger.Info(LogSource.Volte,
-                        $"Set {c.CurrentUser.Username}'s activity to \"{type}: {name}\", at Twitch user {Config.Streamer}.");
+                        $"Set {client.CurrentUser.Username}'s activity to \"{type}: {name}\", at Twitch user {Config.Streamer}.");
                 }
 
                 Executor.ExecuteBackgroundAsync(async () =>
                 {
-                    foreach (var g in c.Guilds)
+                    foreach (var g in client.Guilds)
                     {
                         if (Config.BlacklistedOwners.Contains(g.OwnerId))
                             await g.LeaveAsync().ContinueWith(async _ => Logger.Warn(LogSource.Volte,
-                                $"Left guild \"{g.Name}\" owned by blacklisted owner {await c.Rest.GetUserAsync(g.OwnerId)}."));
+                                $"Left guild \"{g.Name}\" owned by blacklisted owner {await client.Rest.GetUserAsync(g.OwnerId)}."));
                         else provider.Get<DatabaseService>().GetData(g); //ensuring all guilds have data available to prevent exceptions later on 
                     }
                 });
             };
-
-            client.MessageReceived += async socketMessage =>
-            {
-                if (socketMessage.ShouldHandle(out var msg))
-                {
-                    if (msg.Channel is IDMChannel dm)
-                        await dm.SendMessageAsync("Currently, I do not support commands via DM.");
-                    else
-                        await provider.Get<CommandsService>().HandleMessageAsync(new MessageReceivedEventArgs(socketMessage, provider));
-                }
-            };
-            
-            client.ReactionAdded += starboard.HandleReactionAddAsync;
-            client.ReactionRemoved += starboard.HandleReactionRemoveAsync;
-            client.ReactionsCleared += starboard.HandleReactionsClearAsync;
         }
 
         public static Task<IUserMessage> SendToAsync(this EmbedBuilder e, IMessageChannel c) =>

@@ -23,9 +23,8 @@ namespace Volte.Commands.Modules
                 .AddField("Language/Library", $"C# 8, Discord.Net {Version.DiscordNetVersion}", true)
                 .AddField("Discord Application Created", (await Context.Client.GetApplicationInfoAsync()).CreatedAt.GetDiscordTimestamp(TimestampType.LongDateTime))
                 .AddField("Guilds", Context.Client.Guilds.Count, true)
-                .AddField("Shards", Context.Client.Shards.Count, true)
                 .AddField("Channels",
-                    Context.Client.Guilds.SelectMany(x => x.Channels).Where(x => !(x is SocketCategoryChannel))
+                    Context.Client.Guilds.SelectMany(x => x.Channels).Where(x => x is not SocketCategoryChannel)
                         .DistinctBy(x => x.Id).Count(),
                     true)
                 .AddField("Invite Me",

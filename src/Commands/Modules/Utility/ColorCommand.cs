@@ -42,27 +42,25 @@ namespace Volte.Commands.Modules
             }
 
             var colorTypeParse = await CommandService.GetTypeParser<Color>().ParseAsync(null, colorOrRole, Context);
-            // ReSharper disable once InvertIf
-            if (colorTypeParse.IsSuccessful)
+            if (!colorTypeParse.IsSuccessful)
+                return BadRequest("You didn't give a valid role or color.");
+            
+            
+            var color = colorTypeParse.Value;
+            return Ok(async () =>
             {
-                var color = colorTypeParse.Value;
-                return Ok(async () =>
-                {
-                    await using var stream = color.ToRgba32().CreateColorImage();
-                    await stream.SendFileToAsync(Context.Channel, "role.png", string.Empty, false, new EmbedBuilder()
-                            .WithColor(color)
-                            .WithDescription(new StringBuilder()
-                                .AppendLine($"**Hex:** {color.ToString().ToUpper()}")
-                                .AppendLine($"**RGB:** {color.R}, {color.G}, {color.B}")
-                                .ToString())
-                            .WithImageUrl("attachment://role.png")
-                            .WithCurrentTimestamp()
-                            .Build(),
-                        reference: new MessageReference(Context.Message.Id));
-                });
-            }
-
-            return BadRequest("You didn't give a valid role or color.");
+                await using var stream = color.ToRgba32().CreateColorImage();
+                await stream.SendFileToAsync(Context.Channel, "role.png", string.Empty, false, new EmbedBuilder()
+                        .WithColor(color)
+                        .WithDescription(new StringBuilder()
+                            .AppendLine($"**Hex:** {color.ToString().ToUpper()}")
+                            .AppendLine($"**RGB:** {color.R}, {color.G}, {color.B}")
+                            .ToString())
+                        .WithImageUrl("attachment://role.png")
+                        .WithCurrentTimestamp()
+                        .Build(),
+                    reference: new MessageReference(Context.Message.Id));
+            });
         }
     }
 }

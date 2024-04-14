@@ -1,30 +1,32 @@
-﻿using System.Threading.Tasks;
-using Volte.Core.Entities;
-using Volte.Core.Helpers;
+﻿using Volte.Core;
 
-namespace Volte.Services
+namespace Volte.Services;
+
+public sealed class AutoroleService(DatabaseService _db) : VolteExtension
 {
-    public sealed class AutoroleService : IVolteService
+    public override Task OnInitializeAsync(DiscordSocketClient client)
     {
-        private readonly DatabaseService _db;
-
-        public AutoroleService(DatabaseService databaseService) 
-            => _db = databaseService;
-
-        public async Task ApplyRoleAsync(UserJoinedEventArgs args)
+        client.UserJoined += async user =>
         {
-            var data = _db.GetData(args.Guild);
-            var targetRole = args.Guild.GetRole(data.Configuration.Autorole);
-            if (targetRole is null)
-            {
-                Logger.Debug(LogSource.Volte,
-                    $"Guild {args.Guild.Name}'s Autorole is set to an ID of a role that no longer exists; or is not set at all.");
-                return;
-            }
+            if (Config.EnabledFeatures.Autorole) await ApplyRoleAsync(new UserJoinedEventArgs(user));
+        };
 
-            await args.User.AddRoleAsync(targetRole, DiscordHelper.CreateRequestOptions(x => x.AuditLogReason = "Volte Autorole"));
+        return Task.CompletedTask;
+    }
+
+    private async Task ApplyRoleAsync(UserJoinedEventArgs args)
+    {
+        var data = _db.GetData(args.Guild);
+        var targetRole = args.Guild.GetRole(data.Configuration.Autorole);
+        if (targetRole is null)
+        {
             Logger.Debug(LogSource.Volte,
-                $"Applied role {targetRole.Name} to user {args.User} in guild {args.Guild.Name}.");
+                $"Guild {args.Guild.Name}'s Autorole is set to an ID of a role that no longer exists; or is not set at all.");
+            return;
         }
+
+        await args.User.AddRoleAsync(targetRole, DiscordHelper.CreateRequestOptions(x => x.AuditLogReason = "Volte Autorole"));
+        Logger.Debug(LogSource.Volte,
+            $"Applied role {targetRole.Name} to user {args.User} in guild {args.Guild.Name}.");
     }
 }

@@ -1,21 +1,4 @@
-using System;
-using System.Diagnostics;
-using System.Linq;
-using System.Net.Http;
-using System.Threading;
-using System.Threading.Tasks;
 using Discord;
-using Discord.Rest;
-using Discord.WebSocket;
-using Gommon;
-using Microsoft.Extensions.DependencyInjection;
-using Qmmands;
-using Sentry;
-using Volte.Commands.Modules;
-using Volte.Core.Entities;
-using Volte.Core.Helpers;
-using Volte.Services;
-using Console = Colorful.Console;
 
 namespace Volte.Core
 {
@@ -34,9 +17,9 @@ namespace Volte.Core
         private DiscordShardedClient _client;
         private CancellationTokenSource _cts;
 
-        private static IServiceProvider BuildServiceProvider(int shardCount)
+        private static IServiceProvider BuildServiceProvider()
             => new ServiceCollection()
-                .AddAllServices(shardCount)
+                .AddAllServices()
                 .BuildServiceProvider();
 
         private VolteBot()
@@ -50,7 +33,7 @@ namespace Volte.Core
 
             if (!Config.IsValidToken()) return;
 
-            _provider = BuildServiceProvider(await DiscordHelper.GetRecommendedShardCountAsync());
+            _provider = BuildServiceProvider();
             _client = _provider.Get<DiscordShardedClient>();
             _cts = _provider.Get<CancellationTokenSource>();
 
@@ -65,7 +48,7 @@ namespace Volte.Core
             var l = commandService.AddTypeParsers();
             sw.Stop();
             Logger.Info(LogSource.Volte,
-                $"Loaded TypeParsers: [{l.Select(x => x.Name.Replace("Parser", string.Empty)).Join(", ")}] in {sw.ElapsedMilliseconds}ms.");
+                $"Loaded TypeParsers: [{l.Select(x => x.Name.Replace("Parser", string.Empty)).JoinToString(", ")}] in {sw.ElapsedMilliseconds}ms.");
             sw = Stopwatch.StartNew();
             var loaded = commandService.AddModules(GetType().Assembly);
             sw.Stop();
@@ -73,7 +56,7 @@ namespace Volte.Core
                 $"Loaded {loaded.Count} modules and {loaded.Sum(m => m.Commands.Count)} commands in {sw.ElapsedMilliseconds}ms.");
             _client.RegisterVolteEventHandlers(_provider);
 
-            Executor.Execute(async () => await _provider.Get<AddonService>().InitAsync());
+            Executor.ExecuteBackgroundAsync(async () => await _provider.Get<AddonService>().InitAsync());
             _provider.Get<ReminderService>().Initialize();
 
             try
@@ -92,16 +75,6 @@ namespace Volte.Core
         {
             Logger.Critical(LogSource.Volte,
                 "Bot shutdown requested; shutting down and cleaning up.");
-
-            if (Config.GuildLogging.TryValidate(client, out var channel))
-            {
-                await new EmbedBuilder()
-                    .WithErrorColor()
-                    .WithAuthor(client.GetOwner())
-                    .WithDescription(
-                        $"Volte {Version.FullVersion} is shutting down {DateTime.Now.FormatBoldString()}. I was online for **{Process.GetCurrentProcess().CalculateUptime()}**!")
-                    .SendToAsync(channel);
-            }
 
             foreach (var disposable in provider.GetServices<IDisposable>())
                 disposable?.Dispose();

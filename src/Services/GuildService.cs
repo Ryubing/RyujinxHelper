@@ -51,58 +51,12 @@ namespace Volte.Services
             }
             catch (Exception)
             {
-                var c = args.Guild.TextChannels.OrderByDescending(x => x.Position).FirstOrDefault();
+                var c = args.Guild.TextChannels.MaxBy(x => x.Position);
                 Logger.Error(LogSource.Volte,
                     "Could not DM the guild owner; sending to the upper-most channel instead.");
                 if (c != null) await embed.SendToAsync(c);
             }
-
-            if (!Config.GuildLogging.TryValidate(_client, out var channel))
-            {
-                if (Config.GuildLogging.Enabled)
-                    Logger.Error(LogSource.Volte, "Invalid guild_logging.guild_id/guild_logging.channel_id configuration. Check your IDs and try again.");
-                return;
-            }
-
-            var all = args.Guild.Users;
-            var users = all.Where(u => !u.IsBot).ToArray();
-            var bots = all.Where(u => u.IsBot).ToArray();
-
-            var e = new EmbedBuilder()
-                .WithAuthor(await _client.Rest.GetUserAsync(args.Guild.OwnerId))
-                .WithTitle("Joined Guild")
-                .AddField("Name", args.Guild.Name, true)
-                .AddField("ID", args.Guild.Id, true)
-                .WithThumbnailUrl(args.Guild.IconUrl)
-                .WithCurrentTimestamp()
-                .AddField("Users", users.Length, true)
-                .AddField("Bots", bots.Length, true);
-
-            if (bots.Length > users.Length && !(bots.Length > 5))
-                await channel.SendMessageAsync(
-                    $"{_client.GetOwner().Mention}: Joined a guild with more bots than users.", embed: e.WithSuccessColor().Build());
-            else
-                await e.WithSuccessColor().SendToAsync(channel);
-        }
-
-        public async Task OnLeaveAsync(LeftGuildEventArgs args)
-        {
-            Logger.Debug(LogSource.Volte, "Left a guild.");
-            if (!Config.GuildLogging.TryValidate(_client, out var channel))
-            {
-                if (Config.GuildLogging.Enabled)
-                    Logger.Warn(LogSource.Volte, "Invalid guild_logging.guild_id/guild_logging.channel_id configuration. Check your IDs and try again.");
-                return;
-            }
-
-            await new EmbedBuilder()
-                .WithAuthor(await _client.Rest.GetUserAsync(args.Guild.OwnerId))
-                .WithTitle("Left Guild")
-                .AddField("Name", args.Guild.Name, true)
-                .AddField("ID", args.Guild.Id, true)
-                .WithThumbnailUrl(args.Guild.IconUrl)
-                .WithErrorColor()
-                .SendToAsync(channel);
+            
         }
     }
 }

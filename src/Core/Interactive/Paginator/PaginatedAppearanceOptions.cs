@@ -2,6 +2,7 @@
 using Discord;
 using Humanizer;
 using Volte.Core.Helpers;
+using Gommon;
 
 namespace Volte.Interactive
 {
@@ -20,7 +21,7 @@ namespace Volte.Interactive
         public string FooterFormat => "Page {0} / {1}";
 
         public string GenerateFooter(int currentPage, int totalPages) 
-            => FooterFormat.FormatWith(currentPage, totalPages); 
+            => FooterFormat.Format(currentPage, totalPages);
         public string InformationText => "This is a paginator. React with the various icons to change page and more.";
 
         public JumpDisplayOptions JumpDisplayOptions => JumpDisplayOptions.Always;

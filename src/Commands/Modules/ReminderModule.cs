@@ -42,11 +42,12 @@ namespace Volte.Commands.Modules
                     .AddField("Created", x.CreationTime.GetDiscordTimestamp(TimestampType.LongDateTime))
                     .AddField("Channel", MentionUtils.MentionChannel(x.ChannelId)))
                 .ToList();
-            if (pages.IsEmpty())
+            if (pages.None())
                 return Ok(
                     $"You currently have no reminders set{(onlyCurrentGuild ? " in this guild" : string.Empty)}.");
-            if (pages.Count is 1) return Ok(pages.First());
-            return Ok(pages);
+            return pages.Count is 1 
+                ? Ok(pages.First())
+                : Ok(pages);
         }
 
         [Command("Delete")]

@@ -30,7 +30,7 @@ namespace Volte.Commands.Modules
                     .WithAuthor($"{m.Author}, in #{m.Channel}", m.Author.GetEffectiveAvatarUrl())
                     .WithFooter(m.Timestamp.Humanize()).Apply(e =>
                     {
-                        if (!m.Attachments.IsEmpty())
+                        if (m.HasAttachments())
                             e.WithImageUrl(m.Attachments.First().Url);
                     }))
                 : BadRequest($"A message with that ID doesn't exist in {(channel.Id == Context.Channel.Id ? "this channel" : channel.Mention)}.");

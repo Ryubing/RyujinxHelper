@@ -51,7 +51,7 @@ namespace Volte.Interactive
             // Reactions take a while to add, don't wait for them
             _ = Executor.ExecuteAsync(async () =>
             {
-                if (!_pager.Pages.IsEmpty())
+                if (_pager.Pages.Any())
                 {
                     await Message.AddReactionAsync(_pager.Options.First);
                     await Message.AddReactionAsync(_pager.Options.Back);

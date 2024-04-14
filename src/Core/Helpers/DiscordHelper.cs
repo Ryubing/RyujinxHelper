@@ -66,10 +66,6 @@ namespace Volte.Core.Helpers
             return res;
         }
 
-        public static string GetUrl(this Emoji emoji)
-            =>
-                $"https://i.kuro.mu/emoji/512x512/{emoji.ToString().GetUnicodePoints().Select(x => x.ToString("x2")).Join('-')}.png";
-
 
         /// <summary>
         ///     Checks if the current user is the user identified in the bot's config.
@@ -169,10 +165,8 @@ namespace Volte.Core.Helpers
             };
 
             if (provider.TryGet<GuildService>(out var guild))
-            {
                 client.JoinedGuild += async g => await guild.OnJoinAsync(new JoinedGuildEventArgs(g));
-                client.LeftGuild += async g => await guild.OnLeaveAsync(new LeftGuildEventArgs(g));
-            }
+            
 
             client.UserJoined += async user =>
             {
@@ -183,9 +177,10 @@ namespace Volte.Core.Helpers
                     await mod.CheckAccountAgeAsync(new UserJoinedEventArgs(user));
             };
 
-            client.UserLeft += async user =>
+            client.UserLeft += async (eguild, user) =>
             {
-                if (Config.EnabledFeatures.Welcome) await welcome.LeaveAsync(new UserLeftEventArgs(user));
+                if (Config.EnabledFeatures.Welcome) 
+                    await welcome.LeaveAsync(new UserLeftEventArgs(eguild, user));
             };
 
             client.ShardReady += async c =>
@@ -218,7 +213,7 @@ namespace Volte.Core.Helpers
                         $"Set {c.CurrentUser.Username}'s activity to \"{type}: {name}\", at Twitch user {Config.Streamer}.");
                 }
 
-                _ = Executor.ExecuteAsync(async () =>
+                Executor.ExecuteBackgroundAsync(async () =>
                 {
                     foreach (var g in c.Guilds)
                     {
@@ -228,16 +223,6 @@ namespace Volte.Core.Helpers
                         else provider.Get<DatabaseService>().GetData(g); //ensuring all guilds have data available to prevent exceptions later on 
                     }
                 });
-
-                if (Config.GuildLogging.TryValidate(client, out var channel))
-                {
-                    await new EmbedBuilder()
-                        .WithSuccessColor()
-                        .WithAuthor(c.GetOwner())
-                        .WithDescription(
-                            $"Volte {Version.FullVersion} is starting {DateTime.Now.FormatBoldString()}!")
-                        .SendToAsync(channel);
-                }
             };
 
             client.MessageReceived += async socketMessage =>
@@ -342,7 +327,7 @@ namespace Volte.Core.Helpers
             => user.GetAvatarUrl(format, size) ?? user.GetDefaultAvatarUrl();
 
         public static bool HasAttachments(this IMessage message)
-            => !message.Attachments.IsEmpty();
+            => message.Attachments.Any();
 
         public static bool HasColor(this IRole role)
             => role.Color.RawValue != 0;

@@ -13,7 +13,7 @@ namespace Volte.Commands.Modules
         public async Task<ActionResult> IamAsync([Remainder, Description("The SelfRole you want to give yourself.")]
             SocketRole role)
         {
-            if (Context.GuildData.Extras.SelfRoles.IsEmpty())
+            if (!Context.GuildData.Extras.SelfRoles.Any())
                 return BadRequest("This guild does not have any roles you can give yourself.");
 
             if (!Context.GuildData.Extras.SelfRoles.Any(x => x.EqualsIgnoreCase(role.Name)))

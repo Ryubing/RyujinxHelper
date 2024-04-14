@@ -270,11 +270,11 @@ namespace Volte.Services
                 .WithAuthor(message.Author)
                 .AddField("Posted", Format.Bold(Format.Url($"#{message.Channel.Name}", message.GetJumpUrl())));
 
-            if (!message.Attachments.IsEmpty() && !message.Content.IsNullOrEmpty())
+            if (message.Attachments.Any() && !message.Content.IsNullOrEmpty())
                 e.WithDescription(message.Content).WithImageUrl(message.Attachments.First().Url);
-            if (message.Attachments.IsEmpty() && !message.Content.IsNullOrEmpty())
+            if (message.Attachments.None() && !message.Content.IsNullOrEmpty())
                 e.WithDescription(message.Content);
-            if (!message.Attachments.IsEmpty() && message.Content.IsNullOrEmpty())
+            if (message.Attachments.Any() && message.Content.IsNullOrEmpty())
                 e.WithImageUrl(message.Attachments.First().Url);
 
             if (message.Attachments.Count > 1)

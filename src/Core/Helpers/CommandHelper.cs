@@ -64,27 +64,27 @@ namespace Volte.Core.Helpers
                 embed.AddField("Subcommands", (await command.Module.Commands.WhereAccessibleAsync(ctx)
                         .Where(x => !x.Attributes.Any(a => a is DummyCommandAttribute)).ToListAsync())
                     .Select(x => FormatCommandShort(x, false))
-                    .Join(", "));
+                    .JoinToString(", "));
             }
 
 
             if (command.Attributes.Any(x => x is DummyCommandAttribute))
             {
                 await AddSubcommandsFieldAsync();
-                return !checks.IsEmpty()
+                return checks.Any()
                     ? embed.AddField("Checks",
-                        (await Task.WhenAll(checks.Select(check => FormatCheckAsync(check, ctx)))).Join("\n"))
+                        (await Task.WhenAll(checks.Select(check => FormatCheckAsync(check, ctx)))).JoinToString("\n"))
                     : embed;
             }
 
             if (command.Remarks != null)
                 embed.AppendDescription($" {command.Remarks}");
 
-            if (!command.FullAliases.IsEmpty())
-                embed.AddField("Aliases", command.FullAliases.Select(x => Format.Code(x)).Join(", "), true);
+            if (command.FullAliases.Any())
+                embed.AddField("Aliases", command.FullAliases.Select(x => Format.Code(x)).JoinToString(", "), true);
 
-            if (!command.Parameters.IsEmpty())
-                embed.AddField("Parameters", command.Parameters.Select(FormatParameter).Join("\n"));
+            if (command.Parameters.Any())
+                embed.AddField("Parameters", command.Parameters.Select(FormatParameter).JoinToString("\n"));
 
             if (command.CustomArgumentParserType is null)
                 embed.AddField("Usage", FormatUsage(ctx, command));
@@ -93,7 +93,7 @@ namespace Volte.Core.Helpers
                 embed.AddField("Placeholders",
                     WelcomeOptions.ValidPlaceholders
                         .Select(x => $"{Format.Code($"{{{x.Key}}}")}: {Format.Italics(x.Value)}")
-                        .Join("\n"));
+                        .JoinToString("\n"));
 
             if (command.Attributes.Any(x => x is ShowTimeFormatInHelpAttribute))
                 embed.AddField("Example Valid Time",
@@ -106,15 +106,15 @@ namespace Volte.Core.Helpers
                 unixAttr is ShowUnixArgumentsInHelpAttribute attr)
             {
                 static string FormatUnixArgs(KeyValuePair<string[], string> kvp) =>
-                    $"{Format.Bold(kvp.Key.Select(name => $"-{name}").Join(" or "))}: {kvp.Value}";
+                    $"{Format.Bold(kvp.Key.Select(name => $"-{name}").JoinToString(" or "))}: {kvp.Value}";
 
                 static string GetArgs(VolteUnixCommand unixCommand) => unixCommand switch
                 {
                     VolteUnixCommand.Announce => AdminUtilityModule.AnnounceNamedArguments.Select(FormatUnixArgs)
-                        .Join("\n"),
-                    VolteUnixCommand.Zalgo => UtilityModule.ZalgoNamedArguments.Select(FormatUnixArgs).Join("\n"),
+                        .JoinToString("\n"),
+                    VolteUnixCommand.Zalgo => UtilityModule.ZalgoNamedArguments.Select(FormatUnixArgs).JoinToString("\n"),
                     VolteUnixCommand.UnixBan => ModerationModule.UnixBanNamedArguments.Select(FormatUnixArgs)
-                        .Join("\n"),
+                        .JoinToString("\n"),
                     _ => throw new ArgumentOutOfRangeException(nameof(unixCommand))
                 };
 
@@ -122,23 +122,23 @@ namespace Volte.Core.Helpers
             }
 
 
-            return !checks.IsEmpty()
+            return checks.Any()
                 ? embed.AddField("Checks",
-                    (await Task.WhenAll(checks.Select(check => FormatCheckAsync(check, ctx)))).Join("\n"))
+                    (await Task.WhenAll(checks.Select(check => FormatCheckAsync(check, ctx)))).JoinToString("\n"))
                 : embed;
         }
 
         public static string FormatUsage(VolteContext ctx, Command cmd)
         {
-            static string FormatUsageParameter(Parameter param)
+            return new StringBuilder($"{ctx.GuildData.Configuration.CommandPrefix}{cmd.FullAliases.First().ToLower()} ")
+                .Append(cmd.Parameters.Select(formatUsageParameter).JoinToString(" "))
+                .ToString().Trim();
+            
+            static string formatUsageParameter(Parameter param)
                 => new StringBuilder(param.IsOptional ? "[" : "{")
                     .Append(param.Name)
                     .Append(param.IsOptional ? "]" : "}")
                     .ToString();
-
-            return new StringBuilder($"{ctx.GuildData.Configuration.CommandPrefix}{cmd.FullAliases.First().ToLower()} ")
-                .Append(cmd.Parameters.Select(FormatUsageParameter).Join(" "))
-                .ToString().Trim();
         }
 
         private static async Task<string> FormatCheckAsync(CheckAttribute cba, VolteContext context)

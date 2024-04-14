@@ -83,7 +83,7 @@ namespace Volte.Commands.Modules
                     .AppendLine($"Set this server's leaving message to: {Format.Code(message, string.Empty)}")
                     .AppendLine()
                     .AppendLine($"{sendingTest}"),
-                _ => Service.LeaveAsync(new UserLeftEventArgs(Context.User)));
+                _ => Service.LeaveAsync(new UserLeftEventArgs(Context.Guild, Context.User)));
         }
 
         [Command("Dm")]

@@ -41,20 +41,20 @@ namespace Volte.Commands.Modules
 
             try
             {
-                if (!cmds.IsEmpty()) e.AddField("Regular Commands", cmds.Join(", "));
+                if (cmds.Any()) e.AddField("Regular Commands", cmds.JoinToString(", "));
             }
             catch (ArgumentException)
             {
-                e.AppendDescriptionLine().AppendDescriptionLine(cmds.Join(", "));
+                e.AppendDescriptionLine().AppendDescriptionLine(cmds.JoinToString(", "));
             }
 
             try
             {
-                if (!groupCmds.IsEmpty()) e.AddField("Group Commands", groupCmds.Join(", "));
+                if (groupCmds.Any()) e.AddField("Group Commands", groupCmds.JoinToString(", "));
             }
             catch (ArgumentException)
             {
-                e.AppendDescriptionLine().AppendDescriptionLine(groupCmds.Join(", "));
+                e.AppendDescriptionLine().AppendDescriptionLine(groupCmds.JoinToString(", "));
             }
 
             return Ok(e);
@@ -63,7 +63,7 @@ namespace Volte.Commands.Modules
         //module without aliases: regular module
         private async IAsyncEnumerable<string> GetAllRegularCommandsAsync()
         {
-            foreach (var mdl in CommandService.GetAllModules().Where(x => x.FullAliases.IsEmpty()))
+            foreach (var mdl in CommandService.GetAllModules().Where(x => !x.FullAliases.Any()))
             {
                 if (!await CommandHelper.CanShowModuleAsync(Context, mdl)) continue;
 
@@ -78,7 +78,7 @@ namespace Volte.Commands.Modules
         // module with aliases: group command module
         private async IAsyncEnumerable<string> GetAllGroupCommandsAsync()
         {
-            foreach (var mdl in CommandService.GetAllModules().Where(x => !x.FullAliases.IsEmpty()))
+            foreach (var mdl in CommandService.GetAllModules().Where(x => x.FullAliases.None()))
             {
                 if (!await CommandHelper.CanShowModuleAsync(Context, mdl)) continue;
 

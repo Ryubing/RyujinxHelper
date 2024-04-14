@@ -27,8 +27,8 @@ namespace Volte.Commands.Modules
 
             var (allowed, disallowed) = GetPermissions(user);
 
-            var allowedString = allowed.Select(a => $"- {a.Name}").Join('\n');
-            var disallowedString = disallowed.Select(a => $"- {a.Name}").Join('\n');
+            var allowedString = allowed.Select(a => $"- {a.Name}").JoinToString('\n');
+            var disallowedString = disallowed.Select(a => $"- {a.Name}").JoinToString('\n');
             return Ok(Context.CreateEmbedBuilder().WithAuthor(user)
                 .AddField("Allowed", allowedString.IsNullOrEmpty() ? "- None" : allowedString, true)
                 .AddField("Denied", disallowedString.IsNullOrEmpty() ? "- None" : disallowedString, true));

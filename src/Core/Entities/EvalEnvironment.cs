@@ -113,7 +113,7 @@ namespace Volte.Core.Entities
                 }
 
                 if (inheritors.Count > 0)
-                    sb.Append($": {string.Join(", ", inheritors.Select(x => x.AsPrettyString()))}");
+                    sb.Append($": {inheritors.Select(x => x.AsPrettyString()).JoinToString(", ")}");
 
                 sb.AppendLine();
             });
@@ -172,7 +172,7 @@ namespace Volte.Core.Entities
             if (obj is IEnumerable objEnumerable)
             {
                 var arr = objEnumerable as object[] ?? objEnumerable.Cast<object>().ToArray();
-                if (arr.IsEmpty()) return inspection.ToString();
+                if (arr.None()) return inspection.ToString();
                 inspection.AppendLine();
                 inspection.AppendLine("<< Items >>");
                 arr.ForEach(prop => inspection.Append(" - ").Append(prop).AppendLine());
@@ -215,7 +215,7 @@ namespace Volte.Core.Entities
         public void Throw<TException>() where TException : Exception
         {
             var ctor = typeof(TException).GetConstructors()
-                           .FirstOrDefault(x => x.GetParameters().IsEmpty())
+                           .FirstOrDefault(x => x.GetParameters().None())
                        ?? throw new InvalidOperationException(
                            "Specified exception type didn't have a discoverable zero-parameter constructor.");
             throw ctor.Invoke(Array.Empty<object>()).Cast<TException>();

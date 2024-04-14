@@ -8,19 +8,11 @@
   "color_success": 7340283,
   "color_error": 16711680,
   "log_all_commands": true,
-  "guild_logging": {
-    "enabled": false,
-    "guild_id": 0,
-    "channel_id": 0
-  },
   "blacklisted_guild_owners": [],
   "enabled_features": {
     "log_to_file": true,
-    "antilink": true,
-    "blacklist": true,
     "mod_log": true,
     "welcome": true,
     "autorole": true,
-    "ping_checks": true
   }
 }

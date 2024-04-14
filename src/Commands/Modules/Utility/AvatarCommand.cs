@@ -24,7 +24,7 @@ namespace Volte.Commands.Modules
                 sb.Append(sizes.Take(1)
                     .Select(x => $"{Format.Url(x.ToString(), user.GetEffectiveAvatarUrl(size: x))} ").First());
                 sb.Append(sizes.Skip(1)
-                    .Select(x => $"| {Format.Url(x.ToString(), user.GetEffectiveAvatarUrl(size: x))} ").Join(string.Empty));
+                    .Select(x => $"| {Format.Url(x.ToString(), user.GetEffectiveAvatarUrl(size: x))} ").JoinToString(string.Empty));
             }).ToString().Trim();
 
 

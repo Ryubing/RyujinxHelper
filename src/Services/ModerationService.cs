@@ -11,20 +11,16 @@ using Volte.Core.Helpers;
 
 namespace Volte.Services
 {
-    public class ModerationService : IVolteService
+    public class ModerationService(DatabaseService _db) : IVolteService
     {
-        private readonly DatabaseService _db;
-
-        public ModerationService(DatabaseService databaseService) 
-            => _db = databaseService;
-        
         public async Task CheckAccountAgeAsync(UserJoinedEventArgs args)
         {
-            if (args.User.IsBot) return;
+            var modConfig = _db.GetData(args.Guild).Configuration.Moderation;
+            if (args.User.IsBot || !modConfig.CheckAccountAge) return;
             
             Logger.Debug(LogSource.Volte, "Attempting to post a VerifyAge message.");
             
-            var c = args.User.Guild.GetTextChannel(_db.GetData(args.Guild).Configuration.Moderation.ModActionLogChannel);
+            var c = args.User.Guild.GetTextChannel(modConfig.ModActionLogChannel);
             if (c is null) return;
             Logger.Debug(LogSource.Volte, "Resulting channel was either not set or invalid; aborting.");
             var diff = DateTimeOffset.Now - args.User.CreatedAt;
@@ -36,7 +32,7 @@ namespace Volte.Services
                 await new EmbedBuilder()
                     .WithColor(Color.Red)
                     .WithTitle("Possibly Malicious User")
-                    .WithThumbnailUrl("https://img.greemdev.net/WWElGbcQHC/3112312312.png")
+                    .WithThumbnailUrl("https://raw.githubusercontent.com/GreemDev/VolteAssets/main/question_mark.png")
                     .AddField("User", args.User.ToString(), true)
                     .AddField("Account Created", $"{args.User.CreatedAt.GetDiscordTimestamp(TimestampType.LongDateTime)}")
                     .WithFooter($"Account Created {unit.ToQuantity(time)} ago.")

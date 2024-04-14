@@ -114,7 +114,7 @@ namespace Volte.Commands.Modules
                         .AddField("Output", Format.Code(input.ToCharArray()
                             .Where(x => !char.IsWhiteSpace(x))
                             .Select(x => GetNato(char.ToLower(x)))
-                            .Join(" "))
+                            .JoinToString(" "))
                         )),
                 (e) 
                     => BadRequest($"There is not a NATO word for the character `{e.ParamName}`. Only standard English letters and numbers are valid."));

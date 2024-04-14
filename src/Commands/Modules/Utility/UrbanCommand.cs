@@ -18,8 +18,18 @@ namespace Volte.Commands.Modules
             string word)
         {
             var res = await RequestUrbanDefinitionsAsync(word);
+            var pages = res.Select(createEmbed).ToList();
 
-            EmbedBuilder CreateEmbed(UrbanEntry entry)
+            return !pages.Any()
+                ? BadRequest("That word didn't have a definition of Urban Dictionary.")
+                : pages.Count is 1
+                    ? Ok(pages.First())
+                    : Ok(PaginatedMessage.NewBuilder()
+                        .WithPages(pages)
+                        .WithTitle(word)
+                        .WithDefaults(Context));
+            
+            EmbedBuilder createEmbed(UrbanEntry entry)
             {
                 if (entry.Definition.Length > 1024)
                 {
@@ -28,11 +38,11 @@ namespace Volte.Commands.Modules
                                        Format.Bold(
                                            $"\n...and {oldDefLeng - 980} more {"character".ToQuantity(oldDefLeng - 980).Split(" ").Last()}.");
                 }
-                else if (entry.Definition.IsEmpty())
+                else if (!entry.Definition.Any())
                     entry.Definition = "<error occurred>";
 
                 return Context.CreateEmbedBuilder()
-                    .WithThumbnailUrl("https://upload.wikimedia.org/wikipedia/vi/7/70/Urban_Dictionary_logo.png")
+                    .WithThumbnailUrl("https://raw.githubusercontent.com/GreemDev/VolteAssets/main/Urban_Dictionary_logo.png")
                     .AddField("URL", entry.Permalink.IsNullOrEmpty() ? "None provided" : entry.Permalink, true)
                     .AddField("Thumbs Up/Down", $"{entry.Upvotes}/{entry.Downvotes}", true)
                     .AddField("Score", entry.Score, true)
@@ -41,18 +51,6 @@ namespace Volte.Commands.Modules
                     .AddField("Author", entry.Author.IsNullOrEmpty() ? "None provided" : entry.Author, true)
                     .WithFooter($"Created {entry.CreatedAt.FormatPrettyString()}");
             }
-
-
-            var pages = res.Select(CreateEmbed).ToList();
-
-            return pages.IsEmpty()
-                ? BadRequest("That word didn't have a definition of Urban Dictionary.")
-                : pages.Count is 1
-                    ? Ok(pages.First())
-                    : Ok(PaginatedMessage.NewBuilder()
-                        .WithPages(pages)
-                        .WithTitle(word)
-                        .WithDefaults(Context));
         }
     }
 }

@@ -1,7 +1,7 @@
 <table>
     <tr>
         <td align="center" width="25%">
-            <img src="https://img.greemdev.net/YmdTzPoEYx/volte_whiteorangepurple.png"></img>
+            <img src="https://raw.githubusercontent.com/GreemDev/VolteAssets/main/volte_whiteorangepurple.png"></img>
         </td>
         <td align="center" width="75%">
             
@@ -15,19 +15,16 @@ A free, robust, open-source Discord bot written in C# with [Discord.Net](https:/
     </tr>
 </table>
 
-|**Prefix**: $|**Lead:** [@GreemDev](https://github.com/GreemDev)|**Lang:** C#|**Library:** [Discord.Net](https://github.com/discord-net/Discord.Net)|[Discord Guild](https://discord.gg/H8bcFr2)|[Bot Invite Url](https://greemdev.net/invite)|**Runtime**: .NET Core 3
-|---|---|---|---|---|---|---|
+|**Prefix**: $|**Lead:** [@GreemDev](https://github.com/GreemDev)|**Lang:** C#|**Library:** [Discord.Net](https://github.com/discord-net/Discord.Net)|[Discord Guild](https://discord.gg/H8bcFr2)|
+|---|---|---|---|---|
 
 ## Quick Links 
- - [Feature List](https://github.com/Ultz/Volte/wiki/Features)
- - [Invite the bot](https://greemdev.net/Invite)
- - [Issue Tracker](https://github.com/Ultz/Volte/issues)
- - [Website](https://greemdev.net/Volte)
- - [Source Code](https://github.com/Ultz/Volte) (literally this site)
+ - [Feature List](https://github.com/Polyhaze/Volte/wiki/Features)
+ - [Issue Tracker](https://github.com/Polyhaze/Volte/issues)
 
 ## Bots made by Cool People
 
- * [abyssal/Abyss](https://github.com/abyssal/Abyss) 
+ * [jacksonrakena/jacksonbot](https://github.com/abyssal/Abyss) 
  * [QuantumToast/Administrator](https://gitlab.com/QuantumToast/Administrator)
 
 ## Like Volte? Here's a few things you can do if you want.
@@ -43,12 +40,12 @@ Don't want to do any of these? Using the bot and liking it is enough for me :)
 <table>
     <tr>
         <td align="center" width="50%">
-            <a href="https://www.jetbrains.com/resharper/"><img src="https://d3nmt5vlzunoa1.cloudfront.net/dotnet/files/2017/06/logo.png" alt="Jetbrains ReSharper" width="150px"></img></a>
-            <p><strong>For providing me with an open-source license for developement of Volte.</strong></p>            
+            <a href="https://www.jetbrains.com/"><img src="https://raw.githubusercontent.com/GreemDev/VolteAssets/main/jetbrains_logo.png" alt="Jetbrains" width="150px"></img></a>
+            <p><strong>For providing me with an open-source license for developement of Volte using Rider.</strong></p>
         </td>
         <td align="center" width="50%">
-            <a href="https://github.com/abyssal"><img src="https://img.greemdev.net/cpaXCdXden/74743c3b2052a828788a5bd4aeb0fa1e.png" alt="JProfiler" width="150px"></img></a>
-            <p><strong>For letting me <strike>steal your code</strike> use <a href="https://github.com/abyssal/abyss">whatever the hell your bot's name is now</a> as a reference.</strong></p>
+            <a href="https://github.com/jacksonrakena"><img src="https://avatars.githubusercontent.com/u/44521335" alt="abyssal" width="150px"></img></a>
+            <p><strong>For letting me <strike>steal your code</strike> use <a href="https://github.com/jacksonrakena/jacksonbot">whatever the hell your bot's name is now</a> as a reference.</strong></p>
         </td>
     </tr>
 </table>

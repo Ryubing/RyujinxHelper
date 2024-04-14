@@ -46,7 +46,7 @@ namespace Volte.Services
         {
             var sw = Stopwatch.StartNew();
             if (_isInitialized || !Directory.Exists("addons")) return; //don't auto-create a directory; if someone wants to use addons they need to make it themselves.
-            if (Directory.GetDirectories("addons").IsEmpty())
+            if (!Directory.GetDirectories("addons").Any())
             {
                 Logger.Info(LogSource.Service, "No addons are in the addons directory; skipping initialization.");
                 return;
@@ -66,10 +66,9 @@ namespace Volte.Services
             sw.Stop();
             Logger.Info(LogSource.Service, $"{"addon".ToQuantity(LoadedAddons.Count)} loaded in {sw.Elapsed.Humanize(2)}.");
             _isInitialized = true;
-
         }
 
-        private bool TryGetAddonContent(string dir, out VolteAddonMeta meta, out string code)
+        private static bool TryGetAddonContent(string dir, out VolteAddonMeta meta, out string code)
         {
             meta = null;
             code = null;

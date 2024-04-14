@@ -23,7 +23,7 @@ namespace Volte.Commands.Modules
                 .Concat(Context.Guild.VoiceChannels.Where(a => a.CategoryId is null))
                 .OrderBy(c => c.Position).ToList();
 
-            if (toIterate.IsEmpty())
+            if (!toIterate.Any())
                 uncategorized = null;
             else
                 foreach (var c in toIterate)
@@ -51,7 +51,7 @@ namespace Volte.Commands.Modules
             if (uncategorized != null)
                 res.Add(uncategorized.WithTitle("Uncategorized"));
 
-            if (!categories.IsEmpty())
+            if (categories.Any())
                 res.AddRange(categories);
 
             return res.Count is 1 ? Ok(res[0]) : Ok(res);

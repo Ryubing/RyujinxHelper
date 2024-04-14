@@ -34,9 +34,13 @@ namespace Volte.Core.Entities
         /// </summary>
         Gateway = 5,
         /// <summary>
-        ///     Indicates that this log message is from the Volte itself.
+        ///     Indicates that this log message is from Volte itself.
         /// </summary>
         Volte = 6,
+        /// <summary>
+        ///     Indicates that this log message is from Sentry.
+        /// </summary>
+        Sentry = 7,
         /// <summary>
         ///     Indicates that this log message came from an unknown source.
         /// </summary>

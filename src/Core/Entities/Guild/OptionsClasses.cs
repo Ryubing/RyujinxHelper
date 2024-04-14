@@ -88,14 +88,14 @@ namespace Volte.Core.Entities
                 .ReplaceIgnoreCase("{MemberCount}", user.Guild.MemberCount)
                 .ReplaceIgnoreCase("{UserString}", user);
 
-        public string FormatLeavingMessage(SocketGuildUser user)
-            => LeavingMessage.ReplaceIgnoreCase("{ServerName}", user.Guild.Name)
-                .ReplaceIgnoreCase("{GuildName}", user.Guild.Name)
+        public string FormatLeavingMessage(SocketGuild guild, SocketUser user)
+            => LeavingMessage.ReplaceIgnoreCase("{ServerName}", guild.Name)
+                .ReplaceIgnoreCase("{GuildName}", guild.Name)
                 .ReplaceIgnoreCase("{UserName}", user.Username)
                 .ReplaceIgnoreCase("{UserMention}", user.Mention)
-                .ReplaceIgnoreCase("{OwnerMention}", user.Guild.Owner.Mention)
+                .ReplaceIgnoreCase("{OwnerMention}", guild.Owner.Mention)
                 .ReplaceIgnoreCase("{UserTag}", user.Discriminator)
-                .ReplaceIgnoreCase("{MemberCount}", user.Guild.MemberCount)
+                .ReplaceIgnoreCase("{MemberCount}", guild.MemberCount)
                 .ReplaceIgnoreCase("{UserString}", user);
 
         public string FormatDmMessage(SocketGuildUser user)

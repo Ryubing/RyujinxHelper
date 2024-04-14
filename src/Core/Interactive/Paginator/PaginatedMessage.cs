@@ -76,9 +76,9 @@ namespace Volte.Interactive
 
                 do
                 {
-                    newList.Add(temp.Take(perPage).Select(x => x.ToString()).Join("\n"));
+                    newList.Add(temp.Take(perPage).Select(x => x.ToString()).JoinToString("\n"));
                     temp.RemoveRange(0, temp.Count < perPage ? temp.Count : perPage);
-                } while (!temp.IsEmpty());
+                } while (temp.Any());
 
                 Pages = newList;
                 return this;
@@ -136,9 +136,9 @@ namespace Volte.Interactive
 
             do
             {
-                newList.Add(temp.Take(entriesPerPage).Select(x => x.ToString()).Join("\n"));
+                newList.Add(temp.Take(entriesPerPage).Select(x => x.ToString()).JoinToString("\n"));
                 temp.RemoveRange(0, temp.Count < entriesPerPage ? temp.Count : entriesPerPage);
-            } while (!temp.IsEmpty());
+            } while (temp.Any());
 
             Pages = newList;
 

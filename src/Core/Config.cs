@@ -22,7 +22,7 @@ namespace Volte.Core
             ReadCommentHandling = JsonCommentHandling.Skip,
             WriteIndented = true,
             PropertyNameCaseInsensitive = true,
-            IgnoreNullValues = false,
+            DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull,
             AllowTrailingCommas = true
         };
 
@@ -62,9 +62,8 @@ namespace Volte.Core
                 SuccessEmbedColor = 0x7000FB,
                 ErrorEmbedColor = 0xFF0000,
                 LogAllCommands = true,
-                GuildLogging = new GuildLogging(),
-                BlacklistedGuildOwners = new HashSet<ulong>(),
-                EnabledFeatures = new EnabledFeatures()
+                BlacklistedGuildOwners = new(),
+                EnabledFeatures = new()
             };
             try
             {
@@ -103,8 +102,8 @@ namespace Volte.Core
         public static (ActivityType Type, string Name, string Streamer) ParseActivity()
         {
             var split = Game.Split(" ");
-            var title = split.Skip(1).Join(" ");
-            if (split[0].ToLower() is "streaming") title = split.Skip(2).Join(" ");
+            var title = split.Skip(1).JoinToString(" ");
+            if (split[0].ToLower() is "streaming") title = split.Skip(2).JoinToString(" ");
             return split.First().ToLower() switch
             {
                 "playing" => (ActivityType.Playing, title, null),
@@ -140,8 +139,6 @@ namespace Volte.Core
         public static uint ErrorColor => _configuration.ErrorEmbedColor;
 
         public static bool LogAllCommands => _configuration.LogAllCommands;
-
-        public static GuildLogging GuildLogging => _configuration.GuildLogging;
 
         public static HashSet<ulong> BlacklistedOwners => _configuration.BlacklistedGuildOwners;
 
@@ -179,9 +176,6 @@ namespace Volte.Core
 
             [JsonPropertyName("log_all_commands")]
             public bool LogAllCommands { get; set; }
-
-            [JsonPropertyName("guild_logging")]
-            public GuildLogging GuildLogging { get; set; }
 
             [JsonPropertyName("blacklisted_guild_owners")]
             public HashSet<ulong> BlacklistedGuildOwners { get; set; }

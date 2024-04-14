@@ -7,13 +7,11 @@ using Volte.Core.Entities;
 namespace Volte.Commands
 {
     [InjectTypeParser]
-    public sealed class EmoteParser : VolteTypeParser<IEmote>
+    public sealed class EmoteParser : VolteTypeParser<Emote>
     {
-        public override ValueTask<TypeParserResult<IEmote>> ParseAsync(string value, VolteContext _)
+        public override ValueTask<TypeParserResult<Emote>> ParseAsync(string value, VolteContext _)
             => Emote.TryParse(value, out var emote)
                 ? Success(emote)
-                : Regex.Match(value, "[^\u0000-\u007F]+", RegexOptions.IgnoreCase).Success
-                    ? Success(new Emoji(value))
-                    : Failure("Emote not found.");
+                : Failure("Emote not found.");
     }
 }

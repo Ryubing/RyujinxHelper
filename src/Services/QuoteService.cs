@@ -36,7 +36,7 @@ namespace Volte.Services
             var m = await GetMatchMessageAsync(match);
             if (m is null) return false;
             
-            if (m.Content.IsNullOrWhitespace() && !m.Embeds.IsEmpty()) return false;
+            if (m.Content.IsNullOrWhitespace() && m.Embeds.Any()) return false;
 
             await GenerateQuoteEmbed(m, args.Context).SendToAsync(args.Context.Channel)
                 .ContinueWith(async _ =>

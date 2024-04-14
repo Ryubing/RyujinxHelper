@@ -6,13 +6,13 @@ namespace Volte.Core.Entities
 {
     public sealed class UserLeftEventArgs : EventArgs
     {
-        public SocketGuildUser User { get; }
+        public SocketUser User { get; }
         public SocketGuild Guild { get; }
 
-        public UserLeftEventArgs(SocketGuildUser user)
+        public UserLeftEventArgs(SocketGuild guild, SocketUser user)
         {
             User = user;
-            Guild = user.Guild;
+            Guild = guild;
         }
     }
 }

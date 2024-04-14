@@ -91,7 +91,7 @@ namespace Volte.Commands.Modules
                  "The URL to use as the avatar. Must be a DIRECT image URL. If this URL is not provided the bot will look for a message image attachment.")]
             string url = null)
         {
-            if (!Context.Message.Attachments.IsEmpty() && url is null)
+            if (Context.Message.Attachments.Any() && url is null)
                 url = Context.Message.Attachments.First().Url;
 
             if (url.IsNullOrWhitespace() || !Uri.IsWellFormedUriString(url, UriKind.Absolute))

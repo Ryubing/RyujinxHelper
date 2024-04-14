@@ -23,7 +23,7 @@ namespace Volte.Commands.Modules
                     .AppendDescriptionLine($"**Track:** {Format.Url(spotify.TrackTitle, spotify.TrackUrl)}")
                     .AppendDescriptionLine($"**Album:** {spotify.AlbumTitle}")
                     .AppendDescriptionLine($"**Duration:** {(spotify.Duration.HasValue ? spotify.Duration.Value.Humanize(2) : "<not provided>")}")
-                    .AppendDescriptionLine($"**Artist(s):** {spotify.Artists.Join(", ")}")
+                    .AppendDescriptionLine($"**Artist(s):** {spotify.Artists.JoinToString(", ")}")
                     .AppendDescriptionLine($"**Started At:** {spotify.StartedAt?.GetDiscordTimestamp(TimestampType.LongTime) ?? "<not provided>"}")
                     .AppendDescriptionLine($"**Ends At:** {spotify.EndsAt?.GetDiscordTimestamp(TimestampType.LongTime) ?? "<not provided>"}")
                     .WithThumbnailUrl(spotify.AlbumArtUrl))

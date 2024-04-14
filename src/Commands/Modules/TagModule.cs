@@ -35,9 +35,9 @@ namespace Volte.Commands.Modules
         [Description("Lists all available tags in the current guild.")]
         public Task<ActionResult> TagsAsync()
             => Ok(Context.CreateEmbedBuilder(
-                Context.GuildData.Extras.Tags.IsEmpty()
-                    ? "None"
-                    : Context.GuildData.Extras.Tags.Select(x => Format.Code(x.Name)).Join(", ")
+                Context.GuildData.Extras.Tags.Any()
+                    ? Context.GuildData.Extras.Tags.Select(x => Format.Code(x.Name)).JoinToString(", ")
+                    : "None"
             ).WithTitle($"Available Tags for {Context.Guild.Name}"));
 
         [Command("Create", "Add", "New")]

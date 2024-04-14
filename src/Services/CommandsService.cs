@@ -17,24 +17,15 @@ namespace Volte.Services
 {
     public sealed class CommandsService : IVolteService
     {
-        private readonly AntilinkService _antilink;
-        private readonly BlacklistService _blacklist;
-        private readonly PingChecksService _pingchecks;
         private readonly CommandService _commandService;
         private readonly QuoteService _quoteService;
 
         public ulong SuccessfulCommandCalls { get; private set; }
         public ulong FailedCommandCalls { get; private set; }
 
-        public CommandsService(AntilinkService antilinkService,
-            BlacklistService blacklistService,
-            PingChecksService pingChecksService,
-            CommandService commandService,
+        public CommandsService(CommandService commandService,
             QuoteService quoteService)
         {
-            _antilink = antilinkService;
-            _blacklist = blacklistService;
-            _pingchecks = pingChecksService;
             _commandService = commandService;
             _quoteService = quoteService;
             SuccessfulCommandCalls = 0;
@@ -43,10 +34,6 @@ namespace Volte.Services
 
         public async Task HandleMessageAsync(MessageReceivedEventArgs args)
         {
-            if (Config.EnabledFeatures.Blacklist) await _blacklist.CheckMessageAsync(args);
-            if (Config.EnabledFeatures.Antilink) await _antilink.CheckMessageAsync(args);
-            if (Config.EnabledFeatures.PingChecks) await _pingchecks.CheckMessageAsync(args);
-
             var prefixes = new List<string>
             {
                 args.Data.Configuration.CommandPrefix, $"<@{args.Context.Client.CurrentUser.Id}> ",
@@ -152,9 +139,9 @@ namespace Volte.Services
             {
                 CommandNotFoundResult _ => "Unknown command.",
                 ChecksFailedResult cfr =>
-                    $"One or more checks failed for command **{cfr.Command.Name}**: {Format.Code(cfr.FailedChecks.Select(x => x.Result.FailureReason).Join('\n'), "css")}",
+                    $"One or more checks failed for command **{cfr.Command.Name}**: {Format.Code(cfr.FailedChecks.Select(x => x.Result.FailureReason).JoinToString('\n'), "css")}",
                 ParameterChecksFailedResult pcfr =>
-                    $"One or more checks failed on parameter **{pcfr.Parameter.Name}**: {Format.Code(pcfr.FailedChecks.Select(x => x.Result.FailureReason).Join('\n'), "css")}",
+                    $"One or more checks failed on parameter **{pcfr.Parameter.Name}**: {Format.Code(pcfr.FailedChecks.Select(x => x.Result.FailureReason).JoinToString('\n'), "css")}",
                 ArgumentParseFailedResult apfr => $"Parsing for arguments failed for {Format.Bold(apfr.Command.Name)}.",
                 TypeParseFailedResult tpfr => tpfr.FailureReason,
                 OverloadsFailedResult _ => "A suitable overload could not be found for the given parameter type/order.",

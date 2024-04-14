@@ -58,7 +58,7 @@ namespace Volte.Services
             {
                 await new EmbedBuilder()
                     .WithColor(data.Configuration.Welcome.WelcomeColor)
-                    .WithDescription(data.Configuration.Welcome.FormatLeavingMessage(args.User))
+                    .WithDescription(data.Configuration.Welcome.FormatLeavingMessage(args.Guild, args.User))
                     .WithThumbnailUrl(args.User.GetEffectiveAvatarUrl())
                     .WithCurrentTimestamp()
                     .SendToAsync(c);

@@ -55,13 +55,14 @@ namespace Volte.Core.Helpers
         {
             try
             {
-                return (await (await provider.Get<HttpClient>().GetAsync("https://paste.greemdev.net/raw/volteAllowedPasteSites")).Content
-                    .ReadAsStringAsync()).Split(" ");
+                /*return (await (await provider.Get<HttpClient>().GetAsync("https://paste.greemdev.net/raw/volteAllowedPasteSites")).Content
+                    .ReadAsStringAsync()).Split(" ");*/
+                return [];
             }
             catch (Exception e)
             {
                 SentrySdk.CaptureException(e);
-                return Array.Empty<string>();
+                return [];
             }
 
         }

@@ -21,13 +21,13 @@ namespace Volte.Commands.Modules
         [Description("Gets a list of self roles available for this guild.")]
         public Task<ActionResult> SelfRoleListAsync()
         {
-            if (Context.GuildData.Extras.SelfRoles.IsEmpty())
+            if (Context.GuildData.Extras.SelfRoles.None())
                 return BadRequest("No roles available to self-assign in this guild.");
 
             var roles = Context.GuildData.Extras.SelfRoles.Select(x => 
                 Context.Guild.Roles.AnyGet(r => r.Name.EqualsIgnoreCase(x), out var role)
                     ? Format.Bold(role.Name)
-                    : string.Empty).Where(x => !x.IsNullOrEmpty()).Join("\n");
+                    : string.Empty).Where(x => !x.IsNullOrEmpty()).JoinToString("\n");
 
             return Ok(Context.CreateEmbedBuilder(roles).WithTitle("Roles available to self-assign in this guild:"));
         }

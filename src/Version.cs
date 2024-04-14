@@ -16,8 +16,8 @@ namespace Volte
         public static string DiscordNetVersion => Discord.DiscordConfig.Version;
         public static SysVer AsDotNetVersion() => new SysVer(Major, Minor, Patch, Hotfix);
         
-        private static int Major => 3;
-        private static int Minor => 7;
+        private static int Major => 4;
+        private static int Minor => 0;
         private static int Patch => 0;
         private static int Hotfix => 0;
     }

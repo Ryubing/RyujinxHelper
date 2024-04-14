@@ -42,23 +42,5 @@ namespace Gommon
         public static Task WarnAsync(this SocketGuildUser member, VolteContext ctx, string reason)
             => ModerationModule.WarnAsync(ctx.User, ctx.GuildData, member,
                 ctx.Services.GetRequiredService<DatabaseService>(), reason);
-
-        public static T ValueLock<T>(this object @lock, Func<T> action)
-        {
-            lock (@lock)
-                return action();
-        }
-
-        public static void Lock(this object @lock, Action action)
-        {
-            lock (@lock)
-                action();
-        }
-
-        public static void LockedRef<T>(this T obj, Action<T> action)
-        {
-            lock (obj)
-                action(obj);
-        }
     }
 }

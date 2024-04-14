@@ -109,10 +109,10 @@ namespace Volte.Core.Helpers
                 lastChar = token;
             });
 
-            if (!argName.IsEmpty())
+            if (argName.Any())
                 result.Add(argName, argVal);
 
-            return !result.IsEmpty() 
+            return result.Any() 
                 ? result 
                 : throw new InvalidOperationException("No Unix-style arguments were recognizable from the input value.");
         }

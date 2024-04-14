@@ -7,9 +7,9 @@
         <RuntimeIdentifiers>linux-x64</RuntimeIdentifiers>
         <RuntimeIdentifiers>win-x64</RuntimeIdentifiers>
         <Authors>GreemDev</Authors>
-        <Company>Ultz</Company>
-        <PackageProjectUrl>https://greemdev.net/Volte</PackageProjectUrl>
-        <RepositoryUrl>https://github.com/Ultz/Volte</RepositoryUrl>
+        <Company>Polyhaze</Company>
+        <PackageProjectUrl>https://github.com/Polyhaze/Volte</PackageProjectUrl>
+        <RepositoryUrl>https://github.com/Polyhaze/Volte</RepositoryUrl>
         <Copyright>MIT</Copyright>
         <Version>4.0.0-DEV</Version>
         <Platforms>AnyCPU;x64</Platforms>

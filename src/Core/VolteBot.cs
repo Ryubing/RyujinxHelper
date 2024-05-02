@@ -2,26 +2,19 @@ namespace Volte.Core;
 
 public class VolteBot
 {
-    internal static async Task Main() => await StartAsync();
-
-    private static Task StartAsync()
+    public static Task StartAsync()
     {
         Console.Title = "Volte";
         Console.CursorVisible = false;
         return new VolteBot().LoginAsync();
     }
 
-    private IServiceProvider _provider;
+    private ServiceProvider _provider;
     private DiscordSocketClient _client;
     private CancellationTokenSource _cts;
 
-    private static IServiceProvider BuildServiceProvider()
-        => new ServiceCollection()
-            .AddAllServices()
-            .BuildServiceProvider();
-
     private VolteBot()
-        => Console.CancelKeyPress += (_, __) => _cts?.Cancel();
+        => Console.CancelKeyPress += (_, _) => _cts?.Cancel();
 
     private async Task LoginAsync()
     {
@@ -30,8 +23,10 @@ public class VolteBot
         Config.Load();
 
         if (!Config.IsValidToken()) return;
+        
+        Logger.LogFileRestartNotice();
 
-        _provider = BuildServiceProvider();
+        _provider = new ServiceCollection().AddAllServices().BuildServiceProvider();
         _client = _provider.Get<DiscordSocketClient>();
         _cts = _provider.Get<CancellationTokenSource>();
 
@@ -52,7 +47,7 @@ public class VolteBot
         sw.Stop();
         Logger.Info(LogSource.Volte,
             $"Loaded {loaded.Count} modules and {loaded.Sum(m => m.Commands.Count)} commands in {sw.ElapsedMilliseconds}ms.");
-        _client.RegisterVolteEventHandlers(_provider);
+        await _client.RegisterVolteEventHandlersAsync(_provider);
 
         Executor.ExecuteBackgroundAsync(async () => await _provider.Get<AddonService>().InitAsync());
         _provider.Get<ReminderService>().Initialize();
@@ -73,9 +68,6 @@ public class VolteBot
     {
         Logger.Critical(LogSource.Volte,
             "Bot shutdown requested; shutting down and cleaning up.");
-
-        foreach (var disposable in provider.GetServices<IDisposable>())
-            disposable?.Dispose();
 
         await client.SetStatusAsync(UserStatus.Invisible);
         await client.LogoutAsync();

@@ -2,15 +2,8 @@ using Volte.Core;
 
 namespace Volte.Services;
 
-public sealed class GuildService(DiscordSocketClient discordSocketClient) : VolteExtension
+public sealed class GuildService(DiscordSocketClient discordSocketClient) : IVolteService
 {
-    public override Task OnInitializeAsync(DiscordSocketClient client)
-    {
-        client.JoinedGuild += async g => OnJoinAsync(new JoinedGuildEventArgs(g));
-
-        return Task.CompletedTask;
-    }
-
     public async Task OnJoinAsync(JoinedGuildEventArgs args)
     {
         Logger.Debug(LogSource.Volte, "Joined a guild.");
@@ -28,12 +21,13 @@ public sealed class GuildService(DiscordSocketClient discordSocketClient) : Volt
             .WithColor(Config.SuccessColor)
             .WithDescription("Thanks for inviting me! Here's some basic instructions on how to set me up.")
             .AddField("Set your staff roles", "$setup", true)
-            .AddField("Permissions", new StringBuilder()
-                .AppendLine("It is recommended to give me the Administrator permission to avoid any permission errors that may happen.")
-                .AppendLine("You *can* get away with just send messages, ban members, kick members, and the like if you don't want to give me admin; however")
-                .AppendLine("if you're wondering why you're getting permission errors, that's *probably* why.")
-                .ToString())
-            .AddField("Support Server", "https://discord.gg/H8bcFr2");
+            .AddField("Permissions", sb =>
+                sb.AppendLine(
+                        "It is recommended to give me the Administrator permission to avoid any permission errors that may happen.")
+                    .AppendLine(
+                        "You *can* get away with just send messages, ban members, kick members, and the like if you don't want to give me admin; however")
+                    .AppendLine("if you're wondering why you're getting permission errors, that's *probably* why.")
+            );
 
         Logger.Debug(LogSource.Volte,
             "Attempting to send the guild owner the introduction message.");

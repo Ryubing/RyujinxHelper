@@ -12,6 +12,6 @@ namespace Volte.Commands.Modules
         [Command("Now")]
         [Description("Shows the current date and time.")]
         public Task<ActionResult> NowAsync()
-            => Ok(new EmbedBuilder().WithTitle(Context.Now.GetDiscordTimestamp(TimestampType.LongDateTime)));
+            => Ok(new EmbedBuilder().WithTitle(Context.Now.ToDiscordTimestamp(TimestampType.LongDateTime)));
     }
 }

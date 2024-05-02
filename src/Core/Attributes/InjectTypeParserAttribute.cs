@@ -3,12 +3,8 @@
 namespace Volte.Core.Entities
 {
     [AttributeUsage(AttributeTargets.Class)]
-    public sealed class InjectTypeParserAttribute : Attribute
+    public sealed class InjectTypeParserAttribute(bool overridePrimitive = false) : Attribute
     {
-        public bool OverridePrimitive { get; }
-
-        public InjectTypeParserAttribute(bool overridePrimitive = false) 
-            => OverridePrimitive = overridePrimitive;
-
+        public bool OverridePrimitive => overridePrimitive;
     }
 }

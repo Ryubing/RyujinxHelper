@@ -2,23 +2,8 @@
 
 namespace Volte.Services;
 
-public sealed class WelcomeService(DatabaseService _db) : VolteExtension
+public sealed class WelcomeService(DatabaseService _db) : IVolteService
 {
-    public override Task OnInitializeAsync(DiscordSocketClient client)
-    {
-        client.UserJoined += async user =>
-        {
-            if (Config.EnabledFeatures.Welcome) await JoinAsync(new UserJoinedEventArgs(user));
-        };
-        
-        client.UserLeft += async (guild, user) =>
-        {
-            if (Config.EnabledFeatures.Welcome) await LeaveAsync(new UserLeftEventArgs(guild, user));
-        };
-
-        return Task.CompletedTask;
-    }
-
     public async Task JoinAsync(UserJoinedEventArgs args)
     {
         var data = _db.GetData(args.Guild);

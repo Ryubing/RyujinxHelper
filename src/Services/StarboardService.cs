@@ -3,7 +3,7 @@ using System.Net;
 namespace Volte.Services
 {
     public sealed class StarboardService(DatabaseService _db, DiscordSocketClient _client)
-        : VolteExtension
+        : IVolteService
     {
         // Ensures starboard message creations don't happen twice, and edits are atomic. Also ensures dictionary updates
         // don't happen at the same time.
@@ -45,16 +45,7 @@ namespace Volte.Services
             return starboardChannel is not null;
         }
 
-        public override Task OnInitializeAsync(DiscordSocketClient client)
-        {
-            client.ReactionAdded += HandleReactionAddAsync;
-            client.ReactionRemoved += HandleReactionRemoveAsync;
-            client.ReactionsCleared += HandleReactionsClearAsync;
-
-            return Task.CompletedTask;
-        }
-
-        private async Task HandleReactionAddAsync(Cacheable<IUserMessage, ulong> cachedMessage, Cacheable<IMessageChannel, ulong> cachedChannel, SocketReaction reaction)
+        public async Task HandleReactionAddAsync(Cacheable<IUserMessage, ulong> cachedMessage, Cacheable<IMessageChannel, ulong> cachedChannel, SocketReaction reaction)
         {
             var channel = await cachedChannel.GetOrDownloadAsync();
             
@@ -257,7 +248,7 @@ namespace Volte.Services
         {
             var e = new EmbedBuilder()
                 .WithSuccessColor()
-                .WithTitle(message.CreatedAt.GetDiscordTimestamp(TimestampType.Relative))
+                .WithTitle(message.CreatedAt.ToDiscordTimestamp(TimestampType.Relative))
                 .WithAuthor(message.Author)
                 .AddField("Posted", Format.Bold(Format.Url($"#{message.Channel.Name}", message.GetJumpUrl())));
 

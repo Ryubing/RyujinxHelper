@@ -31,8 +31,8 @@ namespace Volte.Interactive
 
         public DeleteMessageReactionCallback(VolteContext ctx, Embed embed)
         {
-            _ = Executor.ExecuteAsync(async () => await (Message = await Context.Channel.SendMessageAsync(embed: embed)).AddReactionAsync(DiscordHelper.X.ToEmoji()));
             Context = ctx;
+            _ = Task.Run(async () => await (Message = await Context.Channel.SendMessageAsync(embed: embed)).AddReactionAsync(DiscordHelper.X.ToEmoji()));
         }
     }
 }

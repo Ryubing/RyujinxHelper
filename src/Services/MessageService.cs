@@ -2,32 +2,16 @@
 
 namespace Volte.Services
 {
-    public sealed class CommandsService(
+    public sealed class MessageService(
         IServiceProvider _provider,
         CommandService _commandService,
         QuoteService _quoteService)
-        : VolteExtension
+        : IVolteService
     {
         public ulong SuccessfulCommandCalls { get; private set; }
         public ulong FailedCommandCalls { get; private set; }
-        
-        public override Task OnInitializeAsync(DiscordSocketClient client)
-        {
-            client.MessageReceived += async socketMessage =>
-            {
-                if (socketMessage.ShouldHandle(out var msg))
-                {
-                    if (msg.Channel is IDMChannel dm)
-                        await dm.SendMessageAsync("Currently, I do not support commands via DM.");
-                    else
-                        await HandleMessageAsync(new MessageReceivedEventArgs(socketMessage, _provider));
-                }
-            };
 
-            return Task.CompletedTask;
-        }
-
-        private async Task HandleMessageAsync(MessageReceivedEventArgs args)
+        public async Task HandleMessageAsync(MessageReceivedEventArgs args)
         {
             List<string> prefixes = [
                 args.Data.Configuration.CommandPrefix, 
@@ -57,14 +41,15 @@ namespace Volte.Services
                 else if (!await _quoteService.CheckMessageAsync(args))
                     if (CommandUtilities.HasPrefix(args.Message.Content, '%', out var tagName))
                     {
-                        var tag = args.Context.GuildData.Extras.Tags.FirstOrDefault(t =>
-                            t.Name.EqualsIgnoreCase(tagName));
-                        if (tag is null) return;
-                        if (args.Context.GuildData.Configuration.EmbedTagsAndShowAuthor)
-                            await tag.AsEmbed(args.Context).SendToAsync(args.Message.Channel);
-                        else
-                            await args.Message.Channel.SendMessageAsync(tag.FormatContent(args.Context));
-
+                        await args.Context.GuildData.Extras.Tags
+                            .FindFirst(t => t.Name.EqualsIgnoreCase(tagName))
+                            .IfPresent(async tag => 
+                            { 
+                                if (args.Context.GuildData.Configuration.EmbedTagsAndShowAuthor) 
+                                    await tag.AsEmbed(args.Context).SendToAsync(args.Message.Channel);
+                                else 
+                                    await args.Message.Channel.SendMessageAsync(tag.FormatContent(args.Context)); 
+                            });
                     }
                 
             }
@@ -100,10 +85,12 @@ namespace Volte.Services
 
                 default:
                 {
+                    Logger.Error(LogSource.Volte, "---------- IMPORTANT ----------");
                     Logger.Error(LogSource.Service,
-                        $"The command {args.Context.Command.Name} didn't return some form of ActionResult. " +
+                        $"The command {args.Context.Command.Name} didn't return some form of {typeof(ActionResult)}. " +
                         "This is developer error. " +
                         "Please report this to my developers: https://github.com/Polyhaze/Volte. Thank you!");
+                    Logger.Error(LogSource.Volte, "---------- IMPORTANT ----------");
                     return;
                 }
             }
@@ -127,7 +114,7 @@ namespace Volte.Services
             Logger.Info(LogSource.Volte, sb.ToString());
         }
 
-        private async Task OnCommandFailureAsync(CommandFailedEventArgs args)
+        private static async Task OnCommandFailureAsync(CommandFailedEventArgs args)
         {
             var reason = args.Result switch
             {
@@ -139,22 +126,9 @@ namespace Volte.Services
                 ArgumentParseFailedResult apfr => $"Parsing for arguments failed for {Format.Bold(apfr.Command.Name)}.",
                 TypeParseFailedResult tpfr => tpfr.FailureReason,
                 OverloadsFailedResult _ => "A suitable overload could not be found for the given parameter type/order.",
-                CommandExecutionFailedResult cefr => ExecutionFailed(cefr),
-                _ => Unknown(args.Result)
+                CommandExecutionFailedResult cefr => executionFailed(cefr),
+                _ => unknown(args.Result)
             };
-
-            static string Unknown(FailedResult result)
-            {
-                Logger.Verbose(LogSource.Service,
-                    $"A command returned an unknown error. Please screenshot this message and show it to my developers: {result.GetType().AsPrettyString()}");
-                return "Unknown error.";
-            }
-
-            static string ExecutionFailed(CommandExecutionFailedResult result)
-            {
-                Logger.Exception(result.Exception);
-                return $"Execution of this command failed. Exception: {result.Exception.GetType().AsPrettyString()}";
-            }
 
             if (!reason.IsNullOrEmpty())
             {
@@ -177,9 +151,24 @@ namespace Volte.Services
                     .AppendLine(After(args))
                     .Append(Separator).ToString());
             }
+
+            return;
+            
+            static string unknown(FailedResult result)
+            {
+                Logger.Verbose(LogSource.Service,
+                    $"A command returned an unknown error. Please screenshot this message and show it to my developers: {result.GetType().AsPrettyString()}");
+                return "Unknown error.";
+            }
+
+            static string executionFailed(CommandExecutionFailedResult result)
+            {
+                Logger.Exception(result.Exception);
+                return $"Execution of this command failed. Exception: {result.Exception.GetType().AsPrettyString()}";
+            }
         }
 
-        private void OnBadRequest(CommandBadRequestEventArgs args)
+        private static void OnBadRequest(CommandBadRequestEventArgs args)
         {
             var sb = new StringBuilder()
                 .AppendLine(CommandFrom(args))
@@ -199,31 +188,36 @@ namespace Volte.Services
         }
 
         private const int SpaceCount = 20;
+        private const int HyphenCount = 49;
 
-        public static string Separator => new StringBuilder(" ".Repeat(SpaceCount)).Append("-".Repeat(49)).ToString();
+        public static readonly string Separator = string.Intern(
+            String(sb => sb
+                .Append(" ".Repeat(SpaceCount))
+                .Append("-".Repeat(HyphenCount))
+            ));
 
-        private string CommandFrom(CommandEventArgs args) => 
+        private static string CommandFrom(CommandEventArgs args) => 
             $"|  -Command from user: {args.Context.User} ({args.Context.User.Id})";
 
-        private string CommandIssued(CommandEventArgs args) => new StringBuilder(" ".Repeat(SpaceCount)).Append(
+        private static string CommandIssued(CommandEventArgs args) => new StringBuilder(" ".Repeat(SpaceCount)).Append(
             $"|     -Command Issued: {args.Context.Command.Name}").ToString();
 
-        private string FullMessage(CommandEventArgs args) => new StringBuilder(" ".Repeat(SpaceCount)).Append(
+        private static string FullMessage(CommandEventArgs args) => new StringBuilder(" ".Repeat(SpaceCount)).Append(
             $"|       -Full Message: {args.Context.Message.Content}").ToString();
 
-        private string InGuild(CommandEventArgs args) => new StringBuilder(" ".Repeat(SpaceCount)).Append(
+        private static string InGuild(CommandEventArgs args) => new StringBuilder(" ".Repeat(SpaceCount)).Append(
             $"|           -In Guild: {args.Context.Guild.Name} ({args.Context.Guild.Id})").ToString();
 
-        private string InChannel(CommandEventArgs args) => new StringBuilder(" ".Repeat(SpaceCount)).Append(
+        private static string InChannel(CommandEventArgs args) => new StringBuilder(" ".Repeat(SpaceCount)).Append(
             $"|         -In Channel: #{args.Context.Channel.Name} ({args.Context.Channel.Id})").ToString();
 
-        private string TimeIssued(CommandEventArgs args) => new StringBuilder(" ".Repeat(SpaceCount)).Append(
+        private static string TimeIssued(CommandEventArgs args) => new StringBuilder(" ".Repeat(SpaceCount)).Append(
             $"|        -Time Issued: {args.Context.Now.FormatFullTime()}, {args.Context.Now.FormatDate()}").ToString();
 
-        private string After(CommandEventArgs args) => new StringBuilder(" ".Repeat(SpaceCount)).Append(
+        private static string After(CommandEventArgs args) => new StringBuilder(" ".Repeat(SpaceCount)).Append(
             $"|              -After: {args.Stopwatch.Elapsed.Humanize()}").ToString();
 
-        private string ResultMessage(ResultCompletionData data) => new StringBuilder(" ".Repeat(SpaceCount)).Append(
+        private static string ResultMessage(ResultCompletionData data) => new StringBuilder(" ".Repeat(SpaceCount)).Append(
             $"|     -Result Message: {data.Message?.Id}").ToString();
     }
 }

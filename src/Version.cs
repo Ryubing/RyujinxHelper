@@ -1,24 +1,47 @@
 ﻿using SysVer = System.Version;
+// ReSharper disable UnusedMember.Global
+// ReSharper disable MemberCanBePrivate.Global
 
-namespace Volte
+namespace Volte;
+
+public static class Version
 {
-    public static class Version
+    public static string InformationVersion { get; }
+    
+    public static SysVer DotNetVersion { get; }
+    
+    static Version()
     {
-        public enum DevelopmentStage
-        {
-            Development,
-            Release
-        }
+        DotNetVersion = Assembly.GetExecutingAssembly().GetName().Version ??
+                        throw new InvalidOperationException("Version not found");
         
-        public static bool IsDevelopment => ReleaseType is DevelopmentStage.Development;
-        public static DevelopmentStage ReleaseType => DevelopmentStage.Development;
-        public static string FullVersion => $"{Major}.{Minor}.{Patch}.{Hotfix}-{ReleaseType}";
-        public static string DiscordNetVersion => Discord.DiscordConfig.Version;
-        public static SysVer AsDotNetVersion() => new SysVer(Major, Minor, Patch, Hotfix);
-        
-        private static int Major => 4;
-        private static int Minor => 0;
-        private static int Patch => 0;
-        private static int Hotfix => 0;
+        var infoVer = Assembly.GetExecutingAssembly().GetCustomAttribute<AssemblyInformationalVersionAttribute>()
+            ?.InformationalVersion ?? throw new InvalidOperationException("Version not found");
+
+        infoVer = infoVer.LastIndexOf('+') != -1
+            ? infoVer[..infoVer.LastIndexOf('+')]
+            : infoVer;
+
+        InformationVersion = $"{DotNetVersion} {infoVer.Trim()}";
     }
+    
+    
+    public static readonly bool IsDevelopment = ReleaseType is DevelopmentStage.Development;
+    public static readonly DevelopmentStage ReleaseType = InformationVersion.ContainsIgnoreCase("dev") 
+        ? DevelopmentStage.Development 
+        : DevelopmentStage.Release;
+
+
+    public static string DiscordNetVersion => DiscordConfig.Version;
+    
+    public static int Major => DotNetVersion.Major;
+    public static int Minor => DotNetVersion.Minor;
+    public static int Patch => DotNetVersion.Build;
+    public static int Hotfix => DotNetVersion.Revision;
+}
+
+public enum DevelopmentStage
+{
+    Development,
+    Release
 }

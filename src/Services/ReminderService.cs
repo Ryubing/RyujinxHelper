@@ -65,8 +65,8 @@ namespace Volte.Services
             }
 
             var timestamp = (await channel.GetMessageAsync(reminder.MessageId).AsOptional())
-                .Convert(msg => Format.Url(reminder.CreationTime.GetDiscordTimestamp(TimestampType.Relative), msg.GetJumpUrl()))
-                .OrElseGet(() => reminder.CreationTime.GetDiscordTimestamp(TimestampType.Relative));
+                .Convert(msg => Format.Url(reminder.CreationTime.ToDiscordTimestamp(TimestampType.Relative), msg.GetJumpUrl()))
+                .OrElseGet(() => reminder.CreationTime.ToDiscordTimestamp(TimestampType.Relative));
 
             await channel.SendMessageAsync(author.Mention, embed: new EmbedBuilder()
                 .WithTitle("Reminder")

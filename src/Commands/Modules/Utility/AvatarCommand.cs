@@ -19,13 +19,13 @@ namespace Volte.Commands.Modules
         {
             user ??= Context.User;
 
-            string FormatEmbedString(params ushort[] sizes) => new StringBuilder().Apply(sb =>
+            string FormatEmbedString(params ushort[] sizes) => String(sb =>
             {
                 sb.Append(sizes.Take(1)
                     .Select(x => $"{Format.Url(x.ToString(), user.GetEffectiveAvatarUrl(size: x))} ").First());
                 sb.Append(sizes.Skip(1)
                     .Select(x => $"| {Format.Url(x.ToString(), user.GetEffectiveAvatarUrl(size: x))} ").JoinToString(string.Empty));
-            }).ToString().Trim();
+            }).Trim();
 
 
             return Ok(Context.CreateEmbedBuilder(FormatEmbedString(128, 256, 512, 1024))

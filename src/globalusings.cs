@@ -32,3 +32,4 @@ global using static Gommon.Lambda;
 
 
 global using Console = Colorful.Console;
+global using DiscordLogMessage = Discord.LogMessage;

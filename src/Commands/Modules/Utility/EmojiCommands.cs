@@ -28,7 +28,7 @@ namespace Volte.Commands.Modules
 
         private EmbedBuilder GenerateEmbed(Emote emote)
             => Context.CreateEmbedBuilder(Format.Url("Direct Link", emote.Url))
-                    .AddField("Created", emote.CreatedAt.GetDiscordTimestamp(TimestampType.Relative), true)
+                    .AddField("Created", emote.CreatedAt.ToDiscordTimestamp(TimestampType.Relative), true)
                     .AddField("Animated?", emote.Animated ? "Yes" : "No")
                     .WithImageUrl(emote.Url)
                     .WithAuthor($":{emote.Name}:", emote.Url);

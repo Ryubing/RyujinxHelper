@@ -4,11 +4,8 @@ namespace Volte.Commands
 {
     public sealed class VolteContext : CommandContext
     {
-        public static VolteContext Create(SocketMessage msg, IServiceProvider provider) 
-            => new(msg, provider);
-
         // ReSharper disable once SuggestBaseTypeForParameter
-        private VolteContext(SocketMessage msg, IServiceProvider provider) : base(provider)
+        public VolteContext(SocketMessage msg, IServiceProvider provider) : base(provider)
         {
             Client = provider.Get<DiscordSocketClient>();
             Guild = msg.Channel.Cast<SocketTextChannel>()?.Guild;
@@ -69,6 +66,10 @@ namespace Volte.Commands
                 ? (parserResult.Value, false) 
                 : (default, false);
         }
+
+        public string FormatUsageFor(string commandName) => 
+            CommandHelper.FormatUsage(this, Services.Get<CommandService>().GetCommand(commandName));
+        
 
         public void Modify(DataEditor modifier)
         {

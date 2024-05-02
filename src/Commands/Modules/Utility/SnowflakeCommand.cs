@@ -13,6 +13,6 @@ namespace Volte.Commands.Modules
         [Command("Snowflake", "Id")]
         [Description("Shows when the object with the given Snowflake ID was created, in UTC.")]
         public Task<ActionResult> SnowflakeAsync([Description("The Discord snowflake you want to see.")] ulong id) =>
-            Ok(Context.CreateEmbedBuilder().WithTitle(SnowflakeUtils.FromSnowflake(id).GetDiscordTimestamp(TimestampType.LongDateTime)));
+            Ok(Context.CreateEmbedBuilder().WithTitle(SnowflakeUtils.FromSnowflake(id).ToDiscordTimestamp(TimestampType.LongDateTime)));
     }
 }

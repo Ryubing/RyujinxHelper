@@ -19,7 +19,7 @@ namespace Volte.Commands.Modules
 {
     public sealed partial class UtilityModule : VolteModule
     {
-        public CommandsService CommandsService { get; set; }
+        public MessageService MessageService { get; set; }
         public HttpClient Http { get; set; }
 
         public static readonly Dictionary<string[], string> ZalgoNamedArguments = new Dictionary<string[], string>()

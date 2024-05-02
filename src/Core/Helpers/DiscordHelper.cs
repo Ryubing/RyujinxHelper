@@ -43,28 +43,13 @@ namespace Volte.Core.Helpers
         public static string Star => "\u2B50";
 
         public static List<Emoji> GetPollEmojis()
-            => new List<Emoji>
-            {
+            => [
                 One.ToEmoji(), Two.ToEmoji(), Three.ToEmoji(), Four.ToEmoji(), Five.ToEmoji(),
                 Six.ToEmoji(), Seven.ToEmoji(), Eight.ToEmoji(), Nine.ToEmoji()
-            };
+            ];
 
         public static RequestOptions CreateRequestOptions(Action<RequestOptions> initializer) 
             => new RequestOptions().Apply(initializer);
-        
-        /// <summary>
-        ///     Gets the recommended shard count from Discord by logging into a <see cref="DiscordRestClient"/> via the value in <see cref="Config"/>.<see cref="Config.Token"/>.
-        ///     This method assumes that the value in the config has already been validated and is usable with Discord.
-        /// </summary>
-        /// <returns></returns>
-        public static async ValueTask<int> GetRecommendedShardCountAsync()
-        {
-            using var client = new DiscordRestClient();
-            await client.LoginAsync(TokenType.Bot, Config.Token);
-            var res = await client.GetRecommendedShardCountAsync();
-            await client.LogoutAsync();
-            return res;
-        }
 
 
         /// <summary>
@@ -105,25 +90,22 @@ namespace Volte.Core.Helpers
         }
 
         public static SocketRole GetHighestRole(this SocketGuildUser member, bool requireColor = true)
-            => member.Roles.Where(x => !requireColor || x.HasColor())
-                .OrderByDescending(x => x.Position).FirstOrDefault();
+            => member.Roles.Where(x => !requireColor || x.HasColor()).MaxBy(x => x.Position);
 
         public static bool TryGetSpotifyStatus(this IGuildUser user, out SpotifyGame spotify)
         {
             spotify = user.Activities.FirstOrDefault(x => x is SpotifyGame).Cast<SpotifyGame>();
             return spotify != null;
         }
-
-        internal static char GetTimestampFlagInternal(this TimestampType type) => (char)type;
         
-        internal static string GetDiscordTimestampInternal(long unixSeconds, char timestampType)
+        public static string ToMarkdownTimestamp(long unixSeconds, char timestampType)
             => $"<t:{unixSeconds}:{timestampType}>";
         
-        public static string GetDiscordTimestamp(this DateTimeOffset dto, TimestampType type) =>
-            GetDiscordTimestampInternal(dto.ToUnixTimeSeconds(), type.GetTimestampFlagInternal());
+        public static string ToDiscordTimestamp(this DateTimeOffset dto, TimestampType type) =>
+            ToMarkdownTimestamp(dto.ToUnixTimeSeconds(), type.HardCast<char>());
 
-        public static string GetDiscordTimestamp(this DateTime date, TimestampType type) => 
-            new DateTimeOffset(date).GetDiscordTimestamp(type);
+        public static string ToDiscordTimestamp(this DateTime date, TimestampType type) => 
+            new DateTimeOffset(date).ToDiscordTimestamp(type);
 
         public static async Task<bool> TrySendMessageAsync(this SocketTextChannel channel, string text = null,
             bool isTts = false, Embed embed = null, RequestOptions options = null)
@@ -150,14 +132,23 @@ namespace Volte.Core.Helpers
         public static SocketGuild GetPrimaryGuild(this BaseSocketClient client)
             => client.GetGuild(405806471578648588); // TODO: config option
 
-        public static void RegisterVolteEventHandlers(this DiscordSocketClient client, IServiceProvider provider)
+        private static readonly string[] _ignoredLogMessages =
+        [
+            "You're using the GuildPresences intent without listening to the PresenceUpdate event",
+            "application_command",
+            "unknown dispatch"
+        ];
+        
+        public static async Task RegisterVolteEventHandlersAsync(this DiscordSocketClient client, ServiceProvider provider)
         {
-            provider.GetServices<VolteExtension>().ForEachAsync(ext => ext.OnInitializeAsync(client));
+            var welcome = provider.Get<WelcomeService>();
+            var autorole = provider.Get<AutoroleService>();
+            var mod = provider.Get<ModerationService>();
+            var starboard = provider.Get<StarboardService>();
             
             client.Log += async m =>
             {
-                if (!(m.Message.ContainsIgnoreCase("unknown dispatch") &&
-                      m.Message.ContainsIgnoreCase("application_command")))
+                if (!m.Message.ContainsAnyIgnoreCase(_ignoredLogMessages))
                     await Task.Run(() => Logger.HandleLogEvent(new LogEventArgs(m)));
             };
 
@@ -196,12 +187,46 @@ namespace Volte.Core.Helpers
                     foreach (var g in client.Guilds)
                     {
                         if (Config.BlacklistedOwners.Contains(g.OwnerId))
-                            await g.LeaveAsync().ContinueWith(async _ => Logger.Warn(LogSource.Volte,
+                            await g.LeaveAsync().Then(async () => Logger.Warn(LogSource.Volte,
                                 $"Left guild \"{g.Name}\" owned by blacklisted owner {await client.Rest.GetUserAsync(g.OwnerId)}."));
                         else provider.Get<DatabaseService>().GetData(g); //ensuring all guilds have data available to prevent exceptions later on 
                     }
                 });
             };
+            
+            if (provider.TryGet<GuildService>(out var guild))
+            {
+                client.JoinedGuild += async g => await guild.OnJoinAsync(new JoinedGuildEventArgs(g));
+            }
+
+            client.UserJoined += async user =>
+            {
+                if (Config.EnabledFeatures.Welcome) await welcome.JoinAsync(new UserJoinedEventArgs(user));
+                if (Config.EnabledFeatures.Autorole) await autorole.ApplyRoleAsync(new UserJoinedEventArgs(user));
+                if (provider.Get<DatabaseService>().GetData(user.Guild).Configuration.Moderation.CheckAccountAge &&
+                    Config.EnabledFeatures.ModLog)
+                    await mod.CheckAccountAgeAsync(new UserJoinedEventArgs(user));
+            };
+
+            client.UserLeft += async (guild, user) =>
+            {
+                if (Config.EnabledFeatures.Welcome) await welcome.LeaveAsync(new UserLeftEventArgs(guild, user));
+            };
+            
+            client.MessageReceived += async socketMessage =>
+            {
+                if (socketMessage.ShouldHandle(out var msg))
+                {
+                    if (msg.Channel is IDMChannel dm)
+                        await dm.SendMessageAsync("Currently, I do not support commands via DM.");
+                    else
+                        await provider.Get<MessageService>().HandleMessageAsync(new MessageReceivedEventArgs(socketMessage, provider));
+                }
+            };
+            
+            client.ReactionAdded += starboard.HandleReactionAddAsync;
+            client.ReactionRemoved += starboard.HandleReactionRemoveAsync;
+            client.ReactionsCleared += starboard.HandleReactionsClearAsync;
         }
 
         public static Task<IUserMessage> SendToAsync(this EmbedBuilder e, IMessageChannel c) =>
@@ -223,33 +248,6 @@ namespace Volte.Core.Helpers
 
         public static async Task<IUserMessage> SendToAsync(this Embed e, IGuildUser u) =>
             await (await u.CreateDMChannelAsync()).SendMessageAsync(embed: e);
-
-        public static EmbedBuilder WithSuccessColor(this EmbedBuilder e) => e.WithColor(Config.SuccessColor);
-
-        public static EmbedBuilder WithErrorColor(this EmbedBuilder e) => e.WithColor(Config.ErrorColor);
-
-        public static EmbedBuilder WithRelevantColor(this EmbedBuilder e, SocketGuildUser user) =>
-            e.WithColor(user.GetHighestRole()?.Color ?? new Color(Config.SuccessColor));
-
-        public static EmbedBuilder AppendDescription(this EmbedBuilder e, string toAppend) =>
-            e.WithDescription((e.Description ?? string.Empty) + toAppend);
-
-        public static EmbedBuilder AppendDescriptionLine(this EmbedBuilder e, string toAppend = "") =>
-            e.AppendDescription($"{toAppend}\n");
-
-        /// <summary>
-        ///     Removes the author and sets the color to the config-provided <see cref="Config"/>.<see cref="Config.SuccessColor"/>,
-        /// however it only removes it if <see cref="ModerationOptions.ShowResponsibleModerator"/> on the provided <paramref name="data"/> is <see langword="false"/>
-        /// </summary>
-        /// <param name="e">The current <see cref="EmbedBuilder"/>.</param>
-        /// <param name="data">The <see cref="GuildData"/> to apply settings for.</param>
-        /// <returns>The possibly-modified <see cref="EmbedBuilder"/></returns>
-        public static EmbedBuilder ApplyConfig(this EmbedBuilder e, GuildData data) => e.Apply(eb =>
-        {
-            if (!data.Configuration.Moderation.ShowResponsibleModerator) return;
-            eb.WithAuthor(author: null);
-            eb.WithSuccessColor();
-        });
 
         public static Emoji ToEmoji(this string str) => new Emoji(str);
 
@@ -290,7 +288,7 @@ namespace Volte.Core.Helpers
             => user.GetAvatarUrl(format, size) ?? user.GetDefaultAvatarUrl();
 
         public static bool HasAttachments(this IMessage message)
-            => message.Attachments.Any();
+            => message.Attachments.Count != 0;
 
         public static bool HasColor(this IRole role)
             => role.Color.RawValue != 0;

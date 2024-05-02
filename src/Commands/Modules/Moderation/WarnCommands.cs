@@ -22,8 +22,7 @@ namespace Volte.Commands.Modules
             await member.WarnAsync(Context, reason);
 
             return Ok($"Successfully warned **{member}** for **{reason}**.",
-                _ => ModerationService.OnModActionCompleteAsync(ModActionEventArgs.New
-                    .WithDefaultsFromContext(Context)
+                _ => ModerationService.OnModActionCompleteAsync(ModActionEventArgs.InContext(Context)
                     .WithActionType(ModActionType.Warn)
                     .WithTarget(member)
                     .WithReason(reason))
@@ -62,8 +61,8 @@ namespace Volte.Commands.Modules
                 Logger.Warn(LogSource.Volte, $"encountered a 403 when trying to message {member}!");
 
             return Ok($"Cleared **{warnCount}** warnings for **{member}**.", _ =>
-                ModerationService.OnModActionCompleteAsync(ModActionEventArgs.New
-                    .WithDefaultsFromContext(Context)
+                ModerationService.OnModActionCompleteAsync(ModActionEventArgs
+                    .InContext(Context)
                     .WithActionType(ModActionType.ClearWarns)
                     .WithTarget(member))
             );

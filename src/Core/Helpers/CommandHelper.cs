@@ -1,17 +1,4 @@
-using Discord;
-using Gommon;
-using Humanizer;
-using Qmmands;
-using System;
 using System.Collections;
-using System.Collections.Generic;
-using System.Linq;
-using System.Reflection;
-using System.Text;
-using System.Threading.Tasks;
-using Volte.Commands;
-using Volte.Commands.Modules;
-using Volte.Core.Entities;
 using Module = Qmmands.Module;
 
 namespace Volte.Core.Helpers
@@ -36,13 +23,11 @@ namespace Volte.Core.Helpers
                 : Format.Bold(Format.Code(firstAlias.Split(command.Service.Separator)[1]));
         }
 
-        public static string FormatModuleShort(Module module)
-        {
-            var firstAlias = module.FullAliases.FirstOrDefault();
-            if (firstAlias is null) return null;
-
-            return Format.Bold(Format.Code(firstAlias));
-        }
+        public static string FormatModuleShort(Module module) => 
+            module.FullAliases.FindFirst()
+                .Convert(firstAlias => Format.Code(firstAlias))
+                .OrElse(null);
+        
 
         public static async IAsyncEnumerable<Command> WhereAccessibleAsync(this IEnumerable<Command> commands,
             VolteContext ctx)
@@ -59,19 +44,10 @@ namespace Volte.Core.Helpers
                 .WithDescription(command.Description ?? "No description provided.");
             var checks = CommandUtilities.EnumerateAllChecks(command).ToList();
 
-            async Task AddSubcommandsFieldAsync()
-            {
-                embed.AddField("Subcommands", (await command.Module.Commands.WhereAccessibleAsync(ctx)
-                        .Where(x => !x.Attributes.Any(a => a is DummyCommandAttribute)).ToListAsync())
-                    .Select(x => FormatCommandShort(x, false))
-                    .JoinToString(", "));
-            }
-
-
             if (command.Attributes.Any(x => x is DummyCommandAttribute))
             {
-                await AddSubcommandsFieldAsync();
-                return checks.Any()
+                await addSubcommandsFieldAsync();
+                return checks.Count > 0
                     ? embed.AddField("Checks",
                         (await Task.WhenAll(checks.Select(check => FormatCheckAsync(check, ctx)))).JoinToString("\n"))
                     : embed;
@@ -100,45 +76,54 @@ namespace Volte.Core.Helpers
                     $"{Format.Code("4d3h2m1s")}: {Format.Italics("4 days, 3 hours, 2 minutes and one second.")}");
 
             if (command.Attributes.Any(x => x is ShowSubcommandsInHelpOverrideAttribute))
-                await AddSubcommandsFieldAsync();
+                await addSubcommandsFieldAsync();
 
-            if (command.Attributes.AnyGet(x => x is ShowUnixArgumentsInHelpAttribute, out var unixAttr) &&
-                unixAttr is ShowUnixArgumentsInHelpAttribute attr)
-            {
-                static string FormatUnixArgs(KeyValuePair<string[], string> kvp) =>
-                    $"{Format.Bold(kvp.Key.Select(name => $"-{name}").JoinToString(" or "))}: {kvp.Value}";
+            if (command.Attributes.TryGetFirst(x => x is ShowUnixArgumentsInHelpAttribute, out var unixAttr) 
+                && unixAttr is ShowUnixArgumentsInHelpAttribute attr)
+                embed.AddField("Unix Arguments", getArgs(attr.VolteUnixCommand));
+            
 
-                static string GetArgs(VolteUnixCommand unixCommand) => unixCommand switch
-                {
-                    VolteUnixCommand.Announce => AdminUtilityModule.AnnounceNamedArguments.Select(FormatUnixArgs)
-                        .JoinToString("\n"),
-                    VolteUnixCommand.Zalgo => UtilityModule.ZalgoNamedArguments.Select(FormatUnixArgs).JoinToString("\n"),
-                    VolteUnixCommand.UnixBan => ModerationModule.UnixBanNamedArguments.Select(FormatUnixArgs)
-                        .JoinToString("\n"),
-                    _ => throw new ArgumentOutOfRangeException(nameof(unixCommand))
-                };
-
-                embed.AddField("Unix Arguments", GetArgs(attr.VolteUnixCommand));
-            }
-
-
-            return checks.Any()
+            return checks.Count > 0
                 ? embed.AddField("Checks",
                     (await Task.WhenAll(checks.Select(check => FormatCheckAsync(check, ctx)))).JoinToString("\n"))
                 : embed;
+            
+            
+            
+            async Task addSubcommandsFieldAsync()
+            {
+                embed.AddField("Subcommands", (await command.Module.Commands.WhereAccessibleAsync(ctx)
+                        .Where(x => !x.Attributes.Any(a => a is DummyCommandAttribute)).ToListAsync())
+                    .Select(x => FormatCommandShort(x, false))
+                    .JoinToString(", "));
+            }
+            
+            static string formatUnixArgs(KeyValuePair<string[], string> kvp) =>
+                $"{Format.Bold(kvp.Key.Select(name => $"-{name}").JoinToString(" or "))}: {kvp.Value}";
+
+            static string getArgs(VolteUnixCommand unixCommand) => unixCommand switch
+            {
+                VolteUnixCommand.Announce => AdminUtilityModule.AnnounceNamedArguments.Select(formatUnixArgs)
+                    .JoinToString("\n"),
+                VolteUnixCommand.Zalgo => UtilityModule.ZalgoNamedArguments.Select(formatUnixArgs).JoinToString("\n"),
+                VolteUnixCommand.UnixBan => ModerationModule.UnixBanNamedArguments.Select(formatUnixArgs)
+                    .JoinToString("\n"),
+                _ => throw new ArgumentOutOfRangeException(nameof(unixCommand))
+            };
         }
 
         public static string FormatUsage(VolteContext ctx, Command cmd)
         {
-            return new StringBuilder($"{ctx.GuildData.Configuration.CommandPrefix}{cmd.FullAliases.First().ToLower()} ")
+            return new StringBuilder($"{ctx.GuildData.Configuration.CommandPrefix}{cmd.FullAliases[0].ToLower()} ")
                 .Append(cmd.Parameters.Select(formatUsageParameter).JoinToString(" "))
                 .ToString().Trim();
-            
+
             static string formatUsageParameter(Parameter param)
-                => new StringBuilder(param.IsOptional ? "[" : "{")
-                    .Append(param.Name)
-                    .Append(param.IsOptional ? "]" : "}")
-                    .ToString();
+                => String(sb =>
+                    sb.Append(param.IsOptional ? "[" : "{")
+                        .Append(param.Name)
+                        .Append(param.IsOptional ? "]" : "}")
+                );
         }
 
         private static async Task<string> FormatCheckAsync(CheckAttribute cba, VolteContext context)
@@ -151,40 +136,43 @@ namespace Volte.Core.Helpers
         private static string GetCheckFriendlyMessage(VolteContext ctx, CheckAttribute cba)
             => cba switch
             {
-                RequireGuildAdminAttribute _ => "You need to have the Admin role.",
-                RequireGuildModeratorAttribute _ => "You need to have the Moderator role.",
-                RequireBotOwnerAttribute _ => $"Only usable by **{ctx.Client.GetOwner()}** (bot owner).",
+                RequireGuildAdminAttribute => "You need to have the Admin role.",
+                RequireGuildModeratorAttribute => "You need to have the Moderator role.",
+                RequireBotOwnerAttribute => $"Only usable by **{ctx.Client.GetOwner()}** (bot owner).",
                 _ => $"Unimplemented check: {cba.GetType().AsPrettyString()}. Please report this to my developers :)"
             };
 
         private static string FormatParameter(Parameter param)
-            => new StringBuilder(Format.Code(param.Name)).Apply(sb =>
+            => String(sb =>
             {
+                sb.Append(Format.Code(param.Name));
+                
                 if (!param.Description.IsNullOrWhitespace())
                     sb.Append($": {param.Description} ");
                 if (param.Checks.Any(x => x is EnsureNotSelfAttribute))
                     sb.Append("Cannot be yourself.");
                 if (param.DefaultValue != null)
                     sb.Append($"Defaults to: {Format.Code(param.DefaultValue.ToString())}");
-            }).ToString().Trim();
-
-        public static string SanitizeName(this Module m)
-            => m.Name.Replace("Module", string.Empty);
+            }).Trim();
 
         internal static IEnumerable<Type> AddTypeParsers(this CommandService service)
         {
-            var assembly = typeof(VolteBot).Assembly;
-            var parsers = assembly.ExportedTypes.Where(x => x.HasAttribute<InjectTypeParserAttribute>()).ToList();
+            var parsers = typeof(VolteBot).Assembly.ExportedTypes.Where(x => x.HasAttribute<InjectTypeParserAttribute>()).ToList();
+
+            var csMirror = Mirror.Reflect(service);
 
             foreach (var parser in parsers)
             {
-                var parserObj = parser.GetConstructor(Type.EmptyTypes)?.Invoke(Array.Empty<object>());
-                var method = typeof(CommandService).GetMethod("AddTypeParser")!.MakeGenericMethod(
-                    parser.BaseType!.GenericTypeArguments[0]);
-                // ReSharper disable twice PossibleNullReferenceException
-                // cant happen
-                method.Invoke(service,
-                    new[] { parserObj, parser.GetCustomAttribute<InjectTypeParserAttribute>().OverridePrimitive });
+                csMirror.CallGeneric("AddTypeParser", 
+                    genericTypes: [
+                        parser.BaseType!.GenericTypeArguments[0]
+                    ],
+                    args: [
+                        parser.GetConstructor(Type.EmptyTypes)?.Invoke([]), 
+                        parser.GetCustomAttribute<InjectTypeParserAttribute>().OverridePrimitive 
+                    ]
+                );
+                
                 yield return parser;
             }
         }
@@ -196,13 +184,10 @@ namespace Volte.Core.Helpers
         {
             var customParsers = typeof(VolteBot).Assembly.GetTypes()
                 .Count(x => x.HasAttribute<InjectTypeParserAttribute>());
-            //add the number of primitive TypeParsers (that come with Qmmands) obtained from the private field _primitiveTypeParsers's Count
-            // ReSharper disable twice PossibleNullReferenceException
-            return customParsers + cs.GetType()
-                .GetField("_primitiveTypeParsers", BindingFlags.Instance | BindingFlags.NonPublic)
-                .GetValue(cs)
-                .Cast<IDictionary>()
-                .Count;
+
+            var primitiveParsers = Mirror.ReflectUnsafe(cs).Get<IDictionary>("_primitiveTypeParsers").Count;
+            
+            return customParsers + primitiveParsers;
         }
     }
 }

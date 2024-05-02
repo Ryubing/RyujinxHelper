@@ -1,187 +1,176 @@
-﻿using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Text.Json;
+﻿using System.IO;
 using System.Text.Json.Serialization;
-using Discord;
-using Gommon;
-using Volte.Core.Entities;
-using Volte.Core.Helpers;
 
-namespace Volte.Core
+namespace Volte.Core;
+
+public static class Config
 {
-    public static class Config
+    private static BotConfig _configuration;
+
+    public static readonly JsonSerializerOptions JsonOptions = new()
     {
-        public const string DataDirectory = "data";
-        public const string ConfigFilePath = DataDirectory + "/volte.json";
-        private static BotConfig _configuration;
+        ReadCommentHandling = JsonCommentHandling.Skip,
+        WriteIndented = true,
+        PropertyNameCaseInsensitive = true,
+        DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull,
+        AllowTrailingCommas = true
+    };
 
-        public static readonly JsonSerializerOptions JsonOptions = new JsonSerializerOptions
+    private static bool IsValidConfig() 
+        => FilePath.ConfigFile.ExistsAsFile && !FilePath.ConfigFile.ReadAllText().IsNullOrEmpty();
+
+    public static bool StartupChecks()
+    {
+        if (!FilePath.Data.ExistsAsDirectory)
         {
-            ReadCommentHandling = JsonCommentHandling.Skip,
-            WriteIndented = true,
-            PropertyNameCaseInsensitive = true,
-            DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull,
-            AllowTrailingCommas = true
-        };
-
-        private static bool IsValidConfig() 
-            => File.Exists(ConfigFilePath) && !File.ReadAllText(ConfigFilePath).IsNullOrEmpty();
-
-        public static bool StartupChecks()
-        {
-            if (!Directory.Exists(DataDirectory))
-            {
-                Logger.Error(LogSource.Volte,
-                    $"The \"{DataDirectory}\" directory didn't exist, so I created it for you. Please fill in the configuration!");
-                Directory.CreateDirectory(DataDirectory);
-                //99.9999999999% of the time the config also won't exist if this block is reached
-                //if the config does exist when this block is reached, feel free to become the lead developer of this project
-            }
-
-            if (CreateIfAbsent()) return true;
             Logger.Error(LogSource.Volte,
-                $"Please fill in the configuration located at \"{ConfigFilePath}\"; restart me when you've done so.");
-            return false;
-
+                $"The \"{FilePath.Data}\" directory didn't exist, so I created it for you. Please fill in the configuration!");
+            FilePath.Data.CreateDirectory();
+            //99.9999999999% of the time the config also won't exist if this block is reached
+            //if the config does exist when this block is reached, feel free to become the lead developer of this project
         }
+
+        if (CreateIfAbsent()) return true;
+        Logger.Error(LogSource.Volte,
+            $"Please fill in the configuration located at \"{FilePath.ConfigFile}\"; restart me when you've done so.");
+        return false;
+
+    }
         
-        public static bool CreateIfAbsent()
+    public static bool CreateIfAbsent()
+    {
+        if (IsValidConfig()) return true;
+        _configuration = new BotConfig
         {
-            if (IsValidConfig()) return true;
-            _configuration = new BotConfig
-            {
-                Token = "token here",
-                SentryDsn = "",
-                CommandPrefix = "$",
-                Owner = 0,
-                Game = "game here",
-                Streamer = "streamer here",
-                EnableDebugLogging = false,
-                SuccessEmbedColor = 0x7000FB,
-                ErrorEmbedColor = 0xFF0000,
-                LogAllCommands = true,
-                BlacklistedGuildOwners = new(),
-                EnabledFeatures = new()
-            };
-            try
-            {
-                File.WriteAllText(ConfigFilePath,
-                    JsonSerializer.Serialize(_configuration, JsonOptions));
-            }
-            catch (Exception e)
-            {
-                Logger.Error(LogSource.Volte, e.Message, e);
-            }
+            Token = "token here",
+            SentryDsn = "",
+            CommandPrefix = "$",
+            Owner = 0,
+            Game = "game here",
+            Streamer = "streamer here",
+            EnableDebugLogging = false,
+            SuccessEmbedColor = 0x7000FB,
+            ErrorEmbedColor = 0xFF0000,
+            LogAllCommands = true,
+            BlacklistedGuildOwners = [],
+            EnabledFeatures = new EnabledFeatures()
+        };
+        
+        try
+        {
+            FilePath.ConfigFile.WriteAllText(JsonSerializer.Serialize(_configuration, JsonOptions));
+        }
+        catch (Exception e)
+        {
+            Logger.Error(LogSource.Volte, e.Message, e);
+        }
 
+        return false;
+    }
+
+    public static void Load()
+    {
+        _ = CreateIfAbsent();
+        if (IsValidConfig())
+            _configuration = JsonSerializer.Deserialize<BotConfig>(FilePath.ConfigFile.ReadAllText(), JsonOptions);                    
+    }
+
+    public static bool Reload()
+    {
+        try
+        {
+            _configuration = JsonSerializer.Deserialize<BotConfig>(FilePath.ConfigFile.ReadAllText());
+            return true;
+        }
+        catch (JsonException e)
+        {
+            Logger.Exception(e);
             return false;
         }
+    }
 
-        public static void Load()
+    public static (ActivityType Type, string Name, string Streamer) ParseActivity()
+    {
+        var split = Game.Split(" ");
+        var title = split.Skip(1).JoinToString(" ");
+        if (split[0].ToLower() is "streaming") title = split.Skip(2).JoinToString(" ");
+        return split.First().ToLower() switch
         {
-            _ = CreateIfAbsent();
-            if (IsValidConfig())
-                _configuration = JsonSerializer.Deserialize<BotConfig>(File.ReadAllText(ConfigFilePath), JsonOptions);                    
-        }
+            "playing" => (ActivityType.Playing, title, null),
+            "listeningto" => (ActivityType.Listening, title, null),
+            "listening" => (ActivityType.Listening, title, null),
+            "streaming" => (ActivityType.Streaming, title, split[1]),
+            "watching" => (ActivityType.Watching, title, null),
+            _ => (ActivityType.Playing, Game, null)
+        };
+    }
 
-        public static bool Reload()
-        {
-            try
-            {
-                _configuration = JsonSerializer.Deserialize<BotConfig>(File.ReadAllText(ConfigFilePath));
-                return true;
-            }
-            catch (JsonException e)
-            {
-                Logger.Exception(e);
-                return false;
-            }
-        }
+    public static bool IsValidToken() 
+        => !(Token.IsNullOrEmpty() || Token.Equals("token here"));
 
-        public static (ActivityType Type, string Name, string Streamer) ParseActivity()
-        {
-            var split = Game.Split(" ");
-            var title = split.Skip(1).JoinToString(" ");
-            if (split[0].ToLower() is "streaming") title = split.Skip(2).JoinToString(" ");
-            return split.First().ToLower() switch
-            {
-                "playing" => (ActivityType.Playing, title, null),
-                "listeningto" => (ActivityType.Listening, title, null),
-                "listening" => (ActivityType.Listening, title, null),
-                "streaming" => (ActivityType.Streaming, title, split[1]),
-                "watching" => (ActivityType.Watching, title, null),
-                _ => (ActivityType.Playing, Game, null)
-            };
-        }
+    public static string Token => _configuration.Token;
 
-        public static bool IsValidToken() 
-            => !(Token.IsNullOrEmpty() || Token.Equals("token here"));
+    public static string CommandPrefix => _configuration.CommandPrefix;
 
-        public static string Token => _configuration.Token;
+    public static string SentryDsn => _configuration.SentryDsn;
 
-        public static string CommandPrefix => _configuration.CommandPrefix;
+    public static ulong Owner => _configuration.Owner;
 
-        public static string SentryDsn => _configuration.SentryDsn;
+    public static string Game => _configuration.Game;
 
-        public static ulong Owner => _configuration.Owner;
+    public static string Streamer => _configuration.Streamer;
 
-        public static string Game => _configuration.Game;
+    public static bool EnableDebugLogging => _configuration.EnableDebugLogging;
 
-        public static string Streamer => _configuration.Streamer;
+    public static string FormattedStreamUrl => $"https://twitch.tv/{Streamer}";
 
-        public static bool EnableDebugLogging => _configuration.EnableDebugLogging;
+    public static uint SuccessColor => _configuration.SuccessEmbedColor;
 
-        public static string FormattedStreamUrl => $"https://twitch.tv/{Streamer}";
+    public static uint ErrorColor => _configuration.ErrorEmbedColor;
 
-        public static uint SuccessColor => _configuration.SuccessEmbedColor;
+    public static bool LogAllCommands => _configuration.LogAllCommands;
 
-        public static uint ErrorColor => _configuration.ErrorEmbedColor;
+    public static HashSet<ulong> BlacklistedOwners => _configuration.BlacklistedGuildOwners;
 
-        public static bool LogAllCommands => _configuration.LogAllCommands;
-
-        public static HashSet<ulong> BlacklistedOwners => _configuration.BlacklistedGuildOwners;
-
-        public static EnabledFeatures EnabledFeatures => _configuration.EnabledFeatures;
+    public static EnabledFeatures EnabledFeatures => _configuration.EnabledFeatures;
         
-        // ReSharper disable MemberHidesStaticFromOuterClass
-        private struct BotConfig
-        {
-            [JsonPropertyName("discord_token")]
-            public string Token { get; set; }
+    // ReSharper disable MemberHidesStaticFromOuterClass
+    private struct BotConfig
+    {
+        [JsonPropertyName("discord_token")]
+        public string Token { get; set; }
             
-            [JsonPropertyName("sentry_dsn")]
-            public string SentryDsn { get; set; }
+        [JsonPropertyName("sentry_dsn")]
+        public string SentryDsn { get; set; }
 
-            [JsonPropertyName("command_prefix")]
-            public string CommandPrefix { get; set; }
+        [JsonPropertyName("command_prefix")]
+        public string CommandPrefix { get; set; }
 
-            [JsonPropertyName("bot_owner")]
-            public ulong Owner { get; set; }
+        [JsonPropertyName("bot_owner")]
+        public ulong Owner { get; set; }
 
-            [JsonPropertyName("status_game")]
-            public string Game { get; set; }
+        [JsonPropertyName("status_game")]
+        public string Game { get; set; }
 
-            [JsonPropertyName("status_twitch_streamer")]
-            public string Streamer { get; set; }
+        [JsonPropertyName("status_twitch_streamer")]
+        public string Streamer { get; set; }
 
-            [JsonPropertyName("enable_debug_logging")]
-            public bool EnableDebugLogging { get; set; }
+        [JsonPropertyName("enable_debug_logging")]
+        public bool EnableDebugLogging { get; set; }
 
-            [JsonPropertyName("color_success")]
-            public uint SuccessEmbedColor { get; set; }
+        [JsonPropertyName("color_success")]
+        public uint SuccessEmbedColor { get; set; }
 
-            [JsonPropertyName("color_error")]
-            public uint ErrorEmbedColor { get; set; }
+        [JsonPropertyName("color_error")]
+        public uint ErrorEmbedColor { get; set; }
 
-            [JsonPropertyName("log_all_commands")]
-            public bool LogAllCommands { get; set; }
+        [JsonPropertyName("log_all_commands")]
+        public bool LogAllCommands { get; set; }
 
-            [JsonPropertyName("blacklisted_guild_owners")]
-            public HashSet<ulong> BlacklistedGuildOwners { get; set; }
+        [JsonPropertyName("blacklisted_guild_owners")]
+        public HashSet<ulong> BlacklistedGuildOwners { get; set; }
 
-            [JsonPropertyName("enabled_features")]
-            public EnabledFeatures EnabledFeatures { get; set; }
-        }
+        [JsonPropertyName("enabled_features")]
+        public EnabledFeatures EnabledFeatures { get; set; }
     }
 }

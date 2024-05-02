@@ -29,8 +29,7 @@ namespace Volte.Commands.Modules
             {
                 await member.BanAsync(7, reason);
                 return Ok($"Successfully banned **{member}** from this guild.", _ =>
-                    ModerationService.OnModActionCompleteAsync(ModActionEventArgs.New
-                        .WithDefaultsFromContext(Context)
+                    ModerationService.OnModActionCompleteAsync(ModActionEventArgs.InContext(Context)
                         .WithActionType(ModActionType.Ban)
                         .WithTarget(member)
                         .WithReason(reason))
@@ -79,8 +78,8 @@ namespace Volte.Commands.Modules
                     await Context.Guild.RemoveBanAsync(member.Id);
                 
                 return Ok($"Successfully banned **{member}** from this guild.", _ =>
-                    ModerationService.OnModActionCompleteAsync(ModActionEventArgs.New
-                        .WithDefaultsFromContext(Context)
+                    ModerationService.OnModActionCompleteAsync(ModActionEventArgs
+                        .InContext(Context)
                         .WithActionType(ModActionType.Ban)
                         .WithTarget(member)
                         .WithReason(reason))

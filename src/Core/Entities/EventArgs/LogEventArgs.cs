@@ -1,6 +1,3 @@
-using Discord;
-using System;
-
 namespace Volte.Core.Entities
 {
     public sealed class LogEventArgs : EventArgs
@@ -10,7 +7,7 @@ namespace Volte.Core.Entities
         public LogSeverity Severity { get; }
         public LogMessage LogMessage { get; }
 
-        public LogEventArgs(global::Discord.LogMessage message)
+        public LogEventArgs(DiscordLogMessage message)
         {
             Message = message.Message;
             Source = message.Source;

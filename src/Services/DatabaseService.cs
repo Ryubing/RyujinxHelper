@@ -1,5 +1,4 @@
 using LiteDB;
-using Volte.Core;
 
 // ReSharper disable ReturnTypeCanBeEnumerable.Global
 
@@ -7,7 +6,7 @@ namespace Volte.Services;
 
 public sealed class DatabaseService : IVolteService, IDisposable
 {
-    public static readonly LiteDatabase Database = new($"filename={Config.DataDirectory}/Volte.db;connection=direct");
+    public static readonly LiteDatabase Database = new($"filename={FilePath.Data / "Volte.db"};connection=direct");
 
     private readonly DiscordSocketClient _client;
 
@@ -28,9 +27,8 @@ public sealed class DatabaseService : IVolteService, IDisposable
 
     public ValueTask<GuildData> GetDataAsync(ulong id) => new(GetData(id));
 
-    public GuildData GetData(ulong id)
-    {
-        return _guildData.ValueLock(() =>
+    public GuildData GetData(ulong id) => 
+        _guildData.ValueLock(() =>
         {
             var conf = _guildData.FindOne(g => g.Id == id);
             if (conf != null) return conf;
@@ -38,9 +36,9 @@ public sealed class DatabaseService : IVolteService, IDisposable
             _guildData.Insert(newConf);
             return newConf;
         });
-    }
+    
 
-    public HashSet<Reminder> GetReminders(IUser user, IGuild guild = null) => GetReminders(user.Id, guild?.Id ?? 0).ToHashSet();
+    public HashSet<Reminder> GetReminders(IUser user, IGuild guild = null) => GetReminders(user.Id, guild?.Id ?? 0);
 
     public HashSet<Reminder> GetReminders(ulong creator, ulong guild = 0)
         => GetAllReminders().Where(r => r.CreatorId == creator && (guild is 0 || r.GuildId == guild)).ToHashSet();

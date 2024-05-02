@@ -14,6 +14,6 @@ namespace Volte.Commands
             => Message = null;
 
         public static implicit operator ValueTask<ResultCompletionData>(ResultCompletionData data) 
-            => new ValueTask<ResultCompletionData>(data);
+            => new(data);
     }
 }

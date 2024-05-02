@@ -16,7 +16,7 @@ namespace Volte.Core.Entities
         public DateTimeOffset Time { get; private set; }
         public SocketGuild Guild { get; private set; }
 
-        public static ModActionEventArgs New => new ModActionEventArgs();
+        public static ModActionEventArgs InContext(VolteContext ctx) => new ModActionEventArgs().WithDefaultsFromContext(ctx);
 
         public ModActionEventArgs WithContext(VolteContext ctx)
         {

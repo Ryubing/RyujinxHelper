@@ -40,8 +40,8 @@ namespace Volte.Commands.Modules
                 await Interactive.ReplyAndDeleteAsync(Context, string.Empty,
                     embed: Context.CreateEmbed($"Successfully deleted {Format.Bold("message".ToQuantity(messages.Count - 1))}."),
                     timeout: 3.Seconds());
-                await ModerationService.OnModActionCompleteAsync(ModActionEventArgs.New
-                    .WithDefaultsFromContext(Context)
+                await ModerationService.OnModActionCompleteAsync(ModActionEventArgs
+                    .InContext(Context)
                     .WithActionType(ModActionType.Purge)
                     .WithCount(count));
             }, false);

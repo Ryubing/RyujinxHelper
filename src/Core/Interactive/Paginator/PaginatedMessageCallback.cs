@@ -49,7 +49,7 @@ namespace Volte.Interactive
             Message = await Context.Channel.SendMessageAsync(_pager.Content, embed: embed);
             Interactive.AddReactionCallback(Message, this);
             // Reactions take a while to add, don't wait for them
-            _ = Executor.ExecuteAsync(async () =>
+            _ = Task.Run(async () =>
             {
                 if (_pager.Pages.Any())
                 {
@@ -96,7 +96,7 @@ namespace Volte.Interactive
                 return await Context.Message.TryDeleteAsync() && await Message.TryDeleteAsync();
             else if (emote.Equals(_pager.Options.Jump))
             {
-                _ = Executor.ExecuteAsync(async () =>
+                _ = Task.Run(async () =>
                 {
                     var response = await Interactive.NextMessageAsync(Context, new Criteria<SocketUserMessage>()
                         .AddCriterion(new EnsureSourceChannelCriterion())

@@ -26,8 +26,8 @@ namespace Volte.Commands.Modules
             {
                 await user.KickAsync(reason);
                 return Ok($"Successfully kicked **{user.Username}#{user.Discriminator}** from this guild.", _ =>
-                    ModerationService.OnModActionCompleteAsync(ModActionEventArgs.New
-                        .WithDefaultsFromContext(Context)
+                    ModerationService.OnModActionCompleteAsync(ModActionEventArgs
+                        .InContext(Context)
                         .WithActionType(ModActionType.Kick)
                         .WithTarget(user)
                         .WithReason(reason))

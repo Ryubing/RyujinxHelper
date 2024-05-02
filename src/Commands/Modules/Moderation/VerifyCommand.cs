@@ -37,8 +37,8 @@ namespace Volte.Commands.Modules
             await member.AddRoleAsync(vRole);
 
             return Ok($"Successfully verified {member.Mention}.", _ =>
-                ModerationService.OnModActionCompleteAsync(ModActionEventArgs.New
-                    .WithDefaultsFromContext(Context)
+                ModerationService.OnModActionCompleteAsync(ModActionEventArgs
+                    .InContext(Context)
                     .WithActionType(ModActionType.Verify)
                     .WithTarget(member))
             );

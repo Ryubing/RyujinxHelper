@@ -49,7 +49,7 @@ namespace Volte.Commands.Modules
             string name, [Remainder, Description("What you want the tag to reply with.")]
             string response)
         {
-            if (Context.GuildData.Extras.Tags.AnyGet(t => t.Name.EqualsIgnoreCase(name), out var tag))
+            if (Context.GuildData.Extras.Tags.TryGetFirst(t => t.Name.EqualsIgnoreCase(name), out var tag))
             {
                 var user = await Context.Client.Rest.GetUserAsync(tag.CreatorId);
                 return BadRequest(

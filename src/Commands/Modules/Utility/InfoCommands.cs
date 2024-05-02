@@ -16,12 +16,12 @@ namespace Volte.Commands.Modules
         [Description("Provides basic information about this instance of Volte.")]
         public async Task<ActionResult> InfoAsync()
             => Ok(Context.CreateEmbedBuilder()
-                .AddField("Version", Version.FullVersion, true)
+                .AddField("Version", Version.InformationVersion, true)
                 .AddField("Author",
                     $"{await Context.Client.Rest.GetUserAsync(168548441939509248)}, contributors on {Format.Url("GitHub", "https://github.com/Ultz/Volte")}, and members of the Ultz organization.",
                     true)
                 .AddField("Language/Library", $"C# 8, Discord.Net {Version.DiscordNetVersion}", true)
-                .AddField("Discord Application Created", (await Context.Client.GetApplicationInfoAsync()).CreatedAt.GetDiscordTimestamp(TimestampType.LongDateTime))
+                .AddField("Discord Application Created", (await Context.Client.GetApplicationInfoAsync()).CreatedAt.ToDiscordTimestamp(TimestampType.LongDateTime))
                 .AddField("Guilds", Context.Client.Guilds.Count, true)
                 .AddField("Channels",
                     Context.Client.Guilds.SelectMany(x => x.Channels).Where(x => x is not SocketCategoryChannel)
@@ -30,8 +30,8 @@ namespace Volte.Commands.Modules
                 .AddField("Invite Me",
                     Format.Code(CommandHelper.FormatUsage(Context, CommandService.GetCommand("Invite"))), true)
                 .AddField("Uptime", Process.GetCurrentProcess().CalculateUptime(), true)
-                .AddField("Successful Commands", CommandsService.SuccessfulCommandCalls, true)
-                .AddField("Failed Commands", CommandsService.FailedCommandCalls, true)
+                .AddField("Successful Commands", MessageService.SuccessfulCommandCalls, true)
+                .AddField("Failed Commands", MessageService.FailedCommandCalls, true)
                 .WithThumbnailUrl(Context.Client.CurrentUser.GetEffectiveAvatarUrl(size: 512)));
 
         [Command("UserInfo", "Ui")]
@@ -59,9 +59,9 @@ namespace Volte.Commands.Modules
                 .AddField("Is Bot", user.IsBot ? "Yes" : "No", true)
                 .AddField("Role Hierarchy", user.Hierarchy, true)
                 .AddField("Account Created",
-                    $"{user.CreatedAt.GetDiscordTimestamp(TimestampType.LongDateTime)}")
+                    $"{user.CreatedAt.ToDiscordTimestamp(TimestampType.LongDateTime)}")
                 .AddField("Joined This Guild",
-                    $"{(user.JoinedAt.HasValue ? user.JoinedAt.Value.GetDiscordTimestamp(TimestampType.LongDateTime) : DiscordHelper.Zws)}")
+                    $"{(user.JoinedAt.HasValue ? user.JoinedAt.Value.ToDiscordTimestamp(TimestampType.LongDateTime) : DiscordHelper.Zws)}")
                 .WithThumbnailUrl(user.GetEffectiveAvatarUrl(size: 512)));
         }
 
@@ -70,7 +70,7 @@ namespace Volte.Commands.Modules
         public Task<ActionResult> GuildInfoAsync()
             => Ok(Context.CreateEmbedBuilder()
                 .WithTitle(Context.Guild.Name)
-                .AddField("Created", $"{Context.Guild.CreatedAt.GetDiscordTimestamp(TimestampType.LongDateTime)}")
+                .AddField("Created", $"{Context.Guild.CreatedAt.ToDiscordTimestamp(TimestampType.LongDateTime)}")
                 .AddField("Owner", Context.Guild.Owner)
                 .AddField("Region", Context.Guild.VoiceRegionId)
                 .AddField("Members", Context.Guild.Users.Count, true)

@@ -10,8 +10,8 @@ namespace Volte.Core.Entities
         public string Message { get; private set; }
         public Exception Exception { get; private set; }
 
-        public static LogMessage FromDiscordLogMessage(Discord.LogMessage message)
-            => new LogMessage
+        public static LogMessage FromDiscordLogMessage(DiscordLogMessage message)
+            => new()
             {
                 Message = message.Message,
                 Severity = message.Severity,

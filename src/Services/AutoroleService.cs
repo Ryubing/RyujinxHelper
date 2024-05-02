@@ -1,20 +1,8 @@
-﻿using Volte.Core;
+﻿namespace Volte.Services;
 
-namespace Volte.Services;
-
-public sealed class AutoroleService(DatabaseService _db) : VolteExtension
+public sealed class AutoroleService(DatabaseService _db) : IVolteService
 {
-    public override Task OnInitializeAsync(DiscordSocketClient client)
-    {
-        client.UserJoined += async user =>
-        {
-            if (Config.EnabledFeatures.Autorole) await ApplyRoleAsync(new UserJoinedEventArgs(user));
-        };
-
-        return Task.CompletedTask;
-    }
-
-    private async Task ApplyRoleAsync(UserJoinedEventArgs args)
+    public async Task ApplyRoleAsync(UserJoinedEventArgs args)
     {
         var data = _db.GetData(args.Guild);
         var targetRole = args.Guild.GetRole(data.Configuration.Autorole);

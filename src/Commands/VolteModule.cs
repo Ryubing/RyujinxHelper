@@ -31,7 +31,7 @@ namespace Volte.Commands
 
         protected ActionResult Ok(Action<StringBuilder> textBuilder, MessageCallback messageCallback = null,
             bool shouldEmbed = true)
-            => Ok(new StringBuilder().Apply(textBuilder), messageCallback, shouldEmbed);
+            => Ok(String(textBuilder), messageCallback, shouldEmbed);
 
         protected ActionResult Ok(StringBuilder text, MessageCallback messageCallback = null, bool shouldEmbed = true)
             => Ok(text.ToString(), messageCallback, shouldEmbed);

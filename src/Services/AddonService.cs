@@ -17,25 +17,32 @@ namespace Volte.Services
 {
     public class AddonService : IVolteService
     {
+        public static FilePath AddonsDir = new("addons", true);
+        
         private readonly IServiceProvider _provider;
         private bool _isInitialized;
-        public Dictionary<VolteAddonMeta, (string Code, ScriptState Output)> LoadedAddons { get; }
+        public Dictionary<VolteAddon, ScriptState> LoadedAddons { get; }
         internal HashSet<ScriptState> AddonResults { get; }
 
         public AddonService(IServiceProvider serviceProvider)
         {
             _isInitialized = false;
             _provider = serviceProvider;
-            LoadedAddons = new Dictionary<VolteAddonMeta, (string Code, ScriptState Output)>();
-            AddonResults = new HashSet<ScriptState>();
+            LoadedAddons = new Dictionary<VolteAddon, ScriptState>();
+            AddonResults = [];
         }
 
-        private IEnumerable<(VolteAddonMeta Meta, string Code)> GetAvailableAddons()
+        private static IEnumerable<VolteAddon> GetAvailableAddons()
         {
-            foreach (var dir in Directory.GetDirectories("addons"))
+            foreach (var dir in AddonsDir.GetSubdirectories())
             {
                 if (TryGetAddonContent(dir, out var meta, out var code))
-                    yield return (meta, code);
+                    yield return new VolteAddon
+                    {
+                        Meta = meta,
+                        Script = code
+                    };
+                
                 if (meta != null && code is null)
                     Logger.Error(LogSource.Service,
                         $"Attempted to load addon {meta.Name} but there were no C# source files in its directory. These are necessary as an addon with no logic does nothing.");
@@ -45,22 +52,22 @@ namespace Volte.Services
         public async Task InitAsync()
         {
             var sw = Stopwatch.StartNew();
-            if (_isInitialized || !Directory.Exists("addons")) return; //don't auto-create a directory; if someone wants to use addons they need to make it themselves.
-            if (!Directory.GetDirectories("addons").Any())
+            if (_isInitialized || !AddonsDir.ExistsAsDirectory) return; //don't auto-create a directory; if someone wants to use addons they need to make it themselves.
+            if (AddonsDir.GetSubdirectories().Count < 1)
             {
                 Logger.Info(LogSource.Service, "No addons are in the addons directory; skipping initialization.");
                 return;
             }
 
-            foreach (var (meta, code) in GetAvailableAddons())
+            foreach (var addon in GetAvailableAddons())
             {
                 try
                 {
-                    LoadedAddons.Add(meta, (code, await CSharpScript.RunAsync(code, EvalHelper.Options, new AddonEnvironment(_provider))));
+                    LoadedAddons.Add(addon, await CSharpScript.RunAsync(addon.Script, EvalHelper.Options, new AddonEnvironment(_provider)));
                 }
                 catch (Exception e)
                 {
-                    Logger.Error(LogSource.Service, $"Addon {meta.Name}'s logic produced an error.", e);
+                    Logger.Error(LogSource.Service, $"Addon {addon.Meta.Name}'s script produced an error.", e);
                 }
             }
             sw.Stop();
@@ -68,18 +75,19 @@ namespace Volte.Services
             _isInitialized = true;
         }
 
-        private static bool TryGetAddonContent(string dir, out VolteAddonMeta meta, out string code)
+        private static bool TryGetAddonContent(FilePath addonDir, out VolteAddonMeta meta, out string code)
         {
             meta = null;
             code = null;
-            foreach (var file in Directory.GetFiles(dir))
+            
+            foreach (var file in addonDir.GetFiles())
             {
-                if (file.EndsWith(".json"))
+                if (file.Extension is "json")
                 {
                     try
                     {
-                        meta = JsonSerializer.Deserialize<VolteAddonMeta>(File.ReadAllText(file),
-                            Config.JsonOptions);
+                        meta = JsonSerializer.Deserialize<VolteAddonMeta>(file.ReadAllText(), Config.JsonOptions);
+                        
                         if (meta.Name.EqualsIgnoreCase("list"))
                             throw new InvalidOperationException(
                                 $"Addon with name {meta.Name} is being ignored because it is using a reserved name. Please change the name or remove the addon.");
@@ -96,8 +104,8 @@ namespace Volte.Services
                     }
                 }
 
-                if (file.EndsWith(".cs"))
-                    code = File.ReadAllText(file);
+                if (file.Extension is "cs")
+                    code = file.ReadAllText();
             }
 
             return meta != null && code != null;

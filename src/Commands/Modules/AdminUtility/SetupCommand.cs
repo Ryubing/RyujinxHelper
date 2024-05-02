@@ -9,9 +9,8 @@ namespace Volte.Commands.Modules
     {
         [Command("Setup")]
         [Description("Interactively setup your guild's moderator and admin roles.")]
-        public Task<ActionResult> SetupVolteAsync()
-        {
-            return Ok(async () =>
+        public Task<ActionResult> SetupAsync() 
+            => Ok(async () =>
             {
                 adminRole:
                 await Context.CreateEmbed("What role would you like to have Admin permission with me?")
@@ -19,13 +18,13 @@ namespace Volte.Commands.Modules
                 var (role, didTimeout) = await Context.GetNextAsync<SocketRole>();
                 if (didTimeout) return;
                 if (role is null) goto adminRole;
-
-                // ReSharper disable twice AccessToModifiedClosure
+                
                 Context.Modify(data => data.Configuration.Moderation.AdminRole = role.Id);
 
                 modRole:
                 await Context.CreateEmbed("What role would you like to have Moderator permission with me?")
                     .SendToAsync(Context.Channel);
+                
                 (role, didTimeout) = await Context.GetNextAsync<SocketRole>();
                 if (didTimeout) return;
                 if (role is null) goto modRole;
@@ -36,6 +35,6 @@ namespace Volte.Commands.Modules
                     .SendToAsync(Context.Channel);
 
             }, false);
-        }
+        
     }
 }

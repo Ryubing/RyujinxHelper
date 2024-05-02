@@ -25,7 +25,7 @@ namespace Volte.Commands.Modules
                 return BadRequest("No roles available to self-assign in this guild.");
 
             var roles = Context.GuildData.Extras.SelfRoles.Select(x => 
-                Context.Guild.Roles.AnyGet(r => r.Name.EqualsIgnoreCase(x), out var role)
+                Context.Guild.Roles.TryGetFirst(r => r.Name.EqualsIgnoreCase(x), out var role)
                     ? Format.Bold(role.Name)
                     : string.Empty).Where(x => !x.IsNullOrEmpty()).JoinToString("\n");
 

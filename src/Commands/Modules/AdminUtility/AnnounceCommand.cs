@@ -71,8 +71,7 @@ public sealed partial class AdminUtilityModule
             embed.WithTitle(result);
 
         if (options.TryGetValue("color", out result) || options.TryGetValue("colour", out result))
-            embed.WithColor(GetColor(await CommandService.GetTypeParser<Color>()
-                .ParseAsync(null, result, Context)));
+            embed.WithColor(GetColor(ColorParser.Parse(result)));
 
         if (options.TryGetValue("author", out result))
         {
@@ -80,8 +79,7 @@ public sealed partial class AdminUtilityModule
                 embed.WithAuthor(Context.User);
             else if (result.EqualsAnyIgnoreCase("bot", "you", "volte"))
                 embed.WithAuthor(Context.Guild.CurrentUser);
-            else if (TryGetUser(await CommandService.GetTypeParser<RestGuildUser>()
-                         .ParseAsync(null, result, Context), out var user))
+            else if (TryGetUser(await RestGuildUserParser.Parse(result, Context), out var user))
                 embed.WithAuthor(user);
         }
 
@@ -91,8 +89,7 @@ public sealed partial class AdminUtilityModule
                 "none" => null,
                 "everyone" => "@everyone",
                 "here" => "@here",
-                _ => GetRoleMention(await CommandService.GetTypeParser<SocketRole>()
-                    .ParseAsync(null, result, Context))
+                _ => GetRoleMention(RoleParser.Parse(result, Context))
             }
             : null;
 

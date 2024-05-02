@@ -43,11 +43,11 @@ namespace Volte.Commands.Modules
                 : $"{page} wasn't found. Here's a list of valid wiki pages: {FormatPages()}"));
 
 
-            string FormatPages() => new StringBuilder().Apply(sb =>
+            string FormatPages() => String(sb =>
             {
                 foreach (var (key, value) in _wikiPageUris)
                     sb.AppendLine(Format.Url(key, value.ToString()));
-            }).ToString();
+            });
         }
     }
 }

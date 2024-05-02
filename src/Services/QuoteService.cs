@@ -5,8 +5,6 @@ namespace Volte.Services;
 //thanks discord-csharp/MODiX for the idea and some of the code (definitely the regex lol)
 public partial class QuoteService(DiscordSocketClient client) : IVolteService
 {
-    private static readonly Regex JumpUrl = JumpUrlPattern();
-
     public async Task<bool> CheckMessageAsync(MessageReceivedEventArgs args)
     {
         if (!args.Context.GuildData.Extras.AutoParseQuoteUrls) return false;
@@ -16,10 +14,11 @@ public partial class QuoteService(DiscordSocketClient client) : IVolteService
         var m = await GetMatchMessageAsync(match);
         if (m is null) return false;
             
-        if (m.Content.IsNullOrWhitespace() && m.Embeds.Any()) return false;
+        if (m.Content.IsNullOrWhitespace() && m.Embeds.Count != 0) return false;
 
-        await GenerateQuoteEmbed(m, args.Context).SendToAsync(args.Context.Channel)
-            .ContinueWith(async _ =>
+        await GenerateQuoteEmbed(m, args.Context)
+            .SendToAsync(args.Context.Channel)
+            .Then(async () =>
             {
                 if (match.Groups["Prelink"].Value.IsNullOrEmpty() && match.Groups["Postlink"].Value.IsNullOrEmpty())
                     await args.Message.TryDeleteAsync();
@@ -60,6 +59,8 @@ public partial class QuoteService(DiscordSocketClient client) : IVolteService
 
         return e.Build();
     }
+    
+    private static readonly Regex JumpUrl = JumpUrlPattern();
 
     [GeneratedRegex(@"(?<Prelink>\S+\s+\S*)?https?://(?:(?:ptb|canary)\.)?discord(app)?\.com/channels/(?<GuildId>\d+)/(?<ChannelId>\d+)/(?<MessageId>\d+)/?(?<Postlink>\S*\s+\S+)?", RegexOptions.IgnoreCase | RegexOptions.Compiled | RegexOptions.CultureInvariant)]
     private static partial Regex JumpUrlPattern();

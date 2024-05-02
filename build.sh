@@ -1,1 +1,1 @@
-dotnet publish -c release -r linux-x64 --self-contained true && dotnet publish -c release -r win10-x64 --self-contained true
+dotnet publish -c release -r linux-x64 --self-contained true && dotnet publish -c release -r win-x64 --self-contained true

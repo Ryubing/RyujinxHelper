@@ -1,8 +1,3 @@
-using System.Linq;
-using System.Threading.Tasks;
-using Discord;
-using Gommon;
-using Qmmands;
 using Volte.Interactive;
 
 namespace Volte.Commands.Modules
@@ -16,14 +11,14 @@ namespace Volte.Commands.Modules
         {
             if (listOrAddon.EqualsIgnoreCase("list"))
             {
-                if (!Addon.LoadedAddons.Any())
+                if (Addon.LoadedAddons.Count == 0)
                     return Ok("You have no addons!\n" +
                               $"Addons can be made via making an {Format.Code("addons")} directory in my installation folder, " +
                               $"and {Format.Url("following this", "https://github.com/GreemDev/ExampleVolteAddon")}.");
 
-                var addonEmbeds = Addon.LoadedAddons.Select(x => Context.CreateEmbedBuilder()
-                        .AddField("Name", x.Key.Name)
-                        .AddField("Description", x.Key.Description).WithDescription(Format.Code(x.Value.Code, "cs")))
+                var addonEmbeds = Addon.LoadedAddons.Keys.Select(x => Context.CreateEmbedBuilder()
+                        .AddField("Name", x.Meta.Name)
+                        .AddField("Description", x.Meta.Description).WithDescription(Format.Code(x.Script, "cs")))
                     .ToList();
 
                 if (addonEmbeds.Count is 1) return Ok(addonEmbeds.First());
@@ -34,11 +29,10 @@ namespace Volte.Commands.Modules
             }
 
 
-            return Addon.LoadedAddons.AnyGet(x => x.Key.Name.EqualsIgnoreCase(listOrAddon), 
-                out var addon)
-                ? Ok(Context.CreateEmbedBuilder().WithTitle($"Addon \"{addon.Key.Name}\"")
-                    .AddField("Description", addon.Key.Description)
-                    .WithDescription(Format.Code(addon.Value.Code, "cs")))
+            return Addon.LoadedAddons.Keys.TryGetFirst(x => x.Meta.Name.EqualsIgnoreCase(listOrAddon), out var addon)
+                ? Ok(Context.CreateEmbedBuilder().WithTitle($"Addon \"{addon.Meta.Name}\"")
+                    .AddField("Description", addon.Meta.Description)
+                    .WithDescription(Format.Code(addon.Script, "cs")))
                 : BadRequest(
                     $"The provided addon, \"{listOrAddon}\", was not found. " +
                     $"Try `{Context.GuildData.Configuration.CommandPrefix}addon list` to see every initialized addon.");

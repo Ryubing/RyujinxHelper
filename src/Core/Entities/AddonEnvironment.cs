@@ -1,30 +1,18 @@
-using System;
-using Discord.WebSocket;
-using Gommon;
-using Qmmands;
-using Volte.Services;
+// ReSharper disable UnusedMember.Global
+// ReSharper disable MemberCanBePrivate.Global
 
-namespace Volte.Core.Entities
+namespace Volte.Core.Entities;
+
+public class AddonEnvironment(IServiceProvider provider)
 {
-    public class AddonEnvironment
-    {
-        public IServiceProvider Services { get; }
-        public DiscordSocketClient Client { get; }
-        public CommandService Commands { get; }
-        public DatabaseService Database { get; }
+    public IServiceProvider Services { get; } = provider;
+    public DiscordSocketClient Client { get; } = provider.Get<DiscordSocketClient>();
+    public CommandService Commands { get; } = provider.Get<CommandService>();
+    public DatabaseService Database { get; } = provider.Get<DatabaseService>();
 
-        public AddonEnvironment(IServiceProvider provider)
-        {
-            Services = provider;
-            Client = provider.Get<DiscordSocketClient>();
-            Commands = provider.Get<CommandService>();
-            Database = provider.Get<DatabaseService>();
-        }
+    public bool IsCommand(SocketUserMessage message, ulong guildId) 
+        => CommandUtilities.HasAnyPrefix(message.Content, 
+            new[] { Database.GetData(guildId).Configuration.CommandPrefix, $"<@{Client.CurrentUser.Id}> ", $"<@!{Client.CurrentUser.Id}> " }, 
+            StringComparison.OrdinalIgnoreCase, out _, out _);
 
-        public bool IsCommand(SocketUserMessage message, ulong guildId) 
-            => CommandUtilities.HasAnyPrefix(message.Content, 
-                new[] { Database.GetData(guildId).Configuration.CommandPrefix, $"<@{Client.CurrentUser.Id}> ", $"<@!{Client.CurrentUser.Id}> " }, 
-                StringComparison.OrdinalIgnoreCase, out _, out _);
-
-    }
 }

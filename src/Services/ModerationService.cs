@@ -2,21 +2,9 @@ using Volte.Core;
 
 namespace Volte.Services;
 
-public class ModerationService(DatabaseService _db) : VolteExtension
+public class ModerationService(DatabaseService _db) : IVolteService
 {
-    public override Task OnInitializeAsync(DiscordSocketClient client)
-    {
-        client.UserJoined += async user =>
-        {
-            if (!Config.EnabledFeatures.ModLog) return;
-                
-            if (_db.GetData(user.Guild).Configuration.Moderation.CheckAccountAge)
-                await CheckAccountAgeAsync(new UserJoinedEventArgs(user));
-        };
-        return Task.CompletedTask;
-    }
-
-    private async Task CheckAccountAgeAsync(UserJoinedEventArgs args)
+    public async Task CheckAccountAgeAsync(UserJoinedEventArgs args)
     {
         var modConfig = _db.GetData(args.Guild).Configuration.Moderation;
         if (args.User.IsBot || !modConfig.CheckAccountAge) return;
@@ -38,7 +26,7 @@ public class ModerationService(DatabaseService _db) : VolteExtension
                 .WithTitle("Possibly Malicious User")
                 .WithThumbnailUrl("https://raw.githubusercontent.com/GreemDev/VolteAssets/main/question_mark.png")
                 .AddField("User", args.User.ToString(), true)
-                .AddField("Account Created", args.User.CreatedAt.GetDiscordTimestamp(TimestampType.LongDateTime))
+                .AddField("Account Created", args.User.CreatedAt.ToDiscordTimestamp(TimestampType.LongDateTime))
                 .WithFooter($"Account Created {unit.ToQuantity(time)} before joining.")
                 .SendToAsync(c);
         }
@@ -217,5 +205,5 @@ public class ModerationService(DatabaseService _db) : VolteExtension
         : $"**User:** {args.TargetUser} ({args.TargetUser.Id})";
 
     private string Time(ModActionEventArgs args) 
-        => $"**Time:** {args.Time.GetDiscordTimestamp(TimestampType.LongDateTime)}";
+        => $"**Time:** {args.Time.ToDiscordTimestamp(TimestampType.LongDateTime)}";
 }

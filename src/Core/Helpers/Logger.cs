@@ -8,44 +8,36 @@ namespace Volte.Core.Helpers
 {
     public static class Logger
     {
-        public class SentryDiagnosticLogger : IDiagnosticLogger
+        public class SentryTranslator : IDiagnosticLogger
         {
             public bool IsEnabled(SentryLevel logLevel) 
                 => Version.IsDevelopment || logLevel is not SentryLevel.Debug;
             
             public void Log(SentryLevel logLevel, string message, Exception exception = null, params object[] args)
-                => Logger.Lock.Lock(() =>
+                => LogSync.Lock(() =>
                 {
-                    var content = new StringBuilder();
                     var (color, value) = VerifySentryLevel(logLevel);
-                    Append($"{value}:".PadRight(10), color);
-                    var dt = DateTime.Now.ToLocalTime();
-                    content.Append($"[{dt.FormatDate()} | {dt.FormatFullTime()}] {value} -> ");
-
-                    (color, value) = VerifySource(LogSource.Sentry);
-                    Append($"[{value}]".PadRight(10), color);
-                    content.Append($"{value} -> ");
+                    Append($"{value}:".P(), color);
+                    Append("[SENTRY]".P(), Color.Chartreuse);
 
                     if (!message.IsNullOrWhitespace())
-                        Append(message.Format(args), Color.White, ref content);
+                        Append(message.Format(args), Color.White);
 
                     if (exception != null)
                     {
                         var toWrite = $"{Environment.NewLine}{exception.Message}{Environment.NewLine}{exception.StackTrace}";
-                        Append(toWrite, Color.IndianRed, ref content);
+                        Append(toWrite, Color.IndianRed);
                     }
                     
                     Console.Write(Environment.NewLine);
-
-                    if (Environment.NewLine == content[^1].ToString()) return;
-                    content.AppendLine();
                 });
         }
+
+        private static readonly StyledString VolteAscii = new Figlet().ToAscii("Volte");
         
-        static Logger() => Directory.CreateDirectory("logs");
+        static Logger() => FilePath.Logs.CreateDirectory();
         
-        public static readonly object Lock = new object();
-        private const string LogFile = "logs/Volte.log";
+        private static readonly object LogSync = new();
 
         public static void HandleLogEvent(LogEventArgs args) =>
             Log(args.LogMessage.Severity, args.LogMessage.Source,
@@ -53,11 +45,24 @@ namespace Volte.Core.Helpers
 
         internal static void PrintHeader()
         {
-            Info(LogSource.Volte, CommandsService.Separator.Trim());
-            new Figlet().ToAscii("Volte").ConcreteValue.Split("\n", StringSplitOptions.RemoveEmptyEntries)
+            Info(LogSource.Volte, MessageService.Separator.Trim());
+            VolteAscii.ConcreteValue.Split("\n", StringSplitOptions.RemoveEmptyEntries)
                 .ForEach(ln => Info(LogSource.Volte, ln));
-            Info(LogSource.Volte, CommandsService.Separator.Trim());
-            Info(LogSource.Volte, $"Currently running Volte V{Version.FullVersion}.");
+            Info(LogSource.Volte, MessageService.Separator.Trim());
+            Info(LogSource.Volte, $"Currently running Volte V{Version.InformationVersion}.");
+        }
+
+        private const string Side = "----------------------------------------------------------";
+        private static bool _logFileNoticePrinted;
+
+        internal static void LogFileRestartNotice()
+        {
+            if (_logFileNoticePrinted || !(Config.EnabledFeatures?.LogToFile ?? false)) return;
+            
+            GetRelevantLogPath().AppendAllText($"{Side}RESTARTING{Side}\n");
+            
+            _logFileNoticePrinted = true;
+
         }
 
         private static void Log(LogSeverity s, LogSource from, string message, Exception e = null)
@@ -65,7 +70,7 @@ namespace Volte.Core.Helpers
             if (s is LogSeverity.Debug && !Config.EnableDebugLogging)
                 return;
             
-            Lock.Lock(() => Execute(s, from, message, e));
+            LogSync.Lock(() => Execute(s, from, message, e));
         }
 
         /// <summary>
@@ -131,13 +136,13 @@ namespace Volte.Core.Helpers
         {
             var content = new StringBuilder();
             var (color, value) = VerifySeverity(s);
-            Append($"{value}:".PadRight(10), color);
+            Append($"{value}:".P(), color);
             var dt = DateTime.Now.ToLocalTime();
             content.Append($"[{dt.FormatDate()} | {dt.FormatFullTime()}] {value} -> ");
 
             (color, value) = VerifySource(src);
-            Append($"[{value}]".PadRight(10), color);
-            content.Append($"{value} -> ");
+            Append($"[{value}]".P(), color);
+            content.Append(string.Intern($"{value} -> "));
 
             if (!message.IsNullOrWhitespace())
                 Append(message, Color.White, ref content);
@@ -145,18 +150,24 @@ namespace Volte.Core.Helpers
             if (e != null)
             {
                 SentrySdk.CaptureException(e);
-                Append(Environment.NewLine + e.Message + 
+                Append(Environment.NewLine + (e.Message.IsNullOrEmpty() ? "No message provided" : e.Message) + 
                        Environment.NewLine + e.StackTrace, 
                     Color.IndianRed, ref content);
             }
 
-            Console.Write(Environment.NewLine);
-            content.AppendLine();
+            if (Environment.NewLine != content[^1].ToString())
+            {
+                Console.Write(Environment.NewLine);
+                content.AppendLine();
+            }
+            
             if (Config.EnabledFeatures?.LogToFile ?? false)
-                File.AppendAllText(NormalizeLogFilePath(DateTime.Now), content.ToString());
+                GetRelevantLogPath().AppendAllText(content.ToString().TrimEnd('\n').Append("\n"));
         }
 
-        private static string NormalizeLogFilePath(DateTime date) => LogFile.Replace("Volte", $"{date.Month}-{date.Day}-{date.Year}");
+        private static FilePath GetLogFilePath(DateTime date) => new FilePath("logs") / string.Intern($"{date.Month}-{date.Day}-{date.Year}");
+
+        private static FilePath GetRelevantLogPath() => GetLogFilePath(DateTime.Now);
 
         private static void Append(string m, Color c)
         {
@@ -168,7 +179,7 @@ namespace Volte.Core.Helpers
         {
             Console.ForegroundColor = c;
             Console.Write(m);
-            sb.Append(m);
+            sb?.Append(m);
         }
 
         private static (Color Color, string Source) VerifySource(LogSource source) =>
@@ -208,5 +219,7 @@ namespace Volte.Core.Helpers
                 LogSeverity.Debug => (Color.SandyBrown, "DEBUG"),
                 _ => throw new InvalidOperationException($"The specified LogSeverity ({severity}) is invalid.")
             };
+
+        private static string P(this string input) => string.Intern(input.PadRight(10));
     }
 }

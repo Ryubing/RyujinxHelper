@@ -17,7 +17,7 @@ namespace Volte.Commands.Modules
              Description("The color you want to see, in #hex or RGB, or a role whose color you want to be shown.")]
             string colorOrRole)
         {
-            var roleTypeParse = await CommandService.GetTypeParser<SocketRole>().ParseAsync(null, colorOrRole, Context);
+            var roleTypeParse = RoleParser.Parse(colorOrRole, Context);
             if (roleTypeParse.IsSuccessful)
             {
                 var role = roleTypeParse.Value;
@@ -41,7 +41,7 @@ namespace Volte.Commands.Modules
                     });
             }
 
-            var colorTypeParse = await CommandService.GetTypeParser<Color>().ParseAsync(null, colorOrRole, Context);
+            var colorTypeParse = ColorParser.Parse(colorOrRole);
             if (!colorTypeParse.IsSuccessful)
                 return BadRequest("You didn't give a valid role or color.");
             

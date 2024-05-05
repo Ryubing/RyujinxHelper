@@ -3,7 +3,7 @@ using Volte.Interactive;
 
 namespace Volte.Services;
 
-public class InteractiveService : IVolteService, IDisposable
+public class InteractiveService : VolteService, IDisposable
 {
     private readonly DiscordSocketClient _client;
 
@@ -66,8 +66,20 @@ public class InteractiveService : IVolteService, IDisposable
         var cancelTcs = new TaskCompletionSource<bool>();
 
         token.Register(() => cancelTcs.SetResult(true));
+        
+        context.Client.MessageReceived += messageHandler;
 
-        async Task Handler(SocketMessage m)
+        var trigger = msgTcs.Task;
+        var task = await Task.WhenAny(trigger, Task.Delay(timeout.Value, token), cancelTcs.Task);
+
+        context.Client.MessageReceived -= messageHandler;
+
+        if (task == trigger)
+            return await trigger;
+
+        return null;
+        
+        async Task messageHandler(SocketMessage m)
         {
             if (m.ShouldHandle(out var msg))
             {
@@ -76,18 +88,6 @@ public class InteractiveService : IVolteService, IDisposable
                     msgTcs.SetResult(msg);
             }
         }
-
-        context.Client.MessageReceived += Handler;
-
-        var trigger = msgTcs.Task;
-        var task = await Task.WhenAny(trigger, Task.Delay(timeout.Value, token), cancelTcs.Task);
-
-        context.Client.MessageReceived -= Handler;
-
-        if (task == trigger)
-            return await trigger;
-
-        return null;
     }
 
     /// <summary>
@@ -120,15 +120,15 @@ public class InteractiveService : IVolteService, IDisposable
     /// <param name="context">The context to use</param>
     /// <param name="pollInfo">The <see cref="PollInfo"/> to apply</param>
     /// <returns>The sent poll message.</returns>
-    public async ValueTask<IUserMessage> StartPollAsync(VolteContext context,
+    public static async ValueTask<IUserMessage> StartPollAsync(VolteContext context,
         PollInfo pollInfo)
     {
-        var m = await pollInfo.Apply(context.CreateEmbedBuilder()).SendToAsync(context.Channel);
+        var m = await context.CreateEmbedBuilder().Apply(pollInfo).SendToAsync(context.Channel);
 
         _ = Task.Run(async () =>
         {
             _ = await context.Message.TryDeleteAsync("Poll invocation message.");
-            await DiscordHelper.GetPollEmojis().GetRange(0, pollInfo.Fields.Count)
+            await DiscordHelper.GetPollEmojis().Take(pollInfo.Fields.Count)
                 .ForEachAsync(emoji => m.AddReactionAsync(emoji));
         });
         return m;

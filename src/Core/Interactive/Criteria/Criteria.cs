@@ -10,8 +10,8 @@ namespace Volte.Interactive
     {
         public delegate ValueTask<bool> LocalCriteria(VolteContext ctx, T value);
         
-        private readonly HashSet<ICriterion<T>> _critiera = new HashSet<ICriterion<T>>();
-        private readonly HashSet<LocalCriteria> _localCriteria = new HashSet<LocalCriteria>();
+        private readonly HashSet<ICriterion<T>> _critiera = [];
+        private readonly HashSet<LocalCriteria> _localCriteria = [];
 
         public Criteria<T> AddCriterion(ICriterion<T> criterion)
         {

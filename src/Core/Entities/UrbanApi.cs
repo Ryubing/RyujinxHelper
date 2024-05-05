@@ -4,7 +4,7 @@ using System.Text.Json.Serialization;
 
 namespace Volte.Core.Entities
 {
-    internal class UrbanApiResponse
+    public class UrbanApiResponse
     {
         [JsonPropertyName("list")]
         // ReSharper disable once CollectionNeverUpdated.Global

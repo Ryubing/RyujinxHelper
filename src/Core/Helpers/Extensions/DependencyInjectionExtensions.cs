@@ -15,8 +15,8 @@ public static partial class Extensions
             .AddSingleton(SentrySdk.Init(opts =>
             {
                 opts.Dsn = Config.SentryDsn;
-                opts.Debug = Config.EnableDebugLogging || Version.IsDevelopment;
-                opts.DiagnosticLogger = new Logger.SentryTranslator();
+                opts.Debug = IsDebugLoggingEnabled;
+                opts.DiagnosticLogger = new SentryTranslator();
             }))
             .AddSingleton(new CommandService(new CommandServiceConfiguration
             {
@@ -29,7 +29,7 @@ public static partial class Extensions
             }))
             .AddSingleton(new DiscordSocketClient(new DiscordSocketConfig
             {
-                LogLevel = Severity,
+                LogLevel = Version.IsDevelopment ? LogSeverity.Debug : LogSeverity.Verbose,
                 GatewayIntents = _intents,
                 AlwaysDownloadUsers = true,
                 ConnectionTimeout = 10000,
@@ -38,17 +38,15 @@ public static partial class Extensions
             .Apply(_ =>
             {
                 //get all the classes that inherit IVolteService or VolteExtension, and aren't abstract.
-                var l = typeof(VolteBot).Assembly.GetTypes()
+                var l = Assembly.GetExecutingAssembly().GetTypes()
                     .Where(IsEligibleService)
                     .Apply(ls => ls.ForEach(coll.TryAddSingleton));
-                Logger.Info(LogSource.Volte, $"Injected {l.Count()} services into the provider.");
+                Info(LogSource.Volte, $"Injected {l.Count()} services into the provider.");
             });
 
-    private static LogSeverity Severity => Version.IsDevelopment ? LogSeverity.Debug : LogSeverity.Verbose;
-
-    private static readonly GatewayIntents _intents
+    private const GatewayIntents _intents
         = GatewayIntents.Guilds | GatewayIntents.GuildMessageReactions | GatewayIntents.GuildMembers |
            GatewayIntents.GuildMessages | GatewayIntents.GuildPresences | GatewayIntents.MessageContent;
 
-    private static bool IsEligibleService(Type type) => type.Inherits<IVolteService>() && !type.IsAbstract;
+    private static bool IsEligibleService(Type type) => type.Inherits<VolteService>() && !type.IsAbstract;
 }

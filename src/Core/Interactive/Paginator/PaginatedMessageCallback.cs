@@ -47,29 +47,31 @@ namespace Volte.Interactive
         {
             var embed = BuildEmbed();
             Message = await Context.Channel.SendMessageAsync(_pager.Content, embed: embed);
-            Interactive.AddReactionCallback(Message, this);
-            // Reactions take a while to add, don't wait for them
-            _ = Task.Run(async () =>
+            if (_pager.Pages.Count() > 1)
             {
-                if (_pager.Pages.Any())
+                Interactive.AddReactionCallback(Message, this);
+                // Reactions take a while to add, don't wait for them
+                _ = Task.Run(async () =>
                 {
                     await Message.AddReactionAsync(_pager.Options.First);
                     await Message.AddReactionAsync(_pager.Options.Back);
                     await Message.AddReactionAsync(_pager.Options.Next);
                     await Message.AddReactionAsync(_pager.Options.Last);
                     var manageMessages = Context.Channel is IGuildChannel guildChannel &&
-                                         (Context.User as IGuildUser).GetPermissions(guildChannel).ManageMessages;
+                                             (Context.User as IGuildUser).GetPermissions(guildChannel).ManageMessages;
 
                     if (_pager.Options.JumpDisplayOptions == JumpDisplayOptions.Always
                         || (_pager.Options.JumpDisplayOptions == JumpDisplayOptions.WithManageMessages && manageMessages))
                         await Message.AddReactionAsync(_pager.Options.Jump);
-                }
+                    
 
-                await Message.AddReactionAsync(_pager.Options.Stop);
+                    await Message.AddReactionAsync(_pager.Options.Stop);
 
-                if (_pager.Options.DisplayInformationIcon)
-                    await Message.AddReactionAsync(_pager.Options.Info);
-            });
+                    if (_pager.Options.DisplayInformationIcon)
+                        await Message.AddReactionAsync(_pager.Options.Info);
+                });
+            }
+
         }
 
         public async ValueTask<bool> HandleAsync(SocketReaction reaction)
@@ -98,10 +100,14 @@ namespace Volte.Interactive
             {
                 _ = Task.Run(async () =>
                 {
-                    var response = await Interactive.NextMessageAsync(Context, new Criteria<SocketUserMessage>()
-                        .AddCriterion(new EnsureSourceChannelCriterion())
-                        .AddCriterion(new EnsureFromUserCriterion(reaction.UserId))
-                        .AddCriterion((__, msg) => new ValueTask<bool>(int.TryParse(msg.Content, out _))), 15.Seconds());
+                    var response = await Interactive.NextMessageAsync(Context, 
+                        new Criteria<SocketUserMessage>()
+                            .AddCriterion(new EnsureSourceChannelCriterion())
+                            .AddCriterion(new EnsureFromUserCriterion(reaction.UserId))
+                            .AddCriterion(
+                                (__, msg) => new ValueTask<bool>(int.TryParse(msg.Content, out _))
+                                ), 
+                        15.Seconds());
                     var req = int.Parse(response.Content);
 
                     if (req < 1 || req > _pageCount)
@@ -140,11 +146,15 @@ namespace Volte.Interactive
                 if (!_pager.Title.IsNullOrWhitespace()) e.WithTitle(_pager.Title);
                 return e.WithFooter(_pager.Options.GenerateFooter(_currentPageIndex, _pageCount)).Build();
             }
-            
+
             var builder = Context.CreateEmbedBuilder()
                 .WithTitle(_pager.Title)
-                .WithRelevantColor(Context.User)
-                .WithFooter(_pager.Options.GenerateFooter(_currentPageIndex, _pageCount));
+                .WithRelevantColor(Context.User);
+
+            if (_pager.Pages.Count() > 1)
+            
+                builder.WithFooter(_pager.Options.GenerateFooter(_currentPageIndex, _pageCount));
+            
 
             return (_pager.Pages switch
             {

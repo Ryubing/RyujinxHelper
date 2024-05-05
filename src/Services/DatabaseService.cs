@@ -4,7 +4,7 @@ using LiteDB;
 
 namespace Volte.Services;
 
-public sealed class DatabaseService : IVolteService, IDisposable
+public sealed class DatabaseService : VolteService, IDisposable
 {
     public static readonly LiteDatabase Database = new($"filename={FilePath.Data / "Volte.db"};connection=direct");
 

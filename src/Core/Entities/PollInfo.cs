@@ -46,14 +46,6 @@ namespace Volte.Core.Entities
             return FromFields(fields);
         }
         
-        public EmbedBuilder Apply(EmbedBuilder embedBuilder) 
-            => embedBuilder.Apply(eb =>
-            {
-                Fields.ForEach(x => eb.AddField(x.Key, x.Value, true));
-                eb.WithTitle(Prompt);
-                eb.WithFooter(Footer);
-            });
-        
 
         public static PollInfo FromInvalid(string reason)
             => new PollInfo

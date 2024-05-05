@@ -10,9 +10,9 @@ public class AddonEnvironment(IServiceProvider provider)
     public CommandService Commands { get; } = provider.Get<CommandService>();
     public DatabaseService Database { get; } = provider.Get<DatabaseService>();
 
-    public bool IsCommand(SocketUserMessage message, ulong guildId) 
+    public bool IsCommand(SocketUserMessage message, ulong guildId, out string targetCommand) 
         => CommandUtilities.HasAnyPrefix(message.Content, 
             new[] { Database.GetData(guildId).Configuration.CommandPrefix, $"<@{Client.CurrentUser.Id}> ", $"<@!{Client.CurrentUser.Id}> " }, 
-            StringComparison.OrdinalIgnoreCase, out _, out _);
+            StringComparison.OrdinalIgnoreCase, out _, out targetCommand);
 
 }

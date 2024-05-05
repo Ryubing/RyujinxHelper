@@ -1,11 +1,12 @@
 ﻿using System.IO;
-using JetBrains.Annotations;
-// ReSharper disable UnusedType.Global
-// ReSharper disable UnusedMember.Global
-// ReSharper disable MemberCanBePrivate.Global
+
+using DotNetPath = System.IO.Path;
 
 namespace Volte.Core.Helpers;
 
+// ReSharper disable UnusedType.Global
+// ReSharper disable UnusedMember.Global
+// ReSharper disable MemberCanBePrivate.Global
 public record FilePath
 {
 
@@ -32,7 +33,7 @@ public record FilePath
     {
         if (!Path.EndsWith('/') && !subPath.StartsWith('/'))
             return new FilePath($"{Path}/{subPath}");
-
+        
         return new FilePath(Path + subPath, isDirectory);
     }
 
@@ -57,21 +58,22 @@ public record FilePath
         return true;
     }
     
-
-    [CanBeNull] 
-    public string Extension => !IsDirectory ? Path.Split('.').LastOrDefault() : null;
+    public string Extension => !IsDirectory ? DotNetPath.GetExtension(Path) : null;
 
     public bool ExistsAsFile => File.Exists(Path);
     public bool ExistsAsDirectory => Directory.Exists(Path);
-    public void CreateDirectory() => Directory.CreateDirectory(Path);
+
+    public void Create()
+    {
+        if (IsDirectory)
+            Directory.CreateDirectory(Path);
+    }
     
-    [CanBeNull]
     public List<FilePath> GetFiles() => 
         IsDirectory 
             ? Directory.GetFiles(Path).Select(path => new FilePath(path, false)).ToList() 
             : null;
     
-    [CanBeNull]
     public List<FilePath> GetSubdirectories() => 
         IsDirectory 
             ? Directory.GetDirectories(Path).Select(path => new FilePath(path, true)).ToList()

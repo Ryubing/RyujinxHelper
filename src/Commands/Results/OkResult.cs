@@ -66,7 +66,7 @@ namespace Volte.Commands
             if (!ctx.Guild.CurrentUser.GetPermissions(ctx.Channel).SendMessages) return new ResultCompletionData();
 
             if (_poll != null)
-                return new ResultCompletionData(await ctx.Interactive.StartPollAsync(ctx, _poll));
+                return new ResultCompletionData(await InteractiveService.StartPollAsync(ctx, _poll));
             
             if (_pager != null)
                 return new ResultCompletionData(

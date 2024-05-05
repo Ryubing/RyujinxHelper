@@ -16,10 +16,10 @@ namespace Volte.Commands.Modules
             SocketGuildUser member)
         {
             var e = Context.CreateEmbedBuilder($"You've been verified in **{Context.Guild.Name}**.")
-                .ApplyConfig(Context.GuildData);
+                .Apply(Context.GuildData);
 
             if (!await member.TrySendMessageAsync(embed: e.Build()))
-                Logger.Warn(LogSource.Module, $"encountered a 403 when trying to message {member}!");
+                Warn(LogSource.Module, $"encountered a 403 when trying to message {member}!");
 
             var uRole = Context.Guild.GetRole(Context.GuildData.Configuration.Moderation.UnverifiedRole);
             var vRole = Context.Guild.GetRole(Context.GuildData.Configuration.Moderation.VerifiedRole);

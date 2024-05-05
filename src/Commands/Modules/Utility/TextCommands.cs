@@ -87,10 +87,9 @@ namespace Volte.Commands.Modules
                 return BadRequest("The result was too large to show in a Discord message.");
             
             return options.TryGetValue("plain", out _)
-                ? Ok(async () =>
-                {
-                    await Context.Channel.SendMessageAsync(zalgo, allowedMentions: AllowedMentions.None);
-                })
+                ? Ok(() =>
+                    Context.Channel.SendMessageAsync(zalgo, allowedMentions: AllowedMentions.None)
+                )
                 : Ok(zalgo);
         }
 
@@ -108,7 +107,7 @@ namespace Volte.Commands.Modules
 
             // ReSharper disable once (Im) PossibleNullReferenceException
             //this legit cant happen because of the if statement above
-            return Lambda.TryCatch<ActionResult, ArgumentOutOfRangeException>(() =>
+            return TryCatch<ActionResult, ArgumentOutOfRangeException>(() =>
                     Ok(Context.CreateEmbedBuilder()
                         .AddField("Input", Format.Code(input))
                         .AddField("Output", Format.Code(input.ToCharArray()
@@ -116,7 +115,7 @@ namespace Volte.Commands.Modules
                             .Select(x => GetNato(char.ToLower(x)))
                             .JoinToString(" "))
                         )),
-                (e) 
+                e
                     => BadRequest($"There is not a NATO word for the character `{e.ParamName}`. Only standard English letters and numbers are valid."));
         }
     }

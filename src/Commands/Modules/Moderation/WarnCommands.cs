@@ -55,10 +55,10 @@ namespace Volte.Commands.Modules
             var e = Context
                 .CreateEmbedBuilder(
                     $"Your {"warn".ToQuantity(warnCount)} in {Format.Bold(Context.Guild.Name)} have been cleared. Hooray!")
-                .ApplyConfig(Context.GuildData);
+                .Apply(Context.GuildData);
 
             if (!await member.TrySendMessageAsync(embed: e.Build()))
-                Logger.Warn(LogSource.Volte, $"encountered a 403 when trying to message {member}!");
+                Warn(LogSource.Volte, $"encountered a 403 when trying to message {member}!");
 
             return Ok($"Cleared **{warnCount}** warnings for **{member}**.", _ =>
                 ModerationService.OnModActionCompleteAsync(ModActionEventArgs

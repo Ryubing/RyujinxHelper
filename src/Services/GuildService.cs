@@ -2,14 +2,14 @@ using Volte.Core;
 
 namespace Volte.Services;
 
-public sealed class GuildService(DiscordSocketClient discordSocketClient) : IVolteService
+public sealed class GuildService(DiscordSocketClient discordSocketClient) : VolteService
 {
     public async Task OnJoinAsync(JoinedGuildEventArgs args)
     {
-        Logger.Debug(LogSource.Volte, "Joined a guild.");
+        Debug(LogSource.Volte, "Joined a guild.");
         if (Config.BlacklistedOwners.Contains(args.Guild.Owner.Id))
         {
-            Logger.Warn(LogSource.Volte,
+            Warn(LogSource.Volte,
                 $"Left guild \"{args.Guild.Name}\" owned by blacklisted owner {args.Guild.Owner}.");
             await args.Guild.LeaveAsync();
             return;
@@ -29,18 +29,18 @@ public sealed class GuildService(DiscordSocketClient discordSocketClient) : IVol
                     .AppendLine("if you're wondering why you're getting permission errors, that's *probably* why.")
             );
 
-        Logger.Debug(LogSource.Volte,
+        Debug(LogSource.Volte,
             "Attempting to send the guild owner the introduction message.");
         try
         {
             await embed.SendToAsync(args.Guild.Owner);
-            Logger.Error(LogSource.Volte,
+            Error(LogSource.Volte,
                 "Sent the guild owner the introduction message.");
         }
         catch (Exception)
         {
             var c = args.Guild.TextChannels.MaxBy(x => x.Position);
-            Logger.Error(LogSource.Volte,
+            Error(LogSource.Volte,
                 "Could not DM the guild owner; sending to the upper-most channel instead.");
             if (c != null) await embed.SendToAsync(c);
         }

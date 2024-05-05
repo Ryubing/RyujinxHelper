@@ -1,5 +1,4 @@
-﻿using System.IO;
-using System.Text.Json.Serialization;
+﻿using System.Text.Json.Serialization;
 
 namespace Volte.Core;
 
@@ -7,14 +6,19 @@ public static class Config
 {
     private static BotConfig _configuration;
 
-    public static readonly JsonSerializerOptions JsonOptions = new()
-    {
-        ReadCommentHandling = JsonCommentHandling.Skip,
-        WriteIndented = true,
-        PropertyNameCaseInsensitive = true,
-        DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull,
-        AllowTrailingCommas = true
-    };
+    public static readonly JsonSerializerOptions JsonOptions = CreateSerializerOptions(true);
+    public static readonly JsonSerializerOptions MinifiedJsonOptions = CreateSerializerOptions(false);
+
+    private static JsonSerializerOptions CreateSerializerOptions(bool writeIndented)
+        => new()
+        {
+            ReadCommentHandling = JsonCommentHandling.Skip,
+            WriteIndented = writeIndented,
+            PropertyNameCaseInsensitive = true,
+            DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull,
+            AllowTrailingCommas = true
+        };
+    
 
     private static bool IsValidConfig() 
         => FilePath.ConfigFile.ExistsAsFile && !FilePath.ConfigFile.ReadAllText().IsNullOrEmpty();
@@ -23,15 +27,15 @@ public static class Config
     {
         if (!FilePath.Data.ExistsAsDirectory)
         {
-            Logger.Error(LogSource.Volte,
+            Error(LogSource.Volte,
                 $"The \"{FilePath.Data}\" directory didn't exist, so I created it for you. Please fill in the configuration!");
-            FilePath.Data.CreateDirectory();
+            FilePath.Data.Create();
             //99.9999999999% of the time the config also won't exist if this block is reached
             //if the config does exist when this block is reached, feel free to become the lead developer of this project
         }
 
         if (CreateIfAbsent()) return true;
-        Logger.Error(LogSource.Volte,
+        Error(LogSource.Volte,
             $"Please fill in the configuration located at \"{FilePath.ConfigFile}\"; restart me when you've done so.");
         return false;
 
@@ -62,7 +66,7 @@ public static class Config
         }
         catch (Exception e)
         {
-            Logger.Error(LogSource.Volte, e.Message, e);
+            Error(LogSource.Volte, e.Message, e);
         }
 
         return false;
@@ -79,12 +83,12 @@ public static class Config
     {
         try
         {
-            _configuration = JsonSerializer.Deserialize<BotConfig>(FilePath.ConfigFile.ReadAllText());
+            _configuration = JsonSerializer.Deserialize<BotConfig>(FilePath.ConfigFile.ReadAllText(), JsonOptions);
             return true;
         }
         catch (JsonException e)
         {
-            Logger.Exception(e);
+            Error(e);
             return false;
         }
     }

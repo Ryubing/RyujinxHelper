@@ -2,12 +2,19 @@
 
 namespace Volte.Services
 {
-    public sealed class MessageService(
-        IServiceProvider _provider,
-        CommandService _commandService,
-        QuoteService _quoteService)
-        : IVolteService
+    public sealed class MessageService : VolteService
     {
+        private readonly CommandService _commandService;
+        private readonly QuoteService _quoteService;
+        
+
+        public MessageService(CommandService commandService,
+            QuoteService quoteService)
+        {
+            _commandService = commandService;
+            _quoteService = quoteService;
+        }
+        
         public ulong SuccessfulCommandCalls { get; private set; }
         public ulong FailedCommandCalls { get; private set; }
 
@@ -63,7 +70,7 @@ namespace Volte.Services
                 case ActionResult actionRes:
                 {
                     data = await actionRes.ExecuteResultAsync(args.Context);
-                    Logger.Debug(LogSource.Service,
+                    Debug(LogSource.Service,
                         $"Executed {args.Context.Command.Name}'s resulting {actionRes.GetType().AsPrettyString()}.");
 
                     if (actionRes is BadRequestResult badreq)
@@ -85,12 +92,12 @@ namespace Volte.Services
 
                 default:
                 {
-                    Logger.Error(LogSource.Volte, "---------- IMPORTANT ----------");
-                    Logger.Error(LogSource.Service,
+                    Error(LogSource.Volte, "---------- IMPORTANT ----------");
+                    Error(LogSource.Service,
                         $"The command {args.Context.Command.Name} didn't return some form of {typeof(ActionResult)}. " +
                         "This is developer error. " +
                         "Please report this to my developers: https://github.com/Polyhaze/Volte. Thank you!");
-                    Logger.Error(LogSource.Volte, "---------- IMPORTANT ----------");
+                    Error(LogSource.Volte, "---------- IMPORTANT ----------");
                     return;
                 }
             }
@@ -111,7 +118,7 @@ namespace Volte.Services
                 sb.AppendLine(ResultMessage(data));
 
             sb.Append(Separator);
-            Logger.Info(LogSource.Volte, sb.ToString());
+            Info(LogSource.Volte, sb.ToString());
         }
 
         private static async Task OnCommandFailureAsync(CommandFailedEventArgs args)
@@ -140,7 +147,7 @@ namespace Volte.Services
 
                 if (!Config.LogAllCommands) return;
 
-                Logger.Error(LogSource.Module, new StringBuilder()
+                Error(LogSource.Module, new StringBuilder()
                     .AppendLine(CommandFrom(args))
                     .AppendLine(CommandIssued(args))
                     .AppendLine(FullMessage(args))
@@ -156,14 +163,14 @@ namespace Volte.Services
             
             static string unknown(FailedResult result)
             {
-                Logger.Verbose(LogSource.Service,
+                Verbose(LogSource.Service,
                     $"A command returned an unknown error. Please screenshot this message and show it to my developers: {result.GetType().AsPrettyString()}");
                 return "Unknown error.";
             }
 
             static string executionFailed(CommandExecutionFailedResult result)
             {
-                Logger.Exception(result.Exception);
+                Error(result.Exception);
                 return $"Execution of this command failed. Exception: {result.Exception.GetType().AsPrettyString()}";
             }
         }
@@ -184,7 +191,7 @@ namespace Volte.Services
                 sb.AppendLine(ResultMessage(args.ResultCompletionData));
 
             sb.Append(Separator);
-            Logger.Error(LogSource.Module, sb.ToString());
+            Error(LogSource.Module, sb.ToString());
         }
 
         private const int SpaceCount = 20;

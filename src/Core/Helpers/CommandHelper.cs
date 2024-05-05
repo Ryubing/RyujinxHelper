@@ -157,7 +157,7 @@ namespace Volte.Core.Helpers
 
         internal static IEnumerable<Type> AddTypeParsers(this CommandService service)
         {
-            var parsers = typeof(VolteBot).Assembly.ExportedTypes.Where(x => x.HasAttribute<InjectTypeParserAttribute>()).ToList();
+            var parsers = Assembly.GetExecutingAssembly().ExportedTypes.Where(x => x.HasAttribute<InjectTypeParserAttribute>()).ToList();
 
             var csMirror = Mirror.Reflect(service);
 
@@ -169,7 +169,7 @@ namespace Volte.Core.Helpers
                     ],
                     args: [
                         parser.GetConstructor(Type.EmptyTypes)?.Invoke([]), 
-                        parser.GetCustomAttribute<InjectTypeParserAttribute>().OverridePrimitive 
+                        parser.GetCustomAttribute<InjectTypeParserAttribute>()!.OverridePrimitive 
                     ]
                 );
                 
@@ -182,7 +182,7 @@ namespace Volte.Core.Helpers
 
         public static int GetTotalTypeParsers(this CommandService cs)
         {
-            var customParsers = typeof(VolteBot).Assembly.GetTypes()
+            var customParsers = Assembly.GetExecutingAssembly().GetTypes()
                 .Count(x => x.HasAttribute<InjectTypeParserAttribute>());
 
             var primitiveParsers = Mirror.ReflectUnsafe(cs).Get<IDictionary>("_primitiveTypeParsers").Count;

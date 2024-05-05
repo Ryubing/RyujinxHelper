@@ -1,23 +1,19 @@
 ﻿using System.ComponentModel;
-using System.Threading.Tasks;
-using Discord;
-using Volte.Commands;
 
-namespace Volte.Interactive
+namespace Volte.Interactive;
+
+public class EnsureFromUserCriterion : ICriterion<IMessage>
 {
-    public class EnsureFromUserCriterion : ICriterion<IMessage>
-    {
-        private readonly ulong _id;
+    private readonly ulong _id;
 
-        public EnsureFromUserCriterion(IUser user)
-            => _id = user.Id;
+    public EnsureFromUserCriterion(IUser user)
+        => _id = user.Id;
 
-        [EditorBrowsable(EditorBrowsableState.Never)]
-        public EnsureFromUserCriterion(ulong id)
-            => _id = id;
+    [EditorBrowsable(EditorBrowsableState.Never)]
+    public EnsureFromUserCriterion(ulong id)
+        => _id = id;
 
-        public ValueTask<bool> JudgeAsync(VolteContext sourceContext, IMessage parameter) 
-            => new ValueTask<bool>(_id == parameter.Author.Id);
+    public ValueTask<bool> JudgeAsync(VolteContext sourceContext, IMessage parameter) 
+        => new(_id == parameter.Author.Id);
 
-    }
 }

@@ -30,6 +30,7 @@ global using Volte.Commands.Modules;
 global using Volte.Core.Helpers;
 global using static Gommon.Lambda;
 
+global using static Volte.Core.Helpers.Logger;
 
 global using Console = Colorful.Console;
 global using DiscordLogMessage = Discord.LogMessage;

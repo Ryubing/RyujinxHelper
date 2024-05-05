@@ -1,6 +1,6 @@
 ﻿namespace Volte.Services;
 
-public sealed class AutoroleService(DatabaseService _db) : IVolteService
+public sealed class AutoroleService(DatabaseService _db) : VolteService
 {
     public async Task ApplyRoleAsync(UserJoinedEventArgs args)
     {
@@ -8,13 +8,13 @@ public sealed class AutoroleService(DatabaseService _db) : IVolteService
         var targetRole = args.Guild.GetRole(data.Configuration.Autorole);
         if (targetRole is null)
         {
-            Logger.Debug(LogSource.Volte,
+            Debug(LogSource.Volte,
                 $"Guild {args.Guild.Name}'s Autorole is set to an ID of a role that no longer exists; or is not set at all.");
             return;
         }
 
         await args.User.AddRoleAsync(targetRole, DiscordHelper.CreateRequestOptions(x => x.AuditLogReason = "Volte Autorole"));
-        Logger.Debug(LogSource.Volte,
+        Debug(LogSource.Volte,
             $"Applied role {targetRole.Name} to user {args.User} in guild {args.Guild.Name}.");
     }
 }

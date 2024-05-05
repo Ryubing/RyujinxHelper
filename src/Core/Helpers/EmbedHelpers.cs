@@ -29,12 +29,19 @@ public static class EmbedHelpers
     /// <param name="e">The current <see cref="EmbedBuilder"/>.</param>
     /// <param name="data">The <see cref="GuildData"/> to apply settings for.</param>
     /// <returns>The possibly-modified <see cref="EmbedBuilder"/></returns>
-    public static EmbedBuilder ApplyConfig(this EmbedBuilder e, GuildData data) => e.Apply(eb =>
+    public static EmbedBuilder Apply(this EmbedBuilder e, GuildData data) => e.Apply(eb =>
     {
         if (data.Configuration.Moderation.ShowResponsibleModerator) return;
         
         eb.WithAuthor(author: null);
         eb.WithSuccessColor();
+    });
+    
+    public static EmbedBuilder Apply(this EmbedBuilder e, PollInfo pollInfo) => e.Apply(eb =>
+    {
+        pollInfo.Fields.ForEach(x => eb.AddField(x.Key, x.Value, true));
+        eb.WithTitle(pollInfo.Prompt);
+        eb.WithFooter(PollInfo.Footer);
     });
     
     public static Embed Embed(Action<EmbedBuilder> initializer) => new EmbedBuilder().Apply(initializer).Build();

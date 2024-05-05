@@ -6,7 +6,7 @@ namespace Volte.Services
     public partial class ReminderService(
         DatabaseService _db,
         DiscordSocketClient _client)
-        : IVolteService
+        : VolteService
     {
         private static readonly Regex JumpUrl =
             MessageUrlPattern();
@@ -30,10 +30,10 @@ namespace Volte.Services
 
         private void Check()
         {
-            Logger.Debug(LogSource.Service, "Checking all reminders.");
+            Debug(LogSource.Service, "Checking all reminders.");
             _db.GetAllReminders().ForEachIndexedAsync(async (reminder, index) =>
             {
-                Logger.Debug(LogSource.Service,
+                Debug(LogSource.Service,
                     $"Reminder '{reminder.ReminderText}', set for {reminder.TargetTime} at index {index}");
                 if (reminder.TargetTime.Ticks <= DateTime.Now.Ticks)
                     await SendAsync(reminder);
@@ -47,9 +47,9 @@ namespace Volte.Services
             if (channel is null)
             {
                 if (_db.TryDeleteReminder(reminder))
-                    Logger.Debug(LogSource.Service,
+                    Debug(LogSource.Service,
                         "Reminder deleted from the database as Volte no longer has access to the channel it was created in.");
-                Logger.Debug(LogSource.Service,
+                Debug(LogSource.Service,
                     "Reminder's target channel was no longer accessible in the guild; aborting.");
                 return;
             }
@@ -58,9 +58,9 @@ namespace Volte.Services
             if (author is null)
             {
                 if (_db.TryDeleteReminder(reminder))
-                    Logger.Debug(LogSource.Service,
+                    Debug(LogSource.Service,
                         "Reminder deleted from the database as its creator is no longer in the guild it was made.");
-                Logger.Debug(LogSource.Service, "Reminder's creator was no longer present in the guild; aborting.");
+                Debug(LogSource.Service, "Reminder's creator was no longer present in the guild; aborting.");
                 return;
             }
 

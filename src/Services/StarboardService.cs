@@ -3,7 +3,7 @@ using System.Net;
 namespace Volte.Services
 {
     public sealed class StarboardService(DatabaseService _db, DiscordSocketClient _client)
-        : IVolteService
+        : VolteService
     {
         // Ensures starboard message creations don't happen twice, and edits are atomic. Also ensures dictionary updates
         // don't happen at the same time.
@@ -222,7 +222,7 @@ namespace Volte.Services
                 }
                 catch (HttpException ex) when (ex.HttpCode == HttpStatusCode.NotFound) 
                 {
-                    Logger.Debug(LogSource.Service, "Could not retrieve original star message in channel.");
+                    Debug(LogSource.Service, "Could not retrieve original star message in channel.");
                     return;
                 }
 

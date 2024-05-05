@@ -13,7 +13,7 @@ namespace Volte.Core.Entities
 
     public class VolteAddon
     {
-        public VolteAddonMeta Meta { get; init; }
-        public string Script { get; init; }
+        public VolteAddonMeta Meta { get; set; }
+        public string Script { get; set; }
     }
 }

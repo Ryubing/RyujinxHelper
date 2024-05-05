@@ -49,7 +49,7 @@ public sealed partial class AdminUtilityModule
 
         if (options.TryGetValue("description", out result) || options.TryGetValue("desc", out result))
         {
-            //must be a URL
+            /*//must be a URL
             if (Uri.IsWellFormedUriString(WebUtility.UrlEncode(result), UriKind.RelativeOrAbsolute)
                 //must be a website/paste service that has support for raw paste viewing via a URL; feel free to PR more or to message me on discord to add some
                 && result.ContainsAnyIgnoreCase(AllowedPasteSites) 
@@ -61,8 +61,11 @@ public sealed partial class AdminUtilityModule
                     var m = await Http.GetAsync(WebUtility.UrlEncode(result));
                     result = await m.Content.ReadAsStringAsync();
                 }
-                catch { /* ignored */ }
-            }
+                catch
+                {
+                     // ignored
+                }
+            }*/
                 
             embed.WithDescription(result);
         }

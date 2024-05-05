@@ -24,7 +24,7 @@ public class VolteBot
 
         if (!Config.IsValidToken()) return;
         
-        Logger.LogFileRestartNotice();
+        LogFileRestartNotice();
 
         _provider = new ServiceCollection().AddAllServices().BuildServiceProvider();
         _client = _provider.Get<DiscordSocketClient>();
@@ -35,18 +35,20 @@ public class VolteBot
         await _client.LoginAsync(TokenType.Bot, Config.Token);
         await _client.StartAsync();
 
-        var commandService = _provider.Get<CommandService>();
+        {
+            var commandService = _provider.Get<CommandService>();
 
-        var sw = Stopwatch.StartNew();
-        var l = commandService.AddTypeParsers();
-        sw.Stop();
-        Logger.Info(LogSource.Volte,
-            $"Loaded TypeParsers: [{l.Select(x => x.Name.Replace("Parser", string.Empty)).JoinToString(", ")}] in {sw.ElapsedMilliseconds}ms.");
-        sw = Stopwatch.StartNew();
-        var loaded = commandService.AddModules(GetType().Assembly);
-        sw.Stop();
-        Logger.Info(LogSource.Volte,
-            $"Loaded {loaded.Count} modules and {loaded.Sum(m => m.Commands.Count)} commands in {sw.ElapsedMilliseconds}ms.");
+            var (sw1, addedParsers) = 
+                Timed(() => commandService.AddTypeParsers());
+            Info(LogSource.Volte,
+                $"Loaded TypeParsers: [{addedParsers.Select(x => x.Name.Replace("Parser", string.Empty)).JoinToString(", ")}] in {sw1.ElapsedMilliseconds}ms.");
+
+            var (sw2, addedModules) = 
+                Timed(() => commandService.AddModules(Assembly.GetExecutingAssembly()));
+            Info(LogSource.Volte,
+                $"Loaded {addedModules.Count} modules and {addedModules.Sum(m => m.Commands.Count)} commands in {sw2.ElapsedMilliseconds}ms.");
+        }
+        
         await _client.RegisterVolteEventHandlersAsync(_provider);
 
         Executor.ExecuteBackgroundAsync(async () => await _provider.Get<AddonService>().InitAsync());
@@ -64,11 +66,12 @@ public class VolteBot
     }
 
     // ReSharper disable SuggestBaseTypeForParameter
-    public static async Task ShutdownAsync(DiscordSocketClient client, IServiceProvider provider)
+    public static async Task ShutdownAsync(DiscordSocketClient client, ServiceProvider provider)
     {
-        Logger.Critical(LogSource.Volte,
-            "Bot shutdown requested; shutting down and cleaning up.");
+        Critical(LogSource.Volte, "Bot shutdown requested; shutting down and cleaning up.");
 
+        await provider.DisposeAsync();
+        
         await client.SetStatusAsync(UserStatus.Invisible);
         await client.LogoutAsync();
         await client.StopAsync();

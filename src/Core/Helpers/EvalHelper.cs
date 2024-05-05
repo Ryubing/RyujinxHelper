@@ -36,7 +36,7 @@ public static partial class EvalHelper
         }
         catch (Exception e)
         {
-            Logger.Error(LogSource.Module, string.Empty, e);
+            Error(LogSource.Module, string.Empty, e);
         }
         finally
         {
@@ -87,23 +87,23 @@ public static partial class EvalHelper
                 var res = state.ReturnValue switch
                 {
                     bool b => b.ToString().ToLower(),
+                    string str => str,
                     IEnumerable enumerable and not string => enumerable.Cast<object>().ToReadableString(),
                     IUser user => $"{user} ({user.Id})",
                     ITextChannel channel => $"#{channel.Name} ({channel.Id})",
                     IMessage message => env.Inspect(message),
-                    string str => str,
                     _ => state.ReturnValue.ToString()
                 };
-                await (shouldReply switch
-                {
-                    true => msg.ModifyAsync(m =>
+
+
+                if (shouldReply)
+                    await msg.ModifyAsync(m =>
                         m.Embed = embed.WithTitle("Eval")
                             .AddField("Elapsed Time", $"{sw.Elapsed.Humanize()}", true)
                             .AddField("Return Type", state.ReturnValue.GetType().AsPrettyString(), true)
-                            .WithDescription(Format.Code(res, res.IsNullOrEmpty() ? string.Empty : "ini")).Build()),
-                    false => msg.DeleteAsync().Then(() => env.ReactAsync(DiscordHelper.BallotBoxWithCheck))
-                        
-                });
+                            .WithDescription(Format.Code(res, res.IsNullOrEmpty() ? string.Empty : "ini")).Build());
+                else
+                    await msg.DeleteAsync().Then(() => env.ReactAsync(DiscordHelper.BallotBoxWithCheck));
             }
             else
                 await msg.DeleteAsync().Then(() => env.ReactAsync(DiscordHelper.BallotBoxWithCheck));

@@ -21,10 +21,10 @@ namespace Volte.Commands.Modules
         {
             var e = Context.CreateEmbedBuilder(
                     $"You've been softbanned from **{Context.Guild.Name}** for **{reason}**.")
-                .ApplyConfig(Context.GuildData);
+                .Apply(Context.GuildData);
 
             if (!await user.TrySendMessageAsync(embed: e.Build()))
-                Logger.Warn(LogSource.Module, $"encountered a 403 when trying to message {user}!");
+                Warn(LogSource.Module, $"encountered a 403 when trying to message {user}!");
 
             try
             {

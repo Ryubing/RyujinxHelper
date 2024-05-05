@@ -2,22 +2,22 @@ using Volte.Core;
 
 namespace Volte.Services;
 
-public class ModerationService(DatabaseService _db) : IVolteService
+public class ModerationService(DatabaseService _db) : VolteService
 {
     public async Task CheckAccountAgeAsync(UserJoinedEventArgs args)
     {
         var modConfig = _db.GetData(args.Guild).Configuration.Moderation;
         if (args.User.IsBot || !modConfig.CheckAccountAge) return;
             
-        Logger.Debug(LogSource.Volte, "Attempting to post a VerifyAge message.");
+        Debug(LogSource.Volte, "Attempting to post a VerifyAge message.");
             
         var c = args.User.Guild.GetTextChannel(modConfig.ModActionLogChannel);
         if (c is null) return;
-        Logger.Debug(LogSource.Volte, "Resulting channel was either not set or invalid; aborting.");
+        Debug(LogSource.Volte, "Resulting channel was either not set or invalid; aborting.");
         var diff = DateTimeOffset.Now - args.User.CreatedAt;
         if (diff.Days <= 30)
         {
-            Logger.Debug(LogSource.Volte, "Account younger than 30 days; posting message.");
+            Debug(LogSource.Volte, "Account younger than 30 days; posting message.");
             var unit = diff.Days > 0 ? "day" : diff.Hours > 0 ? "hour" : "minute";
             var time = diff.Days > 0 ? diff.Days : diff.Hours > 0 ? diff.Hours : diff.Minutes;
                 
@@ -36,17 +36,17 @@ public class ModerationService(DatabaseService _db) : IVolteService
     {
         if (!Config.EnabledFeatures.ModLog) return;
 
-        Logger.Debug(LogSource.Volte, "Attempting to post a modlog message.");
+        Debug(LogSource.Volte, "Attempting to post a modlog message.");
 
         var c = args.Guild.GetTextChannel(args.Context.GuildData.Configuration.Moderation.ModActionLogChannel);
         if (c is null)
         {
-            Logger.Debug(LogSource.Volte, "Resulting channel was either not set or invalid; aborting.");
+            Debug(LogSource.Volte, "Resulting channel was either not set or invalid; aborting.");
             return;
         }
 
         var e = args.Context.CreateEmbedBuilder().WithAuthor(author: null).WithSuccessColor();
-        Logger.Debug(LogSource.Volte, "Received a signal to send a ModLog message.");
+        Debug(LogSource.Volte, "Received a signal to send a ModLog message.");
         var sb = new StringBuilder();
 
         switch (args.ActionType)
@@ -60,7 +60,7 @@ public class ModerationService(DatabaseService _db) : IVolteService
                         .AppendLine(Channel(args))
                         .AppendLine(Time(args)))
                     .SendToAsync(c);
-                Logger.Debug(LogSource.Volte, $"Posted a modlog message for {nameof(ModActionType.Purge)}");
+                Debug(LogSource.Volte, $"Posted a modlog message for {nameof(ModActionType.Purge)}");
                 break;
             }
 
@@ -73,7 +73,7 @@ public class ModerationService(DatabaseService _db) : IVolteService
                         .AppendLine(Channel(args))
                         .AppendLine(Time(args)))
                     .SendToAsync(c);
-                Logger.Debug(LogSource.Volte, $"Posted a modlog message for {nameof(ModActionType.Delete)}");
+                Debug(LogSource.Volte, $"Posted a modlog message for {nameof(ModActionType.Delete)}");
                 break;
             }
 
@@ -88,7 +88,7 @@ public class ModerationService(DatabaseService _db) : IVolteService
                         .AppendLine(Reason(args))
                         .AppendLine(Time(args)))
                     .SendToAsync(c);
-                Logger.Debug(LogSource.Volte, $"Posted a modlog message for {nameof(ModActionType.Kick)}");
+                Debug(LogSource.Volte, $"Posted a modlog message for {nameof(ModActionType.Kick)}");
                 break;
             }
 
@@ -103,7 +103,7 @@ public class ModerationService(DatabaseService _db) : IVolteService
                         .AppendLine(Reason(args))
                         .AppendLine(Time(args)))
                     .SendToAsync(c);
-                Logger.Debug(LogSource.Volte, $"Posted a modlog message for {nameof(ModActionType.Warn)}");
+                Debug(LogSource.Volte, $"Posted a modlog message for {nameof(ModActionType.Warn)}");
                 break;
             }
 
@@ -115,7 +115,7 @@ public class ModerationService(DatabaseService _db) : IVolteService
                         .AppendLine(Target(args, false))
                         .AppendLine(Time(args)))
                     .SendToAsync(c);
-                Logger.Debug(LogSource.Volte, $"Posted a modlog message for {nameof(ModActionType.ClearWarns)}");
+                Debug(LogSource.Volte, $"Posted a modlog message for {nameof(ModActionType.ClearWarns)}");
                 break;
             }
 
@@ -130,7 +130,7 @@ public class ModerationService(DatabaseService _db) : IVolteService
                         .AppendLine(Reason(args))
                         .AppendLine(Time(args)))
                     .SendToAsync(c);
-                Logger.Debug(LogSource.Volte, $"Posted a modlog message for {nameof(ModActionType.Softban)}");
+                Debug(LogSource.Volte, $"Posted a modlog message for {nameof(ModActionType.Softban)}");
                 break;
             }
 
@@ -145,7 +145,7 @@ public class ModerationService(DatabaseService _db) : IVolteService
                         .AppendLine(Reason(args))
                         .AppendLine(Time(args)))
                     .SendToAsync(c);
-                Logger.Debug(LogSource.Volte, $"Posted a modlog message for {nameof(ModActionType.Ban)}");
+                Debug(LogSource.Volte, $"Posted a modlog message for {nameof(ModActionType.Ban)}");
                 break;
             }
 
@@ -159,7 +159,7 @@ public class ModerationService(DatabaseService _db) : IVolteService
                         .AppendLine(await TargetRestUser(args))
                         .AppendLine(Time(args)))
                     .SendToAsync(c);
-                Logger.Debug(LogSource.Volte, $"Posted a modlog message for {nameof(ModActionType.IdBan)}");
+                Debug(LogSource.Volte, $"Posted a modlog message for {nameof(ModActionType.IdBan)}");
                 break;
             }
 
@@ -170,13 +170,13 @@ public class ModerationService(DatabaseService _db) : IVolteService
                         .AppendLine(Target(args, false))
                         .AppendLine(Time(args)))
                     .SendToAsync(c);
-                Logger.Debug(LogSource.Volte, $"Posted a modlog message for {nameof(ModActionType.Verify)}");
+                Debug(LogSource.Volte, $"Posted a modlog message for {nameof(ModActionType.Verify)}");
                 break;
             default:
                 throw new InvalidOperationException();
         }
 
-        Logger.Debug(LogSource.Volte,
+        Debug(LogSource.Volte,
             "Sent a ModLog message or threw an exception.");
     }
 

@@ -122,9 +122,10 @@ namespace Volte.Core.Helpers
         }
 
         public static string GetInviteUrl(this IDiscordClient client, bool withAdmin = true)
-            => withAdmin
-                ? $"https://discord.com/oauth2/authorize?client_id={client.CurrentUser.Id}&scope=bot&permissions=8"
-                : $"https://discord.com/oauth2/authorize?client_id={client.CurrentUser.Id}&scope=bot&permissions=402992246";
+            => client.GetInviteUrl(withAdmin ? 8 : 402992246);
+        
+        public static string GetInviteUrl(this IDiscordClient client, long permissions)
+            => $"https://discord.com/oauth2/authorize?client_id={client.CurrentUser.Id}&permissions={permissions}&scope=bot%20applications.commands";
 
         public static SocketUser GetOwner(this BaseSocketClient client)
             => client.GetUser(Config.Owner);
@@ -141,6 +142,8 @@ namespace Volte.Core.Helpers
         
         public static async Task RegisterVolteEventHandlersAsync(this DiscordSocketClient client, ServiceProvider provider)
         {
+            await VolteService.RegisterClientAsync(client);
+            
             var welcome = provider.Get<WelcomeService>();
             var autorole = provider.Get<AutoroleService>();
             var mod = provider.Get<ModerationService>();
@@ -149,7 +152,7 @@ namespace Volte.Core.Helpers
             client.Log += async m =>
             {
                 if (!m.Message.ContainsAnyIgnoreCase(_ignoredLogMessages))
-                    await Task.Run(() => Logger.HandleLogEvent(new LogEventArgs(m)));
+                    await Task.Run(() => HandleLogEvent(new LogEventArgs(m)));
             };
 
             client.Ready += async () =>
@@ -158,27 +161,27 @@ namespace Volte.Core.Helpers
                 var users = client.Guilds.SelectMany(x => x.Users).DistinctBy(x => x.Id).Count();
                 var channels = client.Guilds.SelectMany(x => x.Channels).DistinctBy(x => x.Id).Count();
 
-                Logger.PrintHeader();
-                Logger.Info(LogSource.Volte, "Use this URL to invite me to your guilds:");
-                Logger.Info(LogSource.Volte, $"{client.GetInviteUrl()}");
-                Logger.Info(LogSource.Volte, $"Logged in as {client.CurrentUser.Username}#{client.CurrentUser.Discriminator}");
-                Logger.Info(LogSource.Volte, $"Default command prefix is: \"{Config.CommandPrefix}\"");
-                Logger.Info(LogSource.Volte, "Connected to:");
-                Logger.Info(LogSource.Volte, $"     {"guild".ToQuantity(guilds)}");
-                Logger.Info(LogSource.Volte, $"     {"user".ToQuantity(users)}");
-                Logger.Info(LogSource.Volte, $"     {"channel".ToQuantity(channels)}");
+                PrintHeader();
+                Info(LogSource.Volte, "Use this URL to invite me to your guilds:");
+                Info(LogSource.Volte, $"{client.GetInviteUrl()}");
+                Info(LogSource.Volte, $"Logged in as {client.CurrentUser.Username}#{client.CurrentUser.Discriminator}");
+                Info(LogSource.Volte, $"Default command prefix is: \"{Config.CommandPrefix}\"");
+                Info(LogSource.Volte, "Connected to:");
+                Info(LogSource.Volte, $"     {"guild".ToQuantity(guilds)}");
+                Info(LogSource.Volte, $"     {"user".ToQuantity(users)}");
+                Info(LogSource.Volte, $"     {"channel".ToQuantity(channels)}");
 
                 var (type, name, streamer) = Config.ParseActivity();
 
                 if (streamer is null && type != ActivityType.CustomStatus)
                 {
                     await client.SetGameAsync(name, null, type);
-                    Logger.Info(LogSource.Volte, $"Set {client.CurrentUser.Username}'s game to \"{Config.Game}\".");
+                    Info(LogSource.Volte, $"Set {client.CurrentUser.Username}'s game to \"{Config.Game}\".");
                 }
                 else if (type != ActivityType.CustomStatus)
                 {
                     await client.SetGameAsync(name, Config.FormattedStreamUrl, type);
-                    Logger.Info(LogSource.Volte,
+                    Info(LogSource.Volte,
                         $"Set {client.CurrentUser.Username}'s activity to \"{type}: {name}\", at Twitch user {Config.Streamer}.");
                 }
 
@@ -187,7 +190,7 @@ namespace Volte.Core.Helpers
                     foreach (var g in client.Guilds)
                     {
                         if (Config.BlacklistedOwners.Contains(g.OwnerId))
-                            await g.LeaveAsync().Then(async () => Logger.Warn(LogSource.Volte,
+                            await g.LeaveAsync().Then(async () => Warn(LogSource.Volte,
                                 $"Left guild \"{g.Name}\" owned by blacklisted owner {await client.Rest.GetUserAsync(g.OwnerId)}."));
                         else provider.Get<DatabaseService>().GetData(g); //ensuring all guilds have data available to prevent exceptions later on 
                     }

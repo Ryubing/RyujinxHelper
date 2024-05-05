@@ -78,16 +78,16 @@ namespace Volte.Interactive
                 {
                     newList.Add(temp.Take(perPage).Select(x => x.ToString()).JoinToString("\n"));
                     temp.RemoveRange(0, temp.Count < perPage ? temp.Count : perPage);
-                } while (temp.Any());
+                } while (temp.Count != 0);
 
                 Pages = newList;
                 return this;
             }
 
             public PaginatedMessage Build()
-                => new PaginatedMessage
+                => new()
                 {
-                    Pages = Pages,
+                    Pages = Pages as List<object> ?? Pages.ToList(),
                     Content = Content,
                     Author = Author,
                     Color = Color,
@@ -104,7 +104,7 @@ namespace Volte.Interactive
         /// <summary>
         /// Pages contains a collection of elements to page over in the embed. It is expected
         /// that a string-like object is used in this collection, as objects will be converted
-        /// to a displayable string only through their generic ToString method, with the
+        /// to a displayable string only through their generic ToString method, with the sole
         /// exception of EmbedFieldBuilders.
         /// 
         /// If this collection is of <see cref="EmbedFieldBuilder"/>, then the pages will be displayed in
@@ -113,7 +113,7 @@ namespace Volte.Interactive
         /// If this collection is of <see cref="EmbedBuilder"/>, every setting in <see cref="PaginatedMessage"/> will be ignored as
         /// the contents of the EmbedBuilders are used instead.
         /// </summary>
-        public IEnumerable<object> Pages { get; internal set; }
+        public List<object> Pages { get; internal set; }
 
         /// <summary>
         /// Content sets the content of the message, displayed above the embed. This may remain empty.

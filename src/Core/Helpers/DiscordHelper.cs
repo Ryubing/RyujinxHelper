@@ -103,7 +103,7 @@ namespace Volte.Core.Helpers
             => $"<t:{unixSeconds}:{timestampType}>";
         
         public static string ToDiscordTimestamp(this DateTimeOffset dto, TimestampType type) =>
-            ToMarkdownTimestamp(dto.ToUnixTimeSeconds(), type.HardCast<char>());
+            ToMarkdownTimestamp(dto.ToUnixTimeSeconds(), (char)type);
 
         public static string ToDiscordTimestamp(this DateTime date, TimestampType type) => 
             new DateTimeOffset(date).ToDiscordTimestamp(type);

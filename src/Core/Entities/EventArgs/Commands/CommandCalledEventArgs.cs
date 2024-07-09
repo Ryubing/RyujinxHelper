@@ -1,7 +1,7 @@
 ﻿using System.Diagnostics;
 using Gommon;
 using Qmmands;
-using Volte.Commands;
+using Volte.Commands.Text;
 
 namespace Volte.Core.Entities
 {

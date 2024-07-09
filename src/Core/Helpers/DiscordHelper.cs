@@ -10,7 +10,7 @@ using Discord.Rest;
 using Discord.WebSocket;
 using Gommon;
 using Humanizer;
-using Volte.Commands;
+using Volte.Commands.Text;
 using Volte.Core.Entities;
 using Volte.Services;
 

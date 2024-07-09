@@ -6,7 +6,7 @@ using Discord.WebSocket;
 using Gommon;
 using Humanizer;
 using Qmmands;
-using Volte.Commands;
+using Volte.Commands.Text;
 using Volte.Core.Helpers;
 
 namespace Volte.Interactive

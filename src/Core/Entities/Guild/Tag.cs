@@ -1,7 +1,7 @@
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using Discord;
-using Volte.Commands;
+using Volte.Commands.Text;
 using Volte.Core.Helpers;
 
 namespace Volte.Core.Entities

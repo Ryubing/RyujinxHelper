@@ -1,6 +1,6 @@
 ﻿using System;
 using System.Diagnostics;
-using Volte.Commands;
+using Volte.Commands.Text;
 
 namespace Volte.Core.Entities
 {

@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using Discord.Commands;
-using Volte.Commands;
+using Volte.Commands.Text;
 
 namespace Volte.Interactive
 {

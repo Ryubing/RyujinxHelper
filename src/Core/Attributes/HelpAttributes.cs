@@ -1,7 +1,7 @@
 using System;
 using System.Collections.Generic;
-using Volte.Commands;
-using Volte.Commands.Modules;
+using Volte.Commands.Text;
+using Volte.Commands.Text.Modules;
 
 namespace Volte.Core.Entities
 {

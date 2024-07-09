@@ -1,7 +1,7 @@
 using System;
 using JsonParser = System.Text.Json.JsonSerializer; // same class in namespace LiteDB
 using System.Text.Json.Serialization;
-using Volte.Commands;
+using Volte.Commands.Text;
 using LiteDB;
 
 namespace Volte.Core.Entities

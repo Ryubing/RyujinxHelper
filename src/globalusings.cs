@@ -17,7 +17,7 @@ global using Discord.Net;
 global using Discord.Rest;
 global using Discord;
 global using Humanizer;
-global using Volte.Commands;
+global using Volte.Commands.Text;
 global using Volte.Core.Entities;
 global using Volte.Services;
 global using System.Net.Http;
@@ -26,7 +26,7 @@ global using Sentry;
 global using System.Diagnostics;
 global using Microsoft.Extensions.DependencyInjection;
 global using Qmmands;
-global using Volte.Commands.Modules;
+global using Volte.Commands.Text.Modules;
 global using Volte.Core.Helpers;
 global using static Gommon.Lambda;
 

@@ -1,6 +1,6 @@
 ﻿using System.Threading.Tasks;
 using Discord.WebSocket;
-using Volte.Commands;
+using Volte.Commands.Text;
 
 namespace Volte.Interactive
 {

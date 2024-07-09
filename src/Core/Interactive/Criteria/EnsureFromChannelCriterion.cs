@@ -1,6 +1,6 @@
 ﻿using System.Threading.Tasks;
 using Discord;
-using Volte.Commands;
+using Volte.Commands.Text;
 
 namespace Volte.Interactive
 {

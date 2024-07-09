@@ -2,6 +2,7 @@
 using Sentry.Extensibility;
 
 using Color = System.Drawing.Color;
+using Optional = Gommon.Optional;
 
 namespace Volte.Core.Helpers;
 
@@ -59,22 +60,43 @@ public static partial class Logger
         _logFileNoticePrinted = true;
     }
     
-    private static void Log(LogSeverity s, LogSource from, string message, Exception e, Gommon.Optional<InvocationInfo> caller)
+    private static void Log<TData>(LogSeverity s, LogSource from, string message, Exception e, InvocationInfo<TData> caller = default)
     {
         if (s is LogSeverity.Debug && !Config.EnableDebugLogging)
             return;
-            
+        
         LogSync.Lock(() => Execute(s, from, message, e, caller));
     }
     
-    private static void Execute(LogSeverity s, LogSource src, string message, Exception e, Gommon.Optional<InvocationInfo> caller)
+    private static void Execute<TData>(LogSeverity s, LogSource src, string message, Exception e, InvocationInfo<TData> caller)
     {
         var content = new StringBuilder();
 
-        if (IsDebugLoggingEnabled && caller is { HasValue: true, Value.IsInitialized: true })
+        if (IsDebugLoggingEnabled && caller.IsInitialized)
         {
-            Append($"{caller.Value.SourceFileName}:{caller.Value.SourceFileLine}->{caller.Value.CallerName}", Color.Aquamarine, ref content);
-            Append(" |>  ", Color.Goldenrod, ref content);
+            var debugInfo = Optional.None<string>();
+            switch (caller)
+            {
+                case InvocationInfo<FullDebugInfo> fdi:
+                    debugInfo =
+                        $"{fdi.GetSourceFileName()}:{fdi.Data.SourceFileLocation.LineInFile}->{fdi.Data.CallerName}";
+                    break;
+                
+                case InvocationInfo<SourceMemberName> smn:
+                    debugInfo = smn.Data.Value;
+                    break;
+                
+                case InvocationInfo<SourceFileLocation> fdi:
+                    debugInfo = $"{fdi.GetSourceFileName()}:{fdi.Data.LineInFile}";
+                    
+                    break;
+            }
+
+            debugInfo.IfPresent(debugInfoContent =>
+            {
+                Append(debugInfoContent, Color.Aquamarine, ref content);
+                Append(" |>  ", Color.Goldenrod, ref content);
+            });
         }
         
         var (color, value) = VerifySeverity(s);

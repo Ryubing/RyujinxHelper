@@ -15,23 +15,23 @@ public partial class TimeSpanParser : VolteTypeParser<TimeSpan>
         var r = ..^1;
         var result = new TimeSpan();
 
-        if (match.Groups["Years"].Success && int.TryParse(match.Groups["Years"].Value[r], out var years))
-            result = result.Add((years * 365).Days());
+        if (match.Groups["Years"].Success && match.Groups["Years"].Value[r].TryParse<int>(out var years))
+            result += (years * 365).Days();
 
-        if (match.Groups["Weeks"].Success && int.TryParse(match.Groups["Weeks"].Value[r], out var weeks))
-            result = result.Add((weeks * 7).Days());
+        if (match.Groups["Weeks"].Success && match.Groups["Weeks"].Value[r].TryParse<int>(out var weeks))
+            result += (weeks * 7).Days();
             
-        if (match.Groups["Days"].Success && int.TryParse(match.Groups["Days"].Value[r], out var days))
-            result = result.Add(days.Days());
+        if (match.Groups["Days"].Success && match.Groups["Days"].Value[r].TryParse<int>(out var days))
+            result += days.Days();
             
-        if (match.Groups["Hours"].Success && int.TryParse(match.Groups["Hours"].Value[r], out var hours))
-            result = result.Add(hours.Hours());
+        if (match.Groups["Hours"].Success && match.Groups["Hours"].Value[r].TryParse<int>(out var hours))
+            result += hours.Hours();
 
-        if (match.Groups["Minutes"].Success && int.TryParse(match.Groups["Minutes"].Value[r], out var minutes))
-            result = result.Add(minutes.Minutes());
+        if (match.Groups["Minutes"].Success && match.Groups["Minutes"].Value[r].TryParse<int>(out var minutes))
+            result += minutes.Minutes();
 
-        if (match.Groups["Seconds"].Success && int.TryParse(match.Groups["Seconds"].Value[r], out var seconds))
-            result = result.Add(seconds.Seconds());
+        if (match.Groups["Seconds"].Success && match.Groups["Seconds"].Value[r].TryParse<int>(out var seconds))
+            result += seconds.Seconds();
 
         return Success(result);
     }

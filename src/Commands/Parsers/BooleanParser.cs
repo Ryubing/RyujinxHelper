@@ -37,7 +37,7 @@ public sealed class BooleanParser : VolteTypeParser<bool>
         if (_falseValues.ContainsIgnoreCase(value))
             return Success(false);
 
-        return bool.TryParse(value, out var result)
+        return value.TryParse<bool>(out var result)
             ? Success(result)
             : Failure($"Failed to parse a {typeof(bool)} (true/false) value. Try using true or false.");
     }

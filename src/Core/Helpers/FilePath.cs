@@ -30,12 +30,13 @@ public record FilePath
     }
 
     public FilePath Resolve(string subPath, bool? isDirectory = null)
-    {
-        if (!Path.EndsWith('/') && !subPath.StartsWith('/'))
-            return new FilePath($"{Path}/{subPath}");
-        
-        return new FilePath(Path + subPath, isDirectory);
-    }
+        => new(
+            !Path.EndsWith('/') && !subPath.StartsWith('/') 
+                ? $"{Path}/{subPath}" 
+                : Path + subPath,
+            isDirectory
+            );
+    
 
     public static FilePath operator /(FilePath left, string right) => left.Resolve(right);
 

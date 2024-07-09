@@ -1,107 +1,95 @@
-using System;
-using System.Collections.Generic;
-using System.Diagnostics;
-using System.IO;
-using System.Linq;
-using System.Text.Json;
-using System.Threading.Tasks;
-using Gommon;
-using Humanizer;
 using Microsoft.CodeAnalysis.CSharp.Scripting;
 using Microsoft.CodeAnalysis.Scripting;
 using Volte.Core;
-using Volte.Core.Entities;
-using Volte.Core.Helpers;
 
-namespace Volte.Services
+namespace Volte.Services;
+
+public class AddonService : VolteService
 {
-    public class AddonService : VolteService
-    {
-        public static FilePath AddonsDir = new("addons", true);
+    public static FilePath AddonsDir = new("addons", true);
         
-        private readonly IServiceProvider _provider;
-        private bool _isInitialized;
-        public Dictionary<VolteAddon, ScriptState> LoadedAddons { get; }
+    private readonly IServiceProvider _provider;
+    private bool _isInitialized;
+    public Dictionary<VolteAddon, ScriptState> LoadedAddons { get; }
 
-        public AddonService(IServiceProvider serviceProvider)
-        {
-            _isInitialized = false;
-            _provider = serviceProvider;
-            LoadedAddons = new Dictionary<VolteAddon, ScriptState>();
-        }
+    public AddonService(IServiceProvider serviceProvider)
+    {
+        _isInitialized = false;
+        _provider = serviceProvider;
+        LoadedAddons = new Dictionary<VolteAddon, ScriptState>();
+    }
 
-        private static IEnumerable<VolteAddon> GetAvailableAddons()
+    private static IEnumerable<VolteAddon> GetAvailableAddons()
+    {
+        foreach (var dir in AddonsDir.GetSubdirectories())
         {
-            foreach (var dir in AddonsDir.GetSubdirectories())
-            {
-                if (TryGetAddonContent(dir, out var addon))
-                    yield return addon;
+            if (TryGetAddonContent(dir, out var addon))
+                yield return addon;
                 
-                if (addon.Meta != null && addon.Script is null)
-                    Error(LogSource.Service,
-                        $"Attempted to load addon {addon.Meta.Name} but there were no C# source files in its directory. These are necessary as an addon with no logic does nothing.");
-            }
+            if (addon.Meta != null && addon.Script is null)
+                Error(LogSource.Service,
+                    $"Attempted to load addon {addon.Meta.Name} but there were no C# source files in its directory. These are necessary as an addon with no logic does nothing.");
+        }
+    }
+
+    public async Task InitAsync()
+    {
+        var sw = Stopwatch.StartNew();
+        if (_isInitialized || !AddonsDir.ExistsAsDirectory) return; //don't auto-create a directory; if someone wants to use addons they need to make it themselves.
+        if (AddonsDir.GetSubdirectories().Count < 1)
+        {
+            Info(LogSource.Service, "No addons are in the addons directory; skipping initialization.");
+            return;
         }
 
-        public async Task InitAsync()
+        foreach (var addon in GetAvailableAddons())
         {
-            var sw = Stopwatch.StartNew();
-            if (_isInitialized || !AddonsDir.ExistsAsDirectory) return; //don't auto-create a directory; if someone wants to use addons they need to make it themselves.
-            if (AddonsDir.GetSubdirectories().Count < 1)
+            try
             {
-                Info(LogSource.Service, "No addons are in the addons directory; skipping initialization.");
-                return;
+                LoadedAddons.Add(addon, await CSharpScript.RunAsync(addon.Script, EvalHelper.Options, new AddonEnvironment(_provider)));
             }
+            catch (Exception e)
+            {
+                Error(LogSource.Service, $"Addon {addon.Meta.Name}'s script produced an error.", e);
+            }
+        }
+        sw.Stop();
+        Info(LogSource.Service, $"{"addon".ToQuantity(LoadedAddons.Count)} loaded in {sw.Elapsed.Humanize(2)}.");
+        _isInitialized = true;
+    }
 
-            foreach (var addon in GetAvailableAddons())
+    private static bool TryGetAddonContent(FilePath addonDir, out VolteAddon addon)
+    {
+        addon = new VolteAddon();
+            
+        foreach (var file in addonDir.GetFiles())
+        {
+            if (file.Extension is "json")
             {
                 try
                 {
-                    LoadedAddons.Add(addon, await CSharpScript.RunAsync(addon.Script, EvalHelper.Options, new AddonEnvironment(_provider)));
-                }
-                catch (Exception e)
-                {
-                    Error(LogSource.Service, $"Addon {addon.Meta.Name}'s script produced an error.", e);
-                }
-            }
-            sw.Stop();
-            Info(LogSource.Service, $"{"addon".ToQuantity(LoadedAddons.Count)} loaded in {sw.Elapsed.Humanize(2)}.");
-            _isInitialized = true;
-        }
-
-        private static bool TryGetAddonContent(FilePath addonDir, out VolteAddon addon)
-        {
-            addon = new VolteAddon();
-            
-            foreach (var file in addonDir.GetFiles())
-            {
-                if (file.Extension is "json")
-                {
-                    try
-                    {
-                        addon.Meta = JsonSerializer.Deserialize<VolteAddonMeta>(file.ReadAllText(), Config.JsonOptions);
+                    addon.Meta = JsonSerializer.Deserialize<VolteAddonMeta>(file.ReadAllText(), Config.JsonOptions);
                         
-                        if (addon.Meta.Name.EqualsIgnoreCase("list"))
-                            throw new InvalidOperationException(
-                                $"Addon with name {addon.Meta.Name} is being ignored because it is using a reserved name. Please change the name or remove the addon.");
+                    if (addon.Meta.Name.EqualsIgnoreCase("list"))
+                        throw new InvalidOperationException(
+                            $"Addon with name {addon.Meta.Name} is being ignored because it is using a reserved name. Please change the name or remove the addon.");
 
-                    }
-                    catch (JsonException e)
-                    {
-                        Error(LogSource.Service, $"Addon meta file '{file}' had invalid JSON contents.", e);
-                    }
-                    catch (InvalidOperationException e)
-                    {
-                        addon.Meta = null;
-                        Error(LogSource.Service, e.Message);
-                    }
                 }
-
-                if (file.Extension is "cs")
-                    addon.Script = file.ReadAllText();
+                catch (JsonException e)
+                {
+                    Error(LogSource.Service, $"Addon meta file '{file}' had invalid JSON contents.", e);
+                }
+                catch (InvalidOperationException e)
+                {
+                    addon.Meta = null;
+                    Error(LogSource.Service, e.Message);
+                }
             }
 
-            return addon.Meta != null && addon.Script != null;
+            if (file.Extension is "cs")
+                addon.Script = file.ReadAllText();
         }
+
+        return addon.Meta != null && addon.Script != null;
     }
 }

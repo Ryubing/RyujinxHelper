@@ -10,7 +10,7 @@ public sealed class ChannelParser : VolteTypeParser<SocketTextChannel>
     {
         SocketTextChannel channel = default;
 
-        if (ulong.TryParse(value, out var id) || MentionUtils.TryParseChannel(value, out id))
+        if (value.TryParse<ulong>(out var id) || MentionUtils.TryParseChannel(value, out id))
             channel = ctx.Client.GetChannel(id).Cast<SocketTextChannel>();
 
         if (channel is null)

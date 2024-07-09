@@ -9,7 +9,7 @@ public sealed class RoleParser : VolteTypeParser<SocketRole>
     public static TypeParserResult<SocketRole> Parse(string value, VolteContext ctx)
     {
         SocketRole role = default;
-        if (ulong.TryParse(value, out var id) || MentionUtils.TryParseRole(value, out id))
+        if (value.TryParse<ulong>(out var id) || MentionUtils.TryParseRole(value, out id))
             role = ctx.Guild.GetRole(id).Cast<SocketRole>();
 
         if (role is null)

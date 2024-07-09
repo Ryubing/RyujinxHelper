@@ -45,9 +45,10 @@ public static class UnixHelper
         var argName = string.Empty;
         var argVal = string.Empty;
         var lastChar = new char();
-        input.ForEachIndexed((token, index) =>
+
+        foreach (var (token, index) in input.WithIndex())
         {
-            switch (token)
+                        switch (token)
             {
                 case '-' when state is ParsingState.ArgumentName && lastChar is ' ':
                     state = ParsingState.Neutral;
@@ -102,7 +103,7 @@ public static class UnixHelper
                     break;
             }
             lastChar = token;
-        });
+        }
 
         if (argName.Length != 0)
             result.Add(argName, argVal);

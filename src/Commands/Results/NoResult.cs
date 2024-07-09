@@ -14,16 +14,16 @@ namespace Volte.Commands
         private readonly AsyncFunction _after;
         private readonly bool _awaitCallback;
 
-        public override async ValueTask<ResultCompletionData> ExecuteResultAsync(VolteContext ctx)
+        public override async ValueTask<Gommon.Optional<ResultCompletionData>> ExecuteResultAsync(VolteContext ctx)
         {
             if (_after is null)
-                return new ResultCompletionData();
+                return default;
 
             if (_awaitCallback)
                 await _after();
             else
                 _ = _after();
-            return new ResultCompletionData();
+            return default;
         }
     }
 }

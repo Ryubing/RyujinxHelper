@@ -38,11 +38,13 @@ namespace Volte.Core.Entities
             if (collection.Length is 1)
                 return FromInvalid("No options specified.");
             var fields = new List<(object Name, object Value)>();
-            collection.ForEachIndexed((entry, index) =>
+
+            foreach (var (_, index) in collection.WithIndex())
             {
-                if (index is 0) return;
+                if (index is 0) continue;
                 fields.Add((emojis[index - 1], collection[index]));
-            });
+            }
+
             return FromFields(fields);
         }
         

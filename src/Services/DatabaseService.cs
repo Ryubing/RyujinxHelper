@@ -9,13 +9,17 @@ public sealed class DatabaseService : VolteService, IDisposable
     public static readonly LiteDatabase Database = new($"filename={FilePath.Data / "Volte.db"};connection=direct");
 
     private readonly DiscordSocketClient _client;
+    private readonly IServiceProvider _provider;
+
+    private readonly ILiteCollection<CalledCommandsInfo> _calledCommandsInfo; 
 
     private readonly ILiteCollection<GuildData> _guildData;
     private readonly ILiteCollection<Reminder> _reminderData;
     private readonly ILiteCollection<StarboardDbEntry> _starboardData;
 
-    public DatabaseService(DiscordSocketClient discordSocketClient)
+    public DatabaseService(IServiceProvider provider, DiscordSocketClient discordSocketClient)
     {
+        _provider = provider;
         _client = discordSocketClient;
         _guildData = Database.GetCollection<GuildData>("guilds");
         _reminderData = Database.GetCollection<Reminder>("reminders");
@@ -36,7 +40,8 @@ public sealed class DatabaseService : VolteService, IDisposable
             _guildData.Insert(newConf);
             return newConf;
         });
-    
+
+
 
     public HashSet<Reminder> GetReminders(IUser user, IGuild guild = null) => GetReminders(user.Id, guild?.Id ?? 0);
 
@@ -107,6 +112,45 @@ public sealed class DatabaseService : VolteService, IDisposable
         {
             coll.Delete($"{entry.GuildId}_{entry.StarboardMessageId}");
             coll.Delete($"{entry.GuildId}_{entry.StarredMessageId}");
+        });
+    }
+    
+    public CalledCommandsInfo GetCalledCommandsInfo() 
+        => _calledCommandsInfo.ValueLock(GetCalledCommandsInfoImpl);
+    
+    private CalledCommandsInfo GetCalledCommandsInfoImpl()
+    {
+        var existing = _calledCommandsInfo.FindAll().ToList();
+        if (existing.Count != 0) return existing.First();
+            
+        var newData = new CalledCommandsInfo
+        {
+            Successful = 0,
+            Failed = 0
+        };
+        _calledCommandsInfo.Insert(newData);
+        return newData;
+    }
+
+    public void SaveCalledCommandsInfo(CalledCommandsInfo calledCommandsInfo)
+    {
+        _calledCommandsInfo.LockedRef(_ =>
+        {
+            _calledCommandsInfo.EnsureIndex(s => s.Total, true);
+            _calledCommandsInfo.Update(calledCommandsInfo);
+        });
+    }
+    
+    public void UpdateCalledCommandsInfo(ulong newSuccesses, ulong newFailures)
+    {
+        _calledCommandsInfo.LockedRef(_ =>
+        {
+            _calledCommandsInfo.EnsureIndex(s => s.Total, true);
+            _calledCommandsInfo.Update(GetCalledCommandsInfoImpl().Apply(cci =>
+            {
+                cci.Successful += newSuccesses;
+                cci.Failed += newFailures;
+            }));
         });
     }
 

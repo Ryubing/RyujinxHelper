@@ -173,8 +173,10 @@ namespace Volte.Services
                     // Remove the stars from the database
                     if (clearList.Length > 0)
                     {
-                        clearList.ForEach(userId => entry.Stargazers.Remove(userId));
-                            
+                        foreach (var userId in clearList)
+                        {
+                            entry.Stargazers.Remove(userId);
+                        }
 
                         // Update message star count
                         if (entry.StarCount < starboard.StarsRequiredToPost)

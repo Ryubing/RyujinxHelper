@@ -1,9 +1,4 @@
-﻿using System;
-using System.Globalization;
-using System.Threading.Tasks;
-using Discord;
-using Qmmands;
-using Volte.Core.Entities;
+﻿using System.Globalization;
 
 namespace Volte.Commands;
 
@@ -15,7 +10,7 @@ public sealed class ColorParser : VolteTypeParser<Color>
     public static TypeParserResult<Color> Parse(string value)
     {
         Color? c = null;
-
+        
         if (uint.TryParse(value.StartsWith('#') ? value[1..] : value, NumberStyles.HexNumber, CultureInfo.CurrentCulture, out var colorInt))
             c = new Color(colorInt);
 
@@ -24,9 +19,10 @@ public sealed class ColorParser : VolteTypeParser<Color>
             try
             {
                 var val = value.Split(" ");
-                var r = int.Parse(val[0]);
-                var g = int.Parse(val[1]);
-                var b = int.Parse(val[2]);
+                
+                var r = val[0].Parse<int>();
+                var g = val[1].Parse<int>();
+                var b = val[2].Parse<int>();
 
                 if (r > 255 || g > 255 || b > 255)
                 {

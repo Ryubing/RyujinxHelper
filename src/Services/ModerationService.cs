@@ -25,9 +25,9 @@ public class ModerationService(DatabaseService _db) : VolteService
                 .WithColor(Color.Red)
                 .WithTitle("Possibly Malicious User")
                 .WithThumbnailUrl("https://raw.githubusercontent.com/GreemDev/VolteAssets/main/question_mark.png")
-                .AddField("User", args.User.ToString(), true)
+                .AddField("User", args.User.Mention, true)
                 .AddField("Account Created", args.User.CreatedAt.ToDiscordTimestamp(TimestampType.LongDateTime))
-                .WithFooter($"Account Created {unit.ToQuantity(time)} before joining.")
+                .WithFooter($"Account created {unit.ToQuantity(time)} before joining.")
                 .SendToAsync(c);
         }
     }
@@ -172,8 +172,10 @@ public class ModerationService(DatabaseService _db) : VolteService
                     .SendToAsync(c);
                 Debug(LogSource.Volte, $"Posted a modlog message for {nameof(ModActionType.Verify)}");
                 break;
+            
             default:
-                throw new InvalidOperationException();
+                Debug(LogSource.Volte, "What the hell did you pass as a ModActionType?", InvocationInfo.Here());
+                break;
         }
 
         Debug(LogSource.Volte,
@@ -186,24 +188,24 @@ public class ModerationService(DatabaseService _db) : VolteService
         _db.Save(ctx.GuildData);
     }
 
-    private string Reason(ModActionEventArgs args) => $"**Reason:** {args.Reason}";
-    private string Action(ModActionEventArgs args) => $"**Action:** {args.ActionType}";
-    private string Moderator(ModActionEventArgs args) => $"**Moderator:** {args.Moderator} ({args.Moderator.Id})";
-    private string Channel(ModActionEventArgs args) => $"**Channel:** {args.Context.Channel.Mention}";
-    private string Case(ModActionEventArgs args) => $"**Case:** {args.Context.GuildData.Extras.ModActionCaseNumber}";
-    private string MessagesCleared(ModActionEventArgs args) => $"**Messages Cleared:** {args.Count}";
+    private static string Reason(ModActionEventArgs args) => $"**Reason:** {args.Reason}";
+    private static string Action(ModActionEventArgs args) => $"**Action:** {args.ActionType}";
+    private static string Moderator(ModActionEventArgs args) => $"**Moderator:** {args.Moderator} ({args.Moderator.Id})";
+    private static string Channel(ModActionEventArgs args) => $"**Channel:** {args.Context.Channel.Mention}";
+    private static string Case(ModActionEventArgs args) => $"**Case:** {args.Context.GuildData.Extras.ModActionCaseNumber}";
+    private static string MessagesCleared(ModActionEventArgs args) => $"**Messages Cleared:** {args.Count}";
 
-    private async Task<string> TargetRestUser(ModActionEventArgs args)
+    private static async Task<string> TargetRestUser(ModActionEventArgs args)
     {
         var u = await args.Context.Client.Rest.GetUserAsync(args.TargetId ?? 0);
         return u is null
             ? $"**User:** {args.TargetId}"
             : $"**User:** {u} ({args.TargetId})";
     }
-    private string Target(ModActionEventArgs args, bool isOnMessageDelete) => isOnMessageDelete
+    private static string Target(ModActionEventArgs args, bool isOnMessageDelete) => isOnMessageDelete
         ? $"**Message Deleted:** {args.TargetId}"
         : $"**User:** {args.TargetUser} ({args.TargetUser.Id})";
 
-    private string Time(ModActionEventArgs args) 
+    private static string Time(ModActionEventArgs args)
         => $"**Time:** {args.Time.ToDiscordTimestamp(TimestampType.LongDateTime)}";
 }

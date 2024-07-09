@@ -64,25 +64,28 @@ public static class ZalgoHelper
     private static double Rand(int max) => Math.Floor(new Random().NextDouble() * max);
 
     public static string GenerateZalgo(string content, ZalgoIntensity intensity, IncludeChars includeChars)
-        => String(sb => content.Where(c => !IsZalgoChar(c)).ForEach(c =>
+        => String(sb =>
         {
-            var (up, mid, down) = intensity switch
+            foreach (var c in content.Where(c => !IsZalgoChar(c)))
             {
-                ZalgoIntensity.Low => (Rand(8), Rand(2), Rand(8)),
-                ZalgoIntensity.Medium => (Rand(16) / 2 + 1, Rand(6) / 2, Rand(16) / 2 + 1),
-                ZalgoIntensity.High => (Rand(64) / 4 + 3, Rand(16) / 4 + 1, Rand(64) / 4 + 3),
-                _ => throw new ArgumentException($"Invalid {nameof(ZalgoIntensity)} provided.")
-            };
+                var (up, mid, down) = intensity switch
+                {
+                    ZalgoIntensity.Low => (Rand(8), Rand(2), Rand(8)),
+                    ZalgoIntensity.Medium => (Rand(16) / 2 + 1, Rand(6) / 2, Rand(16) / 2 + 1),
+                    ZalgoIntensity.High => (Rand(64) / 4 + 3, Rand(16) / 4 + 1, Rand(64) / 4 + 3),
+                    _ => throw new ArgumentException($"Invalid {nameof(ZalgoIntensity)} provided.")
+                };
 
-            sb.Append(c);
-            if (includeChars.HasFlag(IncludeChars.Up))
-                for (var ind = 0; ind < up; ind++)
-                    sb.Append(UpChars.GetRandomElement());
-            if (includeChars.HasFlag(IncludeChars.Middle))
-                for (var ind = 0; ind < mid; ind++)
-                    sb.Append(MidChars.GetRandomElement());
-            if (includeChars.HasFlag(IncludeChars.Down))
-                for (var ind = 0; ind < down; ind++)
-                    sb.Append(DownChars.GetRandomElement());
-        }));
+                sb.Append(c);
+                if (includeChars.HasFlag(IncludeChars.Up))
+                    for (var ind = 0; ind < up; ind++)
+                        sb.Append(UpChars.GetRandomElement());
+                if (includeChars.HasFlag(IncludeChars.Middle))
+                    for (var ind = 0; ind < mid; ind++)
+                        sb.Append(MidChars.GetRandomElement());
+                if (includeChars.HasFlag(IncludeChars.Down))
+                    for (var ind = 0; ind < down; ind++)
+                        sb.Append(DownChars.GetRandomElement());
+            }
+        });
 }

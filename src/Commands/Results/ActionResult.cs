@@ -1,15 +1,11 @@
-using System.Threading.Tasks;
-using Qmmands;
+namespace Volte.Commands;
 
-namespace Volte.Commands
+public abstract class ActionResult : CommandResult
 {
-    public abstract class ActionResult : CommandResult
-    {
-        public override bool IsSuccessful => true;
+    public override bool IsSuccessful => true;
 
-        public abstract ValueTask<ResultCompletionData> ExecuteResultAsync(VolteContext ctx);
+    public abstract ValueTask<Gommon.Optional<ResultCompletionData>> ExecuteResultAsync(VolteContext ctx);
 
-        public static implicit operator Task<ActionResult>(ActionResult res) 
-            => Task.FromResult(res);
-    }
+    public static implicit operator Task<ActionResult>(ActionResult res) 
+        => Task.FromResult(res);
 }

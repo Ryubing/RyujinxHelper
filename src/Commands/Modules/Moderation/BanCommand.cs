@@ -43,7 +43,7 @@ public sealed partial class ModerationModule
     {
         var daysToDelete = (modifications.TryGetValue("days", out var result) ||
                             modifications.TryGetValue("deleteDays", out result)) &&
-                           int.TryParse(result, out var intResult)
+                           result.TryParse<int>(out var intResult)
             ? intResult
             : 0;
 

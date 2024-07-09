@@ -12,7 +12,7 @@ public sealed class SocketGuildUserParser : VolteTypeParser<SocketGuildUser>
 
         SocketGuildUser user = null;
 
-        if (ulong.TryParse(value, out var id) || MentionUtils.TryParseUser(value, out id))
+        if (value.TryParse<ulong>(out var id) || MentionUtils.TryParseUser(value, out id))
             user = users.FirstOrDefault(x => x.Id == id);
 
         user ??= users.FirstOrDefault(x => x.ToString().EqualsIgnoreCase(value));
@@ -42,7 +42,7 @@ public sealed class RestUserParser : VolteTypeParser<RestUser>
     {
         RestUser user = null;
 
-        if (ulong.TryParse(value, out var id) || MentionUtils.TryParseUser(value, out id))
+        if (value.TryParse<ulong>(out var id) || MentionUtils.TryParseUser(value, out id))
             user = await ctx.Client.Rest.GetUserAsync(id);
             
         return user is null
@@ -61,7 +61,7 @@ public sealed class RestGuildUserParser : VolteTypeParser<RestGuildUser>
     {
         RestGuildUser user = null;
 
-        if (ulong.TryParse(value, out var id) || MentionUtils.TryParseUser(value, out id))
+        if (value.TryParse<ulong>(out var id) || MentionUtils.TryParseUser(value, out id))
             user = await ctx.Client.Rest.GetGuildUserAsync(ctx.Guild.Id, id);
 
         return user is null

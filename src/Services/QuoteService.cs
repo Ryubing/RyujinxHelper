@@ -28,9 +28,9 @@ public partial class QuoteService(DiscordSocketClient client) : VolteService
 
     private async Task<RestMessage> GetMatchMessageAsync(Match match)
     {
-        if (!ulong.TryParse(match.Groups["GuildId"].Value, out var guildId) ||
-            !ulong.TryParse(match.Groups["ChannelId"].Value, out var channelId) ||
-            !ulong.TryParse(match.Groups["MessageId"].Value, out var messageId)) return null;
+        if (!match.Groups["GuildId"].Value.TryParse<ulong>(out var guildId) ||
+            !match.Groups["ChannelId"].Value.TryParse<ulong>(out var channelId) ||
+            !match.Groups["MessageId"].Value.TryParse<ulong>(out var messageId)) return null;
 
         var g = await client.Rest.GetGuildAsync(guildId);
         if (g is null) return null;

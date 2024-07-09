@@ -39,7 +39,8 @@ public static class EmbedHelpers
     
     public static EmbedBuilder Apply(this EmbedBuilder e, PollInfo pollInfo) => e.Apply(eb =>
     {
-        pollInfo.Fields.ForEach(x => eb.AddField(x.Key, x.Value, true));
+        foreach (var (fieldName, fieldValue) in pollInfo.Fields)
+            eb.AddField(fieldName, fieldValue, true);
         eb.WithTitle(pollInfo.Prompt);
         eb.WithFooter(PollInfo.Footer);
     });

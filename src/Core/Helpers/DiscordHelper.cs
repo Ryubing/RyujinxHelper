@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Threading.Channels;
 using System.Threading.Tasks;
 using Discord;
 using Discord.Net;
@@ -142,12 +143,22 @@ namespace Volte.Core.Helpers
         
         public static async Task RegisterVolteEventHandlersAsync(this DiscordSocketClient client, ServiceProvider provider)
         {
-            await VolteService.RegisterClientAsync(client);
-            
             var welcome = provider.Get<WelcomeService>();
             var autorole = provider.Get<AutoroleService>();
             var mod = provider.Get<ModerationService>();
             var starboard = provider.Get<StarboardService>();
+            var msgService = provider.Get<MessageService>();
+            
+            client.MessageReceived += async socketMessage =>
+            {
+                if (socketMessage.ShouldHandle(out var msg))
+                {
+                    if (msg.Channel is IDMChannel dm)
+                        await dm.SendMessageAsync("Currently, I do not support commands via DM.");
+                    else
+                        await msgService.HandleMessageAsync(new MessageReceivedEventArgs(socketMessage, provider));
+                }
+            };
             
             client.Log += async m =>
             {
@@ -216,20 +227,9 @@ namespace Volte.Core.Helpers
                 if (Config.EnabledFeatures.Welcome) await welcome.LeaveAsync(new UserLeftEventArgs(guild, user));
             };
             
-            client.MessageReceived += async socketMessage =>
-            {
-                if (socketMessage.ShouldHandle(out var msg))
-                {
-                    if (msg.Channel is IDMChannel dm)
-                        await dm.SendMessageAsync("Currently, I do not support commands via DM.");
-                    else
-                        await provider.Get<MessageService>().HandleMessageAsync(new MessageReceivedEventArgs(socketMessage, provider));
-                }
-            };
-            
-            client.ReactionAdded += starboard.HandleReactionAddAsync;
-            client.ReactionRemoved += starboard.HandleReactionRemoveAsync;
-            client.ReactionsCleared += starboard.HandleReactionsClearAsync;
+            client.ReactionAdded += (message, channel, reaction) => starboard.HandleReactionAddAsync(message, channel, reaction);
+            client.ReactionRemoved += (message, channel, reaction) => starboard.HandleReactionRemoveAsync(message, channel, reaction);
+            client.ReactionsCleared += (message, channel) => starboard.HandleReactionsClearAsync(message, channel);
         }
 
         public static Task<IUserMessage> SendToAsync(this EmbedBuilder e, IMessageChannel c) =>

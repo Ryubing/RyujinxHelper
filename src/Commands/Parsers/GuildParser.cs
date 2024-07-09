@@ -12,7 +12,7 @@ public sealed class GuildParser : VolteTypeParser<SocketGuild>
 
         var guilds = ctx.Client.Guilds;
 
-        if (ulong.TryParse(value, out var id))
+        if (value.TryParse<ulong>(out var id))
             guild = guilds.FirstOrDefault(x => x.Id == id);
 
         if (guild is null)

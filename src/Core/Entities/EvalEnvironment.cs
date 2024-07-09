@@ -55,7 +55,7 @@ public sealed class EvalEnvironment
     public T Service<T>() where T : notnull => Context.Services.GetRequiredService<T>();
 
     public SocketUserMessage Message(string id)
-        => ulong.TryParse(id, out var ulongId)
+        => id.TryParse<ulong>(out var ulongId)
             ? Message(ulongId)
             : throw new ArgumentException(
                 $"Method parameter {nameof(id)} is not a valid {typeof(ulong).FullName}.");
@@ -87,7 +87,7 @@ public sealed class EvalEnvironment
         {
             sb.AppendLine($"Inheritance tree for type [{type.FullName}]").AppendLine();
 
-            baseTypes.ForEach(baseType =>
+            foreach (var baseType in baseTypes)
             {
                 sb.Append($"[{baseType.AsPrettyString()}]");
                 var inheritors = baseType.GetInterfaces().ToList();
@@ -101,11 +101,11 @@ public sealed class EvalEnvironment
                     sb.Append($": {inheritors.Select(x => x.AsPrettyString()).JoinToString(", ")}");
 
                 sb.AppendLine();
-            });
+            }
         });
     }
 
-    public string Inspect(object obj)
+    public string Inspect(object obj, bool discordSizeCap = true)
     {
         var type = obj.GetType();
 
@@ -125,7 +125,7 @@ public sealed class EvalEnvironment
             var columnWidth = props.Max(a => a.Name.Length) + 5;
             foreach (var prop in props)
             {
-                if (inspection.Length > 1800) break;
+                if (inspection.Length > 1800 && discordSizeCap) break;
 
                 var sep = new string(' ', columnWidth - prop.Name.Length);
 
@@ -137,8 +137,6 @@ public sealed class EvalEnvironment
 
         if (fields.Count != 0)
         {
-            // ReSharper disable once ConditionIsAlwaysTrueOrFalse
-            // same here wtf
             if (props.Count != 0)
                 inspection.AppendLine().AppendLine("<< Fields >>");
                 
@@ -146,10 +144,10 @@ public sealed class EvalEnvironment
             var columnWidth = fields.Max(ab => ab.Name.Length) + 5;
             foreach (var prop in fields)
             {
-                if (inspection.Length > 1800) break;
+                if (inspection.Length > 1800 && discordSizeCap) break;
 
                 var sep = new string(' ', columnWidth - prop.Name.Length);
-                inspection.Append(prop.Name).Append(":").Append(sep).Append(ReadValue(prop, obj)).AppendLine();
+                inspection.Append(prop.Name).Append(':').Append(sep).Append(ReadValue(prop, obj)).AppendLine();
             }
         }
 
@@ -159,7 +157,8 @@ public sealed class EvalEnvironment
             if (arr.None()) return inspection.ToString();
             inspection.AppendLine();
             inspection.AppendLine("<< Items >>");
-            arr.ForEach(prop => inspection.Append(" - ").Append(prop).AppendLine());
+            foreach (var prop in arr)
+                inspection.Append(" - ").Append(prop).AppendLine();
         }
 
         return inspection.ToString();
@@ -186,7 +185,7 @@ public sealed class EvalEnvironment
             {
                 null => "Null",
                 IEnumerable e and not string => getEnumerableStr(e),
-                _ => value + $" [{value.GetType().AsPrettyString()}]"
+                _ => $"{value} [{value.GetType().AsPrettyString()}]"
             };
             
             static string getEnumerableStr(IEnumerable e)

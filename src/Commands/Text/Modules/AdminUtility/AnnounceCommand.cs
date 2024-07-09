@@ -1,5 +1,4 @@
-﻿using System.Net;
-using Volte.Core;
+﻿using Volte.Core;
 
 namespace Volte.Commands.Text.Modules;
 

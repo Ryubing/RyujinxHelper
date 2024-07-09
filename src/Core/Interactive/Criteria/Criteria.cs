@@ -1,44 +1,37 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Threading.Tasks;
-using Discord.Commands;
-using Volte.Commands.Text;
+﻿namespace Volte.Interactive;
 
-namespace Volte.Interactive
+public class Criteria<T> : ICriterion<T>
 {
-    public class Criteria<T> : ICriterion<T>
-    {
-        public delegate ValueTask<bool> LocalCriteria(VolteContext ctx, T value);
+    public delegate ValueTask<bool> LocalCriteria(VolteContext ctx, T value);
         
-        private readonly HashSet<ICriterion<T>> _critiera = [];
-        private readonly HashSet<LocalCriteria> _localCriteria = [];
+    private readonly HashSet<ICriterion<T>> _critiera = [];
+    private readonly HashSet<LocalCriteria> _localCriteria = [];
 
-        public Criteria<T> AddCriterion(ICriterion<T> criterion)
+    public Criteria<T> AddCriterion(ICriterion<T> criterion)
+    {
+        _critiera.Add(criterion);
+        return this;
+    }
+
+    public Criteria<T> AddCriterion(LocalCriteria criteria)
+    {
+        _localCriteria.Add(criteria);
+        return this;
+    }
+
+    public async ValueTask<bool> JudgeAsync(VolteContext sourceContext, T parameter)
+    {
+        foreach (var criterion in _critiera)
         {
-            _critiera.Add(criterion);
-            return this;
+            var result = await criterion.JudgeAsync(sourceContext, parameter);
+            if (!result) return false;
         }
 
-        public Criteria<T> AddCriterion(LocalCriteria criteria)
+        foreach (var criteria in _localCriteria)
         {
-            _localCriteria.Add(criteria);
-            return this;
+            var result = await criteria(sourceContext, parameter);
+            if (!result) return false;
         }
-
-        public async ValueTask<bool> JudgeAsync(VolteContext sourceContext, T parameter)
-        {
-            foreach (var criterion in _critiera)
-            {
-                var result = await criterion.JudgeAsync(sourceContext, parameter);
-                if (!result) return false;
-            }
-
-            foreach (var criteria in _localCriteria)
-            {
-                var result = await criteria(sourceContext, parameter);
-                if (!result) return false;
-            }
-            return true;
-        }
+        return true;
     }
 }

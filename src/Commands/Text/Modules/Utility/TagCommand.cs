@@ -1,23 +1,17 @@
-using System.Threading.Tasks;
-using Discord;
-using Qmmands;
-using Volte.Core.Entities;
+namespace Volte.Commands.Text.Modules;
 
-namespace Volte.Commands.Text.Modules
+public sealed partial class UtilityModule
 {
-    public sealed partial class UtilityModule
+    [Command("Tag")]
+    [Description("Gets a tag's contents if it exists.")]
+    public Task<ActionResult> TagAsync([Remainder, Description("The tag to show.")]
+        Tag tag)
     {
-        [Command("Tag")]
-        [Description("Gets a tag's contents if it exists.")]
-        public Task<ActionResult> TagAsync([Remainder, Description("The tag to show.")]
-            Tag tag)
-        {
-            tag.Uses++;
-            Db.Save(Context.GuildData);
+        tag.Uses++;
+        Db.Save(Context.GuildData);
 
-            return Context.GuildData.Configuration.EmbedTagsAndShowAuthor
-                ? Ok(tag.AsEmbed(Context))
-                : Ok(tag.FormatContent(Context), shouldEmbed: false);
-        }
+        return Context.GuildData.Configuration.EmbedTagsAndShowAuthor
+            ? Ok(tag.AsEmbed(Context))
+            : Ok(tag.FormatContent(Context), shouldEmbed: false);
     }
 }

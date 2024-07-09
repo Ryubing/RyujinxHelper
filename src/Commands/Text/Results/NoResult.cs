@@ -1,29 +1,25 @@
-using System.Threading.Tasks;
-using Volte.Core.Entities;
+namespace Volte.Commands.Text;
 
-namespace Volte.Commands.Text
+public class NoResult : ActionResult
 {
-    public class NoResult : ActionResult
+    public NoResult(AsyncFunction afterCompletion = null, bool awaitCallback = true)
     {
-        public NoResult(AsyncFunction afterCompletion = null, bool awaitCallback = true)
-        {
-            _after = afterCompletion;
-            _awaitCallback = awaitCallback;
-        }
+        _after = afterCompletion;
+        _awaitCallback = awaitCallback;
+    }
 
-        private readonly AsyncFunction _after;
-        private readonly bool _awaitCallback;
+    private readonly AsyncFunction _after;
+    private readonly bool _awaitCallback;
 
-        public override async ValueTask<Gommon.Optional<ResultCompletionData>> ExecuteResultAsync(VolteContext ctx)
-        {
-            if (_after is null)
-                return default;
-
-            if (_awaitCallback)
-                await _after();
-            else
-                _ = _after();
+    public override async ValueTask<Gommon.Optional<ResultCompletionData>> ExecuteResultAsync(VolteContext ctx)
+    {
+        if (_after is null)
             return default;
-        }
+
+        if (_awaitCallback)
+            await _after();
+        else
+            _ = _after();
+        return default;
     }
 }

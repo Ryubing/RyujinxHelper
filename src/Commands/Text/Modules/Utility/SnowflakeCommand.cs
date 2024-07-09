@@ -1,18 +1,9 @@
-﻿using System.Text;
-using System.Threading.Tasks;
-using Discord;
-using Gommon;
-using Qmmands;
-using Volte.Commands.Text;
-using Volte.Core.Helpers;
+﻿namespace Volte.Commands.Text.Modules;
 
-namespace Volte.Commands.Text.Modules
+public sealed partial class UtilityModule
 {
-    public sealed partial class UtilityModule
-    {
-        [Command("Snowflake", "Id")]
-        [Description("Shows when the object with the given Snowflake ID was created, in UTC.")]
-        public Task<ActionResult> SnowflakeAsync([Description("The Discord snowflake you want to see.")] ulong id) =>
-            Ok(Context.CreateEmbedBuilder().WithTitle(SnowflakeUtils.FromSnowflake(id).ToDiscordTimestamp(TimestampType.LongDateTime)));
-    }
+    [Command("Snowflake", "Id")]
+    [Description("Shows when the object with the given Snowflake ID was created, in UTC.")]
+    public Task<ActionResult> SnowflakeAsync([Description("The Discord snowflake you want to see.")] ulong id) =>
+        Ok(Context.CreateEmbedBuilder().WithTitle(SnowflakeUtils.FromSnowflake(id).ToDiscordTimestamp(TimestampType.LongDateTime)));
 }

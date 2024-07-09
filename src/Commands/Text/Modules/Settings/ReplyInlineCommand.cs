@@ -1,18 +1,14 @@
-﻿using System.Threading.Tasks;
-using Qmmands;
+﻿namespace Volte.Commands.Text.Modules;
 
-namespace Volte.Commands.Text.Modules
+public sealed partial class SettingsModule
 {
-    public sealed partial class SettingsModule
+    [Command("ReplyInline", "Ri")]
+    [Description("Enable/Disable having commands reply inline.")]
+    public Task<ActionResult> ReplyInlineAsync(bool enabled)
     {
-        [Command("ReplyInline", "Ri")]
-        [Description("Enable/Disable having commands reply inline.")]
-        public Task<ActionResult> ReplyInlineAsync(bool enabled)
-        {
-            Context.Modify(data => data.Configuration.ReplyInline = enabled);
-            return Ok(enabled
-                ? "Enabled ReplyInline in this guild."
-                : "Disabled ReplyInline in this guild.");
-        }
+        Context.Modify(data => data.Configuration.ReplyInline = enabled);
+        return Ok(enabled
+            ? "Enabled ReplyInline in this guild."
+            : "Disabled ReplyInline in this guild.");
     }
 }

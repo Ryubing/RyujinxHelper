@@ -1,96 +1,86 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using Discord;
-using Qmmands;
-using Gommon;
-using Volte.Core.Helpers;
+namespace Volte.Commands.Text.Modules;
 
-namespace Volte.Commands.Text.Modules
+public sealed class HelpModule : VolteModule
 {
-    public sealed class HelpModule : VolteModule
+    [Command("Help", "H")]
+    [Description("Get help for Volte's many commands.")]
+    public async Task<ActionResult> HelpAsync(
+        [Remainder,
+         Description(
+             "The command or command group to search for. If you use pages or pager it will list every command in a paginator.")]
+        string query = null)
     {
-        [Command("Help", "H")]
-        [Description("Get help for Volte's many commands.")]
-        public async Task<ActionResult> HelpAsync(
-            [Remainder,
-             Description(
-                 "The command or command group to search for. If you use pages or pager it will list every command in a paginator.")]
-            string query = null)
+        if (query != null)
         {
-            if (query != null)
-            {
-                if (query.EqualsAnyIgnoreCase("pages", "pager"))
-                    return Ok(await GetPagesAsync().ToListAsync());
+            if (query.EqualsAnyIgnoreCase("pages", "pager"))
+                return Ok(await GetPagesAsync().ToListAsync());
 
-                var searchRes = CommandService.GetCommand(query);
-                if (searchRes is null)
-                    return BadRequest($"No command or group found for {Format.Code(query)}.");
+            var searchRes = CommandService.GetCommand(query);
+            if (searchRes is null)
+                return BadRequest($"No command or group found for {Format.Code(query)}.");
 
-                return Ok(await CommandHelper.CreateCommandEmbedAsync(searchRes, Context));
-            }
-
-            var e = Context.CreateEmbedBuilder()
-                .WithTitle("Command Help")
-                .WithDescription(
-                    $"You can use {Format.Code(CommandHelper.FormatUsage(Context, CommandService.GetCommand("Help")))} for more details on a command or group.");
-
-            var cmds = await GetAllRegularCommandsAsync().ToListAsync();
-            var groupCmds = await GetAllGroupCommandsAsync().ToListAsync();
-
-            try
-            {
-                if (cmds.Any()) e.AddField("Regular Commands", cmds.JoinToString(", "));
-            }
-            catch (ArgumentException)
-            {
-                e.AppendDescriptionLine().AppendDescriptionLine(cmds.JoinToString(", "));
-            }
-
-            try
-            {
-                if (groupCmds.Any()) e.AddField("Group Commands", groupCmds.JoinToString(", "));
-            }
-            catch (ArgumentException)
-            {
-                e.AppendDescriptionLine().AppendDescriptionLine(groupCmds.JoinToString(", "));
-            }
-
-            return Ok(e);
+            return Ok(await CommandHelper.CreateCommandEmbedAsync(searchRes, Context));
         }
 
-        //module without aliases: regular module
-        private async IAsyncEnumerable<string> GetAllRegularCommandsAsync()
-        {
-            foreach (var mdl in CommandService.GetAllModules().Where(x => !x.FullAliases.Any()))
-            {
-                if (!await CommandHelper.CanShowModuleAsync(Context, mdl)) continue;
+        var e = Context.CreateEmbedBuilder()
+            .WithTitle("Command Help")
+            .WithDescription(
+                $"You can use {Format.Code(CommandHelper.FormatUsage(Context, CommandService.GetCommand("Help")))} for more details on a command or group.");
 
-                foreach (var cmd in mdl.Commands)
-                {
-                    var fmt = CommandHelper.FormatCommandShort(cmd);
-                    if (fmt != null) yield return fmt;
-                }
-            }
+        var cmds = await GetAllRegularCommandsAsync().ToListAsync();
+        var groupCmds = await GetAllGroupCommandsAsync().ToListAsync();
+
+        try
+        {
+            if (cmds.Any()) e.AddField("Regular Commands", cmds.JoinToString(", "));
+        }
+        catch (ArgumentException)
+        {
+            e.AppendDescriptionLine().AppendDescriptionLine(cmds.JoinToString(", "));
         }
 
-        // module with aliases: group command module
-        private async IAsyncEnumerable<string> GetAllGroupCommandsAsync()
+        try
         {
-            foreach (var mdl in CommandService.GetAllModules().Where(x => x.FullAliases.None()))
-            {
-                if (!await CommandHelper.CanShowModuleAsync(Context, mdl)) continue;
+            if (groupCmds.Any()) e.AddField("Group Commands", groupCmds.JoinToString(", "));
+        }
+        catch (ArgumentException)
+        {
+            e.AppendDescriptionLine().AppendDescriptionLine(groupCmds.JoinToString(", "));
+        }
 
-                var fmt = CommandHelper.FormatModuleShort(mdl);
+        return Ok(e);
+    }
+
+    //module without aliases: regular module
+    private async IAsyncEnumerable<string> GetAllRegularCommandsAsync()
+    {
+        foreach (var mdl in CommandService.GetAllModules().Where(x => !x.FullAliases.Any()))
+        {
+            if (!await CommandHelper.CanShowModuleAsync(Context, mdl)) continue;
+
+            foreach (var cmd in mdl.Commands)
+            {
+                var fmt = CommandHelper.FormatCommandShort(cmd);
                 if (fmt != null) yield return fmt;
             }
         }
+    }
 
-        private async IAsyncEnumerable<EmbedBuilder> GetPagesAsync() 
+    // module with aliases: group command module
+    private async IAsyncEnumerable<string> GetAllGroupCommandsAsync()
+    {
+        foreach (var mdl in CommandService.GetAllModules().Where(x => x.FullAliases.None()))
         {
-            foreach (var cmd in await CommandService.GetAllCommands().WhereAccessibleAsync(Context).ToListAsync())
-                yield return await CommandHelper.CreateCommandEmbedAsync(cmd, Context);
+            if (!await CommandHelper.CanShowModuleAsync(Context, mdl)) continue;
+
+            var fmt = CommandHelper.FormatModuleShort(mdl);
+            if (fmt != null) yield return fmt;
         }
+    }
+
+    private async IAsyncEnumerable<EmbedBuilder> GetPagesAsync() 
+    {
+        foreach (var cmd in await CommandService.GetAllCommands().WhereAccessibleAsync(Context).ToListAsync())
+            yield return await CommandHelper.CreateCommandEmbedAsync(cmd, Context);
     }
 }

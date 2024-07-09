@@ -1,24 +1,17 @@
-﻿using System.Threading.Tasks;
-using Discord;
-using Discord.WebSocket;
-using Qmmands;
-using Volte.Core.Entities;
+﻿namespace Volte.Commands.Text.Modules;
 
-namespace Volte.Commands.Text.Modules
+public sealed partial class AdminUtilityModule
 {
-    public sealed partial class AdminUtilityModule
+    [Command("RoleColor", "RoleClr", "Rcl")]
+    [Description("Changes the color of a specified role. Accepts a Hex or RGB value.")]
+    public async Task<ActionResult> RoleColorAsync([Description("The role to modify.")] SocketRole role,
+        [Remainder, Description("The color to change the role to. Accepts #hex and RGB.")]
+        Color color)
     {
-        [Command("RoleColor", "RoleClr", "Rcl")]
-        [Description("Changes the color of a specified role. Accepts a Hex or RGB value.")]
-        public async Task<ActionResult> RoleColorAsync([Description("The role to modify.")] SocketRole role,
-            [Remainder, Description("The color to change the role to. Accepts #hex and RGB.")]
-            Color color)
-        {
-            if (role.Position > Context.Guild.CurrentUser.Hierarchy)
-                return BadRequest("Role position is too high for me to be able to do anything with it.");
+        if (role.Position > Context.Guild.CurrentUser.Hierarchy)
+            return BadRequest("Role position is too high for me to be able to do anything with it.");
 
-            await role.ModifyAsync(x => x.Color = color);
-            return Ok($"Successfully changed the color of the role **{role.Name}**.");
-        }
+        await role.ModifyAsync(x => x.Color = color);
+        return Ok($"Successfully changed the color of the role **{role.Name}**.");
     }
 }

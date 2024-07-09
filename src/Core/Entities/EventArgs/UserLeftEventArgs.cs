@@ -1,18 +1,13 @@
-using Discord;
-using Discord.WebSocket;
-using System;
+namespace Volte.Core.Entities;
 
-namespace Volte.Core.Entities
+public sealed class UserLeftEventArgs : EventArgs
 {
-    public sealed class UserLeftEventArgs : EventArgs
-    {
-        public SocketUser User { get; }
-        public SocketGuild Guild { get; }
+    public SocketUser User { get; }
+    public SocketGuild Guild { get; }
 
-        public UserLeftEventArgs(SocketGuild guild, SocketUser user)
-        {
-            User = user;
-            Guild = guild;
-        }
+    public UserLeftEventArgs(SocketGuild guild, SocketUser user)
+    {
+        User = user;
+        Guild = guild;
     }
 }

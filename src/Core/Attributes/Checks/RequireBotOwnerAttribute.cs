@@ -1,19 +1,12 @@
-using System.Threading.Tasks;
-using Gommon;
-using Qmmands;
-using Volte.Commands.Text;
-using Volte.Core.Helpers;
+namespace Volte.Core.Entities;
 
-namespace Volte.Core.Entities
+public sealed class RequireBotOwnerAttribute : CheckAttribute
 {
-    public sealed class RequireBotOwnerAttribute : CheckAttribute
+    public override ValueTask<CheckResult> CheckAsync(CommandContext context)
     {
-        public override ValueTask<CheckResult> CheckAsync(CommandContext context)
-        {
-            var ctx = context.Cast<VolteContext>();
-            if (ctx.User.IsBotOwner()) return CheckResult.Successful;
+        var ctx = context.Cast<VolteContext>();
+        if (ctx.User.IsBotOwner()) return CheckResult.Successful;
             
-            return CheckResult.Failed("Insufficient permission.");
-        }
+        return CheckResult.Failed("Insufficient permission.");
     }
 }

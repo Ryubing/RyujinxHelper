@@ -1,17 +1,12 @@
-﻿using System.Threading.Tasks;
-using Discord;
-using Qmmands;
+﻿namespace Volte.Commands.Text.Modules;
 
-namespace Volte.Commands.Text.Modules
+public sealed partial class SettingsModule
 {
-    public sealed partial class SettingsModule
+    [Command("Prefix")]
+    [Description("Sets the command prefix for this guild.")]
+    public Task<ActionResult> PrefixAsync([Remainder] string newPrefix)
     {
-        [Command("Prefix")]
-        [Description("Sets the command prefix for this guild.")]
-        public Task<ActionResult> PrefixAsync([Remainder] string newPrefix)
-        {
-            Context.Modify(data => data.Configuration.CommandPrefix = newPrefix);
-            return Ok($"Set this guild's prefix to {Format.Bold(newPrefix)}.");
-        }
+        Context.Modify(data => data.Configuration.CommandPrefix = newPrefix);
+        return Ok($"Set this guild's prefix to {Format.Bold(newPrefix)}.");
     }
 }

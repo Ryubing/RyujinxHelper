@@ -1,25 +1,12 @@
-﻿/*using System;
-using System.Linq;
-using System.Reflection;
-using System.Threading;
-using System.Threading.Tasks;
-using Discord;
-using Gommon;
-using Qmmands;
-using Volte.Commands.Results;
-using Volte.Core.Entities;
+﻿namespace Volte.Commands.Text.Modules;
 
-namespace Volte.Commands.Modules
+public sealed partial class UtilityModule
 {
-    public sealed partial class UtilityModule
+    [Command("DevTest")]
+    [Description("monkey man")]
+    [RequireGuildAdmin]
+    public async Task<ActionResult> DevTestAsync()
     {
-        [Command("DevTest")]
-        [Description("Command for developmental testing. This command in its entirety will be commented out for Releases.")]
-        [RequireGuildAdmin]
-        public async Task<ActionResult> DevTestAsync() 
-        {
-            return None();
-        }
+        return None();
     }
-}*/
-
+}

@@ -1,4 +1,4 @@
-﻿namespace Volte.Commands.Text.Modules;
+﻿/*namespace Volte.Commands.Text.Modules;
 
 public sealed partial class UtilityModule
 {
@@ -9,4 +9,4 @@ public sealed partial class UtilityModule
     {
         return None();
     }
-}
+}*/

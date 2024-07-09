@@ -37,7 +37,7 @@ public static partial class Extensions
             }))
             .Apply(_ =>
             {
-                //get all the classes that inherit IVolteService or VolteExtension, and aren't abstract.
+                //get all the classes that inherit IVolteService, and aren't abstract.
                 var l = Assembly.GetExecutingAssembly().GetTypes()
                     .Where(IsEligibleService)
                     .Apply(ls => ls.ForEach(coll.TryAddSingleton));

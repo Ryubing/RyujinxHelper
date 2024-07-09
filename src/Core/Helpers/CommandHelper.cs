@@ -164,9 +164,8 @@ namespace Volte.Core.Helpers
             foreach (var parser in parsers)
             {
                 csMirror.CallGeneric("AddTypeParser", 
-                    genericTypes: [
-                        parser.BaseType!.GenericTypeArguments[0]
-                    ],
+                    parser.BaseType!.GenericTypeArguments,
+                    BindingFlags.Public,
                     args: [
                         parser.GetConstructor(Type.EmptyTypes)?.Invoke([]), 
                         parser.GetCustomAttribute<InjectTypeParserAttribute>()!.OverridePrimitive 

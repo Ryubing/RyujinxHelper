@@ -1,4 +1,4 @@
-﻿namespace Volte.Core.Entities;
+﻿namespace Volte.Entities;
 
 /// <summary>
 ///     The base class for all Command-related Volte EventArgs.

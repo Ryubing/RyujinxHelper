@@ -6,7 +6,7 @@ using Discord;
 using Discord.WebSocket;
 using Gommon;
 using Qmmands;
-using Volte.Core.Helpers;
+using Volte.Helpers;
 
 namespace Volte.Commands.Text.Modules;
 
@@ -28,7 +28,7 @@ public sealed partial class UtilityModule
                     .DistinctBy(x => x.Id).Count(),
                 true)
             .AddField("Invite Me",
-                Format.Code(CommandHelper.FormatUsage(Context, CommandService.GetCommand("Invite"))), true)
+                Format.Code(TextCommandHelper.FormatUsage(Context, CommandService.GetCommand("Invite"))), true)
             .AddField("Uptime", Process.GetCurrentProcess().CalculateUptime(), true)
             .AddField("Successful Commands", MessageService.SuccessfulCommandCalls, true)
             .AddField("Failed Commands", MessageService.FailedCommandCalls, true)

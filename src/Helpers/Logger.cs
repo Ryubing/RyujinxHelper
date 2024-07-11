@@ -3,7 +3,7 @@ using System.Runtime.CompilerServices;
 using Color = System.Drawing.Color;
 using Optional = Gommon.Optional;
 
-namespace Volte.Core.Helpers;
+namespace Volte.Helpers;
 
 public static partial class Logger
 {

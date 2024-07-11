@@ -1,11 +1,11 @@
-namespace Volte.Core.Entities;
+namespace Volte.Commands.Text;
 
-public sealed class RequireGuildModeratorAttribute : CheckAttribute
+public sealed class RequireBotOwnerAttribute : CheckAttribute
 {
     public override ValueTask<CheckResult> CheckAsync(CommandContext context)
     {
         var ctx = context.Cast<VolteContext>();
-        if (ctx.IsModerator(ctx.User)) return CheckResult.Successful;
+        if (ctx.User.IsBotOwner()) return CheckResult.Successful;
             
         return CheckResult.Failed("Insufficient permission.");
     }

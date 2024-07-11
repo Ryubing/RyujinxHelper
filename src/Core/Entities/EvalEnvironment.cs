@@ -2,7 +2,7 @@ using System.Collections;
 
 // ReSharper disable MemberCanBePrivate.Global
 
-namespace Volte.Core.Entities;
+namespace Volte.Entities;
 
 public sealed class EvalEnvironment
 {

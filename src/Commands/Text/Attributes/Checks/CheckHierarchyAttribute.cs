@@ -1,4 +1,4 @@
-﻿namespace Volte.Core.Entities;
+﻿namespace Volte.Commands.Text;
 
 [AttributeUsage(AttributeTargets.Parameter)]
 public sealed class CheckHierarchyAttribute : ParameterCheckAttribute

@@ -1,3 +1,3 @@
-﻿using Volte.Core;
+﻿using Volte;
 
 await VolteBot.StartAsync();

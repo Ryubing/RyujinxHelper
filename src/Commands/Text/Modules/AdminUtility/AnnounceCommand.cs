@@ -1,6 +1,4 @@
-﻿using Volte.Core;
-
-namespace Volte.Commands.Text.Modules;
+﻿namespace Volte.Commands.Text.Modules;
 
 public sealed partial class AdminUtilityModule
 {

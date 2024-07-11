@@ -1,6 +1,5 @@
 using Microsoft.CodeAnalysis.CSharp.Scripting;
 using Microsoft.CodeAnalysis.Scripting;
-using Volte.Core;
 
 namespace Volte.Services;
 

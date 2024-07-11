@@ -1,9 +1,9 @@
 using System.Collections;
 using Module = Qmmands.Module;
 
-namespace Volte.Core.Helpers;
+namespace Volte.Helpers;
 
-public static class CommandHelper
+public static class TextCommandHelper
 {
     public static async ValueTask<bool> CanShowCommandAsync(VolteContext ctx, Command command) =>
         await command.RunChecksAsync(ctx) is SuccessfulResult;

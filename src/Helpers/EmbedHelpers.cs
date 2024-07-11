@@ -1,4 +1,4 @@
-﻿namespace Volte.Core.Helpers;
+﻿namespace Volte.Helpers;
 
 public static class EmbedHelpers
 {

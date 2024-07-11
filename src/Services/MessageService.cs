@@ -1,6 +1,4 @@
-﻿using Volte.Core;
-
-namespace Volte.Services;
+﻿namespace Volte.Services;
 
 public sealed class MessageService : VolteService
 {
@@ -147,7 +145,7 @@ public sealed class MessageService : VolteService
             await args.Context.CreateEmbedBuilder()
                 .AddField("Error in Command", args.Context.Command.Name)
                 .AddField("Error Reason", reason)
-                .AddField("Usage", CommandHelper.FormatUsage(args.Context, args.Context.Command))
+                .AddField("Usage", TextCommandHelper.FormatUsage(args.Context, args.Context.Command))
                 .SendToAsync(args.Context.Channel);
 
             if (!Config.LogAllCommands) return;

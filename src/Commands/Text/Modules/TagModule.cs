@@ -5,7 +5,7 @@ public class TagModule : VolteModule
 {
     [Command, DummyCommand, Description("The command group for modifying and creating tags.")]
     public async Task<ActionResult> BaseAsync() =>
-        Ok(await CommandHelper.CreateCommandEmbedAsync(Context.Command, Context));
+        Ok(await TextCommandHelper.CreateCommandEmbedAsync(Context.Command, Context));
 
     [Command("Stats")]
     [Description("Shows stats for a tag.")]

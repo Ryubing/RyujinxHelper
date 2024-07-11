@@ -1,4 +1,4 @@
-namespace Volte.Core.Entities;
+namespace Volte.Entities;
 
 public sealed class LogEventArgs : EventArgs
 {

@@ -1,4 +1,4 @@
-﻿namespace Volte.Core.Entities;
+﻿namespace Volte.Commands.Text;
 
 [AttributeUsage(AttributeTargets.Class)]
 public sealed class InjectTypeParserAttribute(bool overridePrimitive = false) : Attribute

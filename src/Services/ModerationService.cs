@@ -1,5 +1,3 @@
-using Volte.Core;
-
 namespace Volte.Services;
 
 public class ModerationService(DatabaseService _db) : VolteService

@@ -3,7 +3,7 @@ using System.Text.RegularExpressions;
 using Microsoft.CodeAnalysis.CSharp.Scripting;
 using Microsoft.CodeAnalysis.Scripting;
 
-namespace Volte.Core.Helpers;
+namespace Volte.Helpers;
 
 public static partial class EvalHelper
 {

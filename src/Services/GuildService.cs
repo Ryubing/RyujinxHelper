@@ -1,5 +1,3 @@
-using Volte.Core;
-
 namespace Volte.Services;
 
 public sealed class GuildService(DiscordSocketClient discordSocketClient) : VolteService

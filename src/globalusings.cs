@@ -3,7 +3,7 @@
  * if i can avoid needing to put the same set of usings in every file, im gonna avoid it
  */
 
-global using Gommon;
+
 global using System;
 global using System.Collections.Generic;
 global using System.Linq;
@@ -18,7 +18,7 @@ global using Discord.Rest;
 global using Discord;
 global using Humanizer;
 global using Volte.Commands.Text;
-global using Volte.Core.Entities;
+global using Volte.Entities;
 global using Volte.Services;
 global using System.Net.Http;
 global using System.Text.Json;
@@ -27,10 +27,10 @@ global using System.Diagnostics;
 global using Microsoft.Extensions.DependencyInjection;
 global using Qmmands;
 global using Volte.Commands.Text.Modules;
-global using Volte.Core.Helpers;
+global using Volte.Helpers;
+global using Gommon;
 global using static Gommon.Lambda;
-
-global using static Volte.Core.Helpers.Logger;
+global using static Volte.Helpers.Logger;
 
 global using Console = Colorful.Console;
 global using DiscordLogMessage = Discord.LogMessage;

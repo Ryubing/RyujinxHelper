@@ -1,4 +1,4 @@
-namespace Volte.Core.Entities;
+namespace Volte.Entities;
 
 public enum ModActionType : uint
 {

@@ -8,7 +8,7 @@ public class WelcomeModule : VolteModule
 
     [Command, DummyCommand, Description("The command group for modifying the Welcome system.")]
     public async Task<ActionResult> BaseAsync() =>
-        Ok(await CommandHelper.CreateCommandEmbedAsync(Context.Command, Context));
+        Ok(await TextCommandHelper.CreateCommandEmbedAsync(Context.Command, Context));
 
     [Command("Channel", "C")]
     [Description("Sets the channel used for welcoming new users for this guild.")]

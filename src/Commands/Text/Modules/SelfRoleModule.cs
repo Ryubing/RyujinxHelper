@@ -5,7 +5,7 @@ public class SelfRoleModule : VolteModule
 {
     [Command, DummyCommand, Description("The command group for modifying SelfRoles.")]
     public async Task<ActionResult> BaseAsync() =>
-        Ok(await CommandHelper.CreateCommandEmbedAsync(Context.Command, Context));
+        Ok(await TextCommandHelper.CreateCommandEmbedAsync(Context.Command, Context));
 
     [Command("List", "Ls", "L")]
     [Description("Gets a list of self roles available for this guild.")]

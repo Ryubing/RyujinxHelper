@@ -9,7 +9,7 @@ public sealed class BotOwnerSetModule : VolteModule
     [Command, DummyCommand,
      Description("The command group for modifying certain parts of the currently logged in bot account.")]
     public async Task<ActionResult> BaseAsync() =>
-        Ok(await CommandHelper.CreateCommandEmbedAsync(Context.Command, Context));
+        Ok(await TextCommandHelper.CreateCommandEmbedAsync(Context.Command, Context));
 
     [Command("Game")]
     [Description("Sets the bot's game (presence).")]

@@ -1,6 +1,4 @@
-﻿using Volte.Core;
-
-namespace Volte.Interactive;
+﻿namespace Volte.Interactive;
 
 public class PaginatedMessage
 {

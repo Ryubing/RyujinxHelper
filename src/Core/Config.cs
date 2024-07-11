@@ -1,6 +1,6 @@
 ﻿using System.Text.Json.Serialization;
 
-namespace Volte.Core;
+namespace Volte;
 
 public static class Config
 {

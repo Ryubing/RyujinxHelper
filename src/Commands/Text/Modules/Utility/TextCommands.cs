@@ -1,4 +1,3 @@
-using Volte.Core;
 using Volte.Interactive;
 
 namespace Volte.Commands.Text.Modules;

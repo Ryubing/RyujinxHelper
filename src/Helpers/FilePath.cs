@@ -2,7 +2,7 @@
 
 using DotNetPath = System.IO.Path;
 
-namespace Volte.Core.Helpers;
+namespace Volte.Helpers;
 
 // ReSharper disable UnusedType.Global
 // ReSharper disable UnusedMember.Global

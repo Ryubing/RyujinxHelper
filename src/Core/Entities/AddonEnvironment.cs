@@ -1,7 +1,7 @@
 // ReSharper disable UnusedMember.Global
 // ReSharper disable MemberCanBePrivate.Global
 
-namespace Volte.Core.Entities;
+namespace Volte.Entities;
 
 public class AddonEnvironment(IServiceProvider provider)
 {

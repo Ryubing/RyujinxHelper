@@ -1,4 +1,4 @@
-namespace Volte.Core.Helpers;
+namespace Volte.Helpers;
 
 // https://stackoverflow.com/a/31194647
 public sealed class AsyncDuplicateLock<T>

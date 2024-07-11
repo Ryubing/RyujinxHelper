@@ -1,6 +1,6 @@
 using System.Text.Json.Serialization;
 
-namespace Volte.Core.Entities;
+namespace Volte.Entities;
 
 public sealed class Tag
 {

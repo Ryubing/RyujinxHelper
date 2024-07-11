@@ -19,13 +19,13 @@ public sealed class HelpModule : VolteModule
             if (searchRes is null)
                 return BadRequest($"No command or group found for {Format.Code(query)}.");
 
-            return Ok(await CommandHelper.CreateCommandEmbedAsync(searchRes, Context));
+            return Ok(await TextCommandHelper.CreateCommandEmbedAsync(searchRes, Context));
         }
 
         var e = Context.CreateEmbedBuilder()
             .WithTitle("Command Help")
             .WithDescription(
-                $"You can use {Format.Code(CommandHelper.FormatUsage(Context, CommandService.GetCommand("Help")))} for more details on a command or group.");
+                $"You can use {Format.Code(TextCommandHelper.FormatUsage(Context, CommandService.GetCommand("Help")))} for more details on a command or group.");
 
         var cmds = await GetAllRegularCommandsAsync().ToListAsync();
         var groupCmds = await GetAllGroupCommandsAsync().ToListAsync();
@@ -56,11 +56,11 @@ public sealed class HelpModule : VolteModule
     {
         foreach (var mdl in CommandService.GetAllModules().Where(x => !x.FullAliases.Any()))
         {
-            if (!await CommandHelper.CanShowModuleAsync(Context, mdl)) continue;
+            if (!await TextCommandHelper.CanShowModuleAsync(Context, mdl)) continue;
 
             foreach (var cmd in mdl.Commands)
             {
-                var fmt = CommandHelper.FormatCommandShort(cmd);
+                var fmt = TextCommandHelper.FormatCommandShort(cmd);
                 if (fmt != null) yield return fmt;
             }
         }
@@ -71,9 +71,9 @@ public sealed class HelpModule : VolteModule
     {
         foreach (var mdl in CommandService.GetAllModules().Where(x => x.FullAliases.None()))
         {
-            if (!await CommandHelper.CanShowModuleAsync(Context, mdl)) continue;
+            if (!await TextCommandHelper.CanShowModuleAsync(Context, mdl)) continue;
 
-            var fmt = CommandHelper.FormatModuleShort(mdl);
+            var fmt = TextCommandHelper.FormatModuleShort(mdl);
             if (fmt != null) yield return fmt;
         }
     }
@@ -81,6 +81,6 @@ public sealed class HelpModule : VolteModule
     private async IAsyncEnumerable<EmbedBuilder> GetPagesAsync() 
     {
         foreach (var cmd in await CommandService.GetAllCommands().WhereAccessibleAsync(Context).ToListAsync())
-            yield return await CommandHelper.CreateCommandEmbedAsync(cmd, Context);
+            yield return await TextCommandHelper.CreateCommandEmbedAsync(cmd, Context);
     }
 }

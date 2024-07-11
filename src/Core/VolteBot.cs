@@ -1,4 +1,4 @@
-namespace Volte.Core;
+namespace Volte;
 
 public class VolteBot
 {

@@ -1,4 +1,4 @@
-namespace Volte.Core.Entities;
+namespace Volte.Entities;
 
 public delegate void DataEditor(GuildData data);
 public delegate void TagInitializer(Tag tag);

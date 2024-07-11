@@ -1,6 +1,4 @@
-﻿using Volte.Core;
-
-namespace Volte.Services;
+﻿namespace Volte.Services;
 
 public sealed class WelcomeService(DatabaseService _db) : VolteService
 {

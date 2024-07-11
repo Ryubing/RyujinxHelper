@@ -1,6 +1,4 @@
-﻿using Volte.Core;
-
-namespace Volte.Commands.Text;
+﻿namespace Volte.Commands.Text;
 
 public sealed class VolteContext : CommandContext
 {
@@ -68,7 +66,7 @@ public sealed class VolteContext : CommandContext
     }
 
     public string FormatUsageFor(string commandName) => 
-        CommandHelper.FormatUsage(this, Services.Get<CommandService>().GetCommand(commandName));
+        TextCommandHelper.FormatUsage(this, Services.Get<CommandService>().GetCommand(commandName));
         
 
     public void Modify(DataEditor modifier)

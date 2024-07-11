@@ -74,8 +74,14 @@ public static class DiscordHelper
         }
     }
 
-    public static SocketRole GetHighestRole(this SocketGuildUser member, bool requireColor = true)
-        => member.Roles.Where(x => !requireColor || x.HasColor()).MaxBy(x => x.Position);
+    public static SocketRole GetHighestRole(this SocketUser user, bool requireColor = true)
+    {
+        if (user is not SocketGuildUser sgu) return null;
+        
+        return sgu.Roles
+            .Where(x => !requireColor || x.HasColor())
+            .MaxBy(x => x.Position);
+    }
 
     public static bool TryGetSpotifyStatus(this IGuildUser user, out SpotifyGame spotify)
     {

@@ -1,25 +1,30 @@
 ﻿using System.Collections.Concurrent;
+using Discord.Interactions;
+using Volte.Interactions;
 using Volte.Interactive;
+using RunMode = Qmmands.RunMode;
 
 namespace Volte.Services;
 
 public class InteractiveService : VolteService, IDisposable
 {
     private readonly DiscordSocketClient _client;
-
-    private readonly Dictionary<ulong, IReactionCallback> _callbacks;
+    
     private readonly InteractiveServiceConfig _config;
-    private readonly ConcurrentQueue<PaginatedMessageCallback> _activePagers;
+
+    private readonly Dictionary<ulong, IReactionCallback> _reactionCallbacks = [];
+    private readonly Dictionary<ulong, IButtonCallback> _buttonCallbacks = [];
 
     public InteractiveService(DiscordSocketClient discord, InteractiveServiceConfig config = null)
     {
         _client = discord;
         _client.ReactionAdded += HandleReactionAsync;
+        _client.InteractionCreated += interaction =>
+            interaction is SocketMessageComponent { Data.Type: ComponentType.Button } component
+                ? HandleComponentAsync(component)
+                : Task.CompletedTask;
 
         _config = config ?? new InteractiveServiceConfig();
-
-        _callbacks = new Dictionary<ulong, IReactionCallback>();
-        _activePagers = new ConcurrentQueue<PaginatedMessageCallback>();
     }
 
     /// <summary>
@@ -108,7 +113,7 @@ public class InteractiveService : VolteService, IDisposable
     {
         timeout ??= _config.DefaultTimeout;
         var message = await context.Channel.SendMessageAsync(content, isTts, embed, options);
-        _ = Executor.ExecuteAfterDelayAsync(timeout.Value, async () => await message.TryDeleteAsync());
+        _ = ExecuteAfterDelayAsync(timeout.Value, async () => await message.TryDeleteAsync());
         return message;
     }
 
@@ -134,35 +139,79 @@ public class InteractiveService : VolteService, IDisposable
         return m;
     }
 
-    public async ValueTask<IUserMessage> SendPaginatedMessageAsync(VolteContext context,
+    public async ValueTask<IUserMessage> SendReactionPaginatedMessageAsync(VolteContext context,
         PaginatedMessage pager,
         ICriterion<SocketReaction> criterion = null)
     {
         var callback = new PaginatedMessageCallback(this, context, pager, criterion);
-        _activePagers.Enqueue(callback);
         await callback.DisplayAsync();
         return callback.Message;
     }
+    
+    public async ValueTask<IUserMessage> SendButtonPaginatedMessageAsync(SocketUserMessage sourceMessage,
+        IServiceProvider provider,
+        PaginatedMessage pager,
+        ICriterion<SocketInteractionContext<SocketMessageComponent>> criterion = null)
+    {
+        var callback = new ButtonPaginatorCallback(this, sourceMessage, pager, provider,  criterion);
+        await callback.StartAsync();
+        return callback.PagerMessage;
+    }
+    
+    public async ValueTask<IUserMessage> SendButtonPaginatedMessageAsync(VolteContext context,
+        PaginatedMessage pager,
+        ICriterion<SocketInteractionContext<SocketMessageComponent>> criterion = null)
+    {
+        var callback = new ButtonPaginatorCallback(this, context, pager, criterion);
+        await callback.StartAsync();
+        return callback.PagerMessage;
+    }
 
     public void AddReactionCallback(IMessage message, IReactionCallback callback) =>
-        _callbacks[message.Id] = callback;
+        _reactionCallbacks[message.Id] = callback;
 
     public bool RemoveReactionCallback(IMessage message) => RemoveReactionCallback(message.Id);
-    public bool RemoveReactionCallback(ulong id) => _callbacks.Remove(id);
-    public void ClearReactionCallbacks() => _callbacks.Clear();
+    public bool RemoveReactionCallback(ulong id) => _reactionCallbacks.Remove(id);
+    public void ClearReactionCallbacks() => _reactionCallbacks.Clear();
+    
+    public void AddButtonCallback(IMessage message, IButtonCallback callback) =>
+        _buttonCallbacks[message.Id] = callback;
 
+    public bool RemoveButtonCallback(IMessage message) => RemoveReactionCallback(message.Id);
+    public bool RemoveButtonCallback(ulong id) => _buttonCallbacks.Remove(id);
+    public void ClearButtonCallbacks() => _buttonCallbacks.Clear();
+
+    private async Task HandleComponentAsync(SocketMessageComponent component)
+    {
+        if (!_buttonCallbacks.TryGetValue(component.Message.Id, out var callback)) return;
+        var ctx = new SocketInteractionContext<SocketMessageComponent>(_client, component);
+        var id = ctx.Interaction.GetId();
+        if (id.Identifier != "pager") return;
+        if (id.Value != callback.MessageContext.Message.Id.ToString()) return;
+        if (!await callback.Criterion.JudgeAsync(callback.MessageContext, ctx)) return;
+
+        var callbackTask = Task.Run(async () =>
+        {
+            if (await callback.HandleAsync(ctx) && RemoveButtonCallback(callback.PagerMessage.Id))
+                Debug(LogSource.Service, $"Button paginator for {callback.MessageContext.Message.Id} deleted, pager was ID {callback.PagerMessage.Id}");
+        });
+
+        if (callback.RunMode is RunMode.Sequential)
+            await callbackTask;
+    }
+    
 
     private async Task HandleReactionAsync(Cacheable<IUserMessage, ulong> message,
         Cacheable<IMessageChannel, ulong> _,
         SocketReaction reaction)
     {
         if (reaction.UserId == _client.CurrentUser.Id) return;
-        if (!_callbacks.TryGetValue(message.Id, out var callback)) return;
+        if (!_reactionCallbacks.TryGetValue(message.Id, out var callback)) return;
         if (!await callback.Criterion.JudgeAsync(callback.Context, reaction)) return;
         var callbackTask = Task.Run(async () =>
         {
-            if (await callback.HandleAsync(reaction))
-                RemoveReactionCallback(await message.GetOrDownloadAsync());
+            if (await callback.HandleAsync(reaction) && RemoveReactionCallback(await message.GetOrDownloadAsync()))
+                Debug(LogSource.Service, $"Reaction paginator for {callback.Context.Message.Id} deleted");
         });
 
         if (callback.RunMode is RunMode.Sequential)

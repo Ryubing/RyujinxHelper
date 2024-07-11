@@ -19,7 +19,7 @@ public class PaginatedAppearanceOptions
     public readonly string InformationText = "This is a paginator. React with the various icons to change page and more.";
 
     public readonly JumpDisplayOptions JumpDisplayOptions = JumpDisplayOptions.Always;
-    public const bool DisplayInformationIcon = true;
+    public readonly bool DisplayInformationIcon = true;
 
     public TimeSpan InfoTimeout = 30.Seconds();
 

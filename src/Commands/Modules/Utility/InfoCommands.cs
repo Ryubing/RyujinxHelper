@@ -18,18 +18,16 @@ public sealed partial class UtilityModule
         => Ok(Context.CreateEmbedBuilder()
             .AddField("Version", Version.InformationVersion, true)
             .AddField("Author",
-                $"{await Context.Client.Rest.GetUserAsync(168548441939509248)}, contributors on {Format.Url("GitHub", "https://github.com/Ultz/Volte")}, and members of the Ultz organization.",
+                $"{await Context.Client.Rest.GetUserAsync(168548441939509248)}, contributors on {Format.Url("GitHub", "https://github.com/Polyhaze/Volte")}, and members of the Ultz organization.",
                 true)
-            .AddField("Language/Library", $"C# 8, Discord.Net {Version.DiscordNetVersion}", true)
+            .AddField("Language/Library", $"C# 12, Discord.Net {Version.DiscordNetVersion}", true)
             .AddField("Discord Application Created", (await Context.Client.GetApplicationInfoAsync()).CreatedAt.ToDiscordTimestamp(TimestampType.LongDateTime))
             .AddField("Guilds", Context.Client.Guilds.Count, true)
             .AddField("Channels",
                 Context.Client.Guilds.SelectMany(x => x.Channels).Where(x => x is not SocketCategoryChannel)
                     .DistinctBy(x => x.Id).Count(),
                 true)
-            .AddField("Invite Me",
-                Format.Code(TextCommandHelper.FormatUsage(Context, CommandService.GetCommand("Invite"))), true)
-            .AddField("Uptime", Process.GetCurrentProcess().CalculateUptime(), true)
+            .AddField("Uptime", Process.GetCurrentProcess().CalculateUptime())
             .AddField("Successful Commands", MessageService.SuccessfulCommandCalls, true)
             .AddField("Failed Commands", MessageService.FailedCommandCalls, true)
             .WithThumbnailUrl(Context.Client.CurrentUser.GetEffectiveAvatarUrl(size: 512)));

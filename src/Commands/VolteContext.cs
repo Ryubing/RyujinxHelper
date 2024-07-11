@@ -31,7 +31,7 @@ public sealed class VolteContext : CommandContext
         => CreateEmbedBuilder().Apply(action).Build();
         
     public Embed CreateEmbed(string content) => CreateEmbedBuilder(content).Build();
-
+    
     public EmbedBuilder CreateEmbedBuilder(string content = null) => new EmbedBuilder()
         .WithColor(User.GetHighestRole()?.Color ?? new Color(Config.SuccessColor))
         .WithAuthor(User.ToString(), User.GetEffectiveAvatarUrl())

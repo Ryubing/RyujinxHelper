@@ -17,7 +17,7 @@ public class OkResult : ActionResult
     public OkResult(IEnumerable<EmbedBuilder> pages, uint pageSplit = 0, Color? color = null, IGuildUser author = null,
         VolteContext ctx = null, string title = null, PaginatedAppearanceOptions options = null)
     {
-        _pager = PaginatedMessage.Builder.New
+        _pager = PaginatedMessage.Builder.New()
             .WithPages(pages);
 
         if (color.HasValue)
@@ -63,7 +63,10 @@ public class OkResult : ActionResult
             
         if (_pager != null)
             return new ResultCompletionData(
-                await ctx.Interactive.SendPaginatedMessageAsync(ctx, _pager.WithDefaults(ctx).Build()));
+                _pager.UseButtonPaginator
+                    ? await ctx.Interactive.SendButtonPaginatedMessageAsync(ctx, _pager.WithDefaults(ctx).Build())
+                    : await ctx.Interactive.SendReactionPaginatedMessageAsync(ctx, _pager.WithDefaults(ctx).Build())
+                );
 
         if (_separateLogic != null)
         {

@@ -30,6 +30,7 @@ global using Volte.Commands.Text.Modules;
 global using Volte.Helpers;
 global using Gommon;
 global using static Gommon.Lambda;
+global using static Gommon.Executor;
 global using static Volte.Helpers.Logger;
 
 global using Console = Colorful.Console;

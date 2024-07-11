@@ -2,18 +2,22 @@
 
 public class PaginatedMessage
 {
-    public static Builder NewBuilder() => Builder.New;
-        
     public class Builder
     {
+
+        public static Builder New(bool useButtonPaginator = false) => new()
+        {
+            UseButtonPaginator = useButtonPaginator
+        };
+        
+        public bool UseButtonPaginator { get; private set; }
+        
         public IEnumerable<object> Pages { get; private set; }
         public string Content { get; private set; } = string.Empty;
         public IGuildUser Author { get; private set; }
         public Color Color { get; private set; } = new(Config.SuccessColor);
         public string Title { get; private set; }
         public PaginatedAppearanceOptions Options { get; private set; } = PaginatedAppearanceOptions.New;
-
-        public static Builder New => new();
 
         public Builder WithPages(IEnumerable<object> pages)
         {

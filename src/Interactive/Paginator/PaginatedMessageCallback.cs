@@ -55,7 +55,7 @@ public sealed class PaginatedMessageCallback : IReactionCallback, IAsyncDisposab
 
                 await Message.AddReactionAsync(_pager.Options.Stop);
 
-                if (PaginatedAppearanceOptions.DisplayInformationIcon)
+                if (_pager.Options.DisplayInformationIcon)
                     await Message.AddReactionAsync(_pager.Options.Info);
             });
         }
@@ -129,7 +129,7 @@ public sealed class PaginatedMessageCallback : IReactionCallback, IAsyncDisposab
     private Embed BuildEmbed()
     {
         var currentElement = _pager.Pages.ElementAt(_currentPageIndex - 1);
-        
+
         if (currentElement is EmbedBuilder embed)
         {
             if (!_pager.Title.IsNullOrWhitespace()) embed.WithTitle(_pager.Title);
@@ -142,15 +142,16 @@ public sealed class PaginatedMessageCallback : IReactionCallback, IAsyncDisposab
 
         if (_pager.Pages.Count > 1)
             builder.WithFooter(_pager.Options.GenerateFooter(_currentPageIndex, _pageCount));
-            
 
-        return (_pager.Pages switch
+        if (currentElement is EmbedFieldBuilder)
         {
-            IEnumerable<EmbedFieldBuilder> efb => builder.WithFields(efb
+            return builder.WithFields(_pager.Pages.OfType<EmbedFieldBuilder>()
                 .Skip((_currentPageIndex - 1) * _pager.Options.FieldsPerPage)
-                .Take(_pager.Options.FieldsPerPage).ToList()),
-            _ => builder.WithDescription(currentElement.ToString())
-        }).Build();
+                .Take(_pager.Options.FieldsPerPage).ToList()
+            ).Build();
+        }
+
+        return builder.WithDescription(currentElement.ToString()).Build();
     }
 
     private Task RenderAsync() => Message.ModifyAsync(m => m.Embed = BuildEmbed());

@@ -98,7 +98,7 @@ public static class Config
         var split = Game.Split(" ");
         var title = split.Skip(1).JoinToString(" ");
         if (split[0].ToLower() is "streaming") title = split.Skip(2).JoinToString(" ");
-        return split.First().ToLower() switch
+        return split[0].ToLower() switch
         {
             "playing" => (ActivityType.Playing, title, null),
             "listeningto" => (ActivityType.Listening, title, null),

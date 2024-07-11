@@ -90,7 +90,7 @@ public partial class UtilityModule
         string input = null)
     {
         if (input.IsNullOrEmpty())
-            return Ok(PaginatedMessage.Builder.New
+            return Ok(PaginatedMessage.Builder.New()
                 .WithTitle("NATO Phonetic Alphabet")
                 .WithPages(_nato.Select(kvp => $"**{char.ToUpper(kvp.Key)}**: {Format.Code(kvp.Value)}"))
                 .SplitPages(12));

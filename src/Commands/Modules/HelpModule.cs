@@ -1,3 +1,5 @@
+using Volte.Interactive;
+
 namespace Volte.Commands.Text.Modules;
 
 public sealed class HelpModule : VolteModule
@@ -13,7 +15,7 @@ public sealed class HelpModule : VolteModule
         if (query != null)
         {
             if (query.EqualsAnyIgnoreCase("pages", "pager"))
-                return Ok(await GetPagesAsync().ToListAsync());
+                return Ok(PaginatedMessage.Builder.New(true).WithPages(await GetPagesAsync().ToListAsync()));
 
             var searchRes = CommandService.GetCommand(query);
             if (searchRes is null)

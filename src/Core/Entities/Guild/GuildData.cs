@@ -16,15 +16,11 @@ public sealed class GuildData
                 Moderation = new ModerationOptions
                 {
                     AdminRole = default,
-                    Antilink = default,
-                    Blacklist = new HashSet<string>(),
-                    MassPingChecks = default,
                     ModActionLogChannel = default,
                     ModRole = default,
                     CheckAccountAge = false,
                     VerifiedRole = default,
                     UnverifiedRole = default,
-                    BlacklistAction = BlacklistAction.Nothing,
                     ShowResponsibleModerator = true
                 },
                 Welcome = new WelcomeOptions
@@ -38,7 +34,7 @@ public sealed class GuildData
             Extras = new GuildExtras
             {
                 ModActionCaseNumber = default,
-                SelfRoles = new HashSet<string>(),
+                SelfRoles = new HashSet<ulong>(),
                 Tags = new HashSet<Tag>(),
                 Warns = new HashSet<Warn>()
             }

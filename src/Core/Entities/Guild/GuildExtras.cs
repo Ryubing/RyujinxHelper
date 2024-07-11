@@ -18,7 +18,7 @@ public sealed class GuildExtras
     public bool AutoParseQuoteUrls { get; set; }
 
     [JsonPropertyName("self_roles")]
-    public HashSet<string> SelfRoles { get; set; }
+    public HashSet<ulong> SelfRoles { get; set; }
 
     [JsonPropertyName("tags")]
     public HashSet<Tag> Tags { get; set; }

@@ -4,15 +4,6 @@ namespace Volte.Entities;
 
 public sealed class ModerationOptions
 {
-    internal ModerationOptions()
-        => Blacklist = new HashSet<string>();
-
-    [JsonPropertyName("mass_ping_checks")]
-    public bool MassPingChecks { get; set; }
-
-    [JsonPropertyName("antilink")]
-    public bool Antilink { get; set; }
-
     [JsonPropertyName("mod_log_channel")]
     public ulong ModActionLogChannel { get; set; }
 
@@ -33,12 +24,6 @@ public sealed class ModerationOptions
         
     [JsonPropertyName("show_moderator")]
     public bool ShowResponsibleModerator { get; set; }
-
-    [JsonPropertyName("blacklist")]
-    public HashSet<string> Blacklist { get; set; }
-
-    [JsonPropertyName("blacklist_action")]
-    public BlacklistAction BlacklistAction { get; set; }
         
     public override string ToString()
         => JsonSerializer.Serialize(this, Config.JsonOptions);
@@ -46,7 +31,6 @@ public sealed class ModerationOptions
 
 public sealed class WelcomeOptions
 {
-
     public static Dictionary<string, string> ValidPlaceholders => new Dictionary<string, string>
     {
         {"GuildName", "The name of the guild."},
@@ -120,26 +104,4 @@ public sealed class StarboardOptions
         
     [JsonPropertyName("delete_invalid_stars")]
     public bool DeleteInvalidStars { get; set; }
-}
-
-public static class BlacklistActions
-{
-    public static BlacklistAction DetermineAction(string input)
-        => input.ToLower() switch
-        {
-            "nothing" => BlacklistAction.Nothing,
-            "warn" => BlacklistAction.Warn,
-            "kick" => BlacklistAction.Kick,
-            "ban" => BlacklistAction.Ban,
-            _ => throw new NotSupportedException($"BlacklistAction {input.ToLower()} is not supported."),
-        };
-}
-
-public enum BlacklistAction
-{
-    Nothing,
-    Warn,
-    Kick,
-    Ban
-
 }

@@ -46,7 +46,7 @@ public class SelfRoleModule : VolteModule
         [Remainder, Description("The role to remove from the SelfRoles list.")]
         SocketRole role)
     {
-        if (Context.GuildData.Extras.SelfRoles.Contains(role.Id))
+        if (!Context.GuildData.Extras.SelfRoles.Contains(role.Id))
             return BadRequest($"The Self Roles list for this guild doesn't contain **{role.Name}**.");
 
         Context.Modify(data => data.Extras.SelfRoles.Remove(role.Id));

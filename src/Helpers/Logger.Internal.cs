@@ -157,6 +157,7 @@ public static partial class Logger
             LogSource.Rest => (Color.Red, "REST"),
             LogSource.Unknown => (Color.Fuchsia, "UNKNOWN"),
             LogSource.Sentry => (Color.Chartreuse, "SENTRY"),
+            LogSource.UI => (Color.Teal, "UI"),
             _ => throw new InvalidOperationException($"The specified LogSource {source} is invalid.")
         };
         

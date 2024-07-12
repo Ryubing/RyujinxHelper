@@ -42,6 +42,10 @@ public enum LogSource
     /// </summary>
     Sentry = 7,
     /// <summary>
+    ///     Indicates that this log message is from the UI thread.
+    /// </summary>
+    UI = 8,
+    /// <summary>
     ///     Indicates that this log message came from an unknown source.
     /// </summary>
     Unknown = int.MaxValue

@@ -5,6 +5,7 @@ using Silk.NET.Windowing;
 
 namespace Volte.UI;
 
+// adapted from https://github.com/dotnet/Silk.NET/blob/main/examples/CSharp/OpenGL%20Demos/ImGui/Program.cs
 public class ImGuiManager : IDisposable
 {
     private readonly IWindow window;

@@ -1,3 +1,9 @@
-﻿using Volte;
+﻿namespace Volte;
 
-await VolteBot.StartAsync();
+public static class Program
+{
+    static async Task Main(string[] args)
+    {
+        await VolteBot.StartAsync(args.ContainsIgnoreCase("--ui"));
+    }
+}

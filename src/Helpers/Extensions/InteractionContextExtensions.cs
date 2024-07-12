@@ -3,7 +3,7 @@ using Volte;
 
 namespace Gommon;
 
-public static class IInteractionContextExtensions
+public static class InteractionContextExtensions
 {
     public static Embed CreateEmbed<TInteraction>(
         this SocketInteractionContext<TInteraction> context,

@@ -1,12 +1,14 @@
+using Volte.UI;
+
 namespace Volte;
 
 public class VolteBot
 {
-    public static Task StartAsync()
+    public static Task StartAsync(bool ui)
     {
         Console.Title = "Volte";
         Console.CursorVisible = false;
-        return new VolteBot().LoginAsync();
+        return new VolteBot().LoginAsync(ui);
     }
 
     private ServiceProvider _provider;
@@ -16,7 +18,7 @@ public class VolteBot
     private VolteBot()
         => Console.CancelKeyPress += (_, _) => _cts?.Cancel();
 
-    private async Task LoginAsync()
+    private async Task LoginAsync(bool ui)
     {
         if (!Config.StartupChecks()) return;
 
@@ -51,11 +53,12 @@ public class VolteBot
 
         await _client.RegisterVolteEventHandlersAsync(_provider);
 
-        Executor.ExecuteBackgroundAsync(async () => await _provider.Get<AddonService>().InitAsync());
+        ExecuteBackgroundAsync(async () => await _provider.Get<AddonService>().InitAsync());
         _provider.Get<ReminderService>().Initialize();
 
         try
         {
+            ImGuiManager.CreateUiThread(new VolteImGuiLayer()).Start();
             await Task.Delay(-1, _cts.Token);
         }
         catch (Exception e)

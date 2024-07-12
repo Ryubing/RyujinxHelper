@@ -5,6 +5,7 @@
         <LangVersion>latest</LangVersion>
         <RuntimeIdentifiers>linux-x64</RuntimeIdentifiers>
         <RuntimeIdentifiers>win-x64</RuntimeIdentifiers>
+        <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
         <Authors>GreemDev</Authors>
         <Company>Polyhaze</Company>
         <PackageProjectUrl>https://github.com/Polyhaze/Volte</PackageProjectUrl>
@@ -33,6 +34,10 @@
         <PackageReference Include="OneOf" Version="3.0.263" />        
         <PackageReference Include="Qmmands" Version="4.0.1-nightly-00257" />        
         <PackageReference Include="Sentry" Version="4.6.0" />
+        <PackageReference Include="Silk.NET.Input" Version="2.21.0" />
+        <PackageReference Include="Silk.NET.OpenGL" Version="2.21.0" />
+        <PackageReference Include="Silk.NET.OpenGL.Extensions.ImGui" Version="2.21.0" />
+        <PackageReference Include="Silk.NET.Windowing" Version="2.21.0" />
         <PackageReference Include="SixLabors.ImageSharp" Version="3.1.4" />
     </ItemGroup>
 </Project>

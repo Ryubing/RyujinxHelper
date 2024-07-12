@@ -1,3 +1,4 @@
+using System.IO;
 using LiteDB;
 
 // ReSharper disable ReturnTypeCanBeEnumerable.Global
@@ -7,11 +8,10 @@ namespace Volte.Services;
 public sealed class DatabaseService : VolteService, IDisposable
 {
     public static readonly LiteDatabase Database = new($"filename={FilePath.Data / "Volte.db"};connection=direct");
+    public static readonly FilePath CalledCommandsFile = FilePath.Data / "commandstats.bin";
 
     private readonly DiscordSocketClient _client;
     private readonly IServiceProvider _provider;
-
-    private readonly ILiteCollection<CalledCommandsInfo> _calledCommandsInfo; 
 
     private readonly ILiteCollection<GuildData> _guildData;
     private readonly ILiteCollection<Reminder> _reminderData;
@@ -24,7 +24,8 @@ public sealed class DatabaseService : VolteService, IDisposable
         _guildData = Database.GetCollection<GuildData>("guilds");
         _reminderData = Database.GetCollection<Reminder>("reminders");
         _starboardData = Database.GetCollection<StarboardDbEntry>("starboard").Apply(sd =>
-            sd.EnsureIndex("composite_id", $"$.{nameof(StarboardDbEntry.GuildId)} + '_' + $.{nameof(StarboardDbEntry.Key)}"));
+            sd.EnsureIndex("composite_id",
+                $"$.{nameof(StarboardDbEntry.GuildId)} + '_' + $.{nameof(StarboardDbEntry.Key)}"));
     }
 
     public GuildData GetData(SocketGuild guild) => GetData(guild.Id);
@@ -114,44 +115,37 @@ public sealed class DatabaseService : VolteService, IDisposable
             coll.Delete($"{entry.GuildId}_{entry.StarredMessageId}");
         });
     }
-    
-    public CalledCommandsInfo GetCalledCommandsInfo() 
-        => _calledCommandsInfo.ValueLock(GetCalledCommandsInfoImpl);
-    
-    private CalledCommandsInfo GetCalledCommandsInfoImpl()
+
+    public static CalledCommandsInfo GetCalledCommandsInfo()
     {
-        var existing = _calledCommandsInfo.FindAll().ToList();
-        if (existing.Count != 0) return existing.First();
-            
-        var newData = new CalledCommandsInfo
+        var cci = new CalledCommandsInfo();
+        if (!CalledCommandsFile.ExistsAsFile)
         {
-            Successful = 0,
-            Failed = 0
-        };
-        _calledCommandsInfo.Insert(newData);
-        return newData;
+            CalledCommandsFile.Create();
+            using var writeStream = CalledCommandsFile.OpenWrite();
+            cci.WriteTo(writeStream);
+        }
+        else
+        {
+            using var readStream = CalledCommandsFile.OpenRead();
+            cci.LoadFrom(readStream);
+        }
+        
+        return cci;
     }
 
-    public void SaveCalledCommandsInfo(CalledCommandsInfo calledCommandsInfo)
+    public static void SaveCalledCommandsInfo(CalledCommandsInfo calledCommandsInfo)
     {
-        _calledCommandsInfo.LockedRef(_ =>
-        {
-            _calledCommandsInfo.EnsureIndex(s => s.Total, true);
-            _calledCommandsInfo.Update(calledCommandsInfo);
-        });
+        using var fileStream = CalledCommandsFile.OpenWrite();
+        calledCommandsInfo.WriteTo(fileStream);
     }
     
     public void UpdateCalledCommandsInfo(ulong newSuccesses, ulong newFailures)
     {
-        _calledCommandsInfo.LockedRef(_ =>
-        {
-            _calledCommandsInfo.EnsureIndex(s => s.Total, true);
-            _calledCommandsInfo.Update(GetCalledCommandsInfoImpl().Apply(cci =>
-            {
-                cci.Successful += newSuccesses;
-                cci.Failed += newFailures;
-            }));
-        });
+        var current = GetCalledCommandsInfo();
+        current.Successful += newSuccesses;
+        current.Failed += newFailures;
+        SaveCalledCommandsInfo(current);
     }
 
     public void Dispose() 

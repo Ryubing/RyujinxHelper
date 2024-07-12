@@ -68,6 +68,8 @@ public record FilePath
     {
         if (IsDirectory)
             Directory.CreateDirectory(Path);
+        else if (!ExistsAsFile)
+            File.Create(Path).Close();
     }
     
     public List<FilePath> GetFiles() => 
@@ -90,6 +92,9 @@ public record FilePath
     public string ReadAllText(Encoding encoding = null) => File.ReadAllText(Path, encoding ?? Encoding.UTF8);
     public string[] ReadAllLines(Encoding encoding = null) => File.ReadAllLines(Path, encoding ?? Encoding.UTF8);
     public byte[] ReadAllBytes() => File.ReadAllBytes(Path);
+    
+    public FileStream OpenRead() => File.OpenRead(Path);
+    public FileStream OpenWrite() => File.OpenWrite(Path);
 
     public override string ToString() => Path;
 }

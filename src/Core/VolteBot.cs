@@ -58,7 +58,9 @@ public class VolteBot
 
         try
         {
-            ImGuiManager.CreateUiThread(new VolteImGuiLayer()).Start();
+            if (ui)
+                ImGuiManager.CreateUiThread(new VolteImGuiLayer(_provider)).Start();
+            
             await Task.Delay(-1, _cts.Token);
         }
         catch (Exception e)
@@ -76,13 +78,7 @@ public class VolteBot
         var messageService = provider.Get<MessageService>();
         var db = provider.Get<DatabaseService>();
 
-        db.SaveCalledCommandsInfo(
-            db.GetCalledCommandsInfo().Apply(cci =>
-            {
-                cci.Successful += messageService.SuccessfulCommandCalls;
-                cci.Failed += messageService.FailedCommandCalls;
-            })
-        );
+        db.UpdateCalledCommandsInfo(messageService.SuccessfulCommandCalls, messageService.FailedCommandCalls);
 
         await provider.DisposeAsync();
 

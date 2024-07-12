@@ -2,22 +2,20 @@
 
 public sealed class MessageService : VolteService
 {
-    private readonly IServiceProvider _provider;
     private readonly CommandService _commandService;
     private readonly QuoteService _quoteService;
         
-    public MessageService(IServiceProvider provider, 
+    public MessageService(
         CommandService commandService,
         QuoteService quoteService)
     {
-        _provider = provider;
         _commandService = commandService;
         _quoteService = quoteService;
     }
     
-    public ulong AllTimeCommandCalls => _provider.Get<DatabaseService>().GetCalledCommandsInfo().Total + SuccessfulCommandCalls + FailedCommandCalls;
-    public ulong AllTimeSuccessfulCommandCalls => _provider.Get<DatabaseService>().GetCalledCommandsInfo().Successful + SuccessfulCommandCalls;
-    public ulong AllTimeFailedCommandCalls => _provider.Get<DatabaseService>().GetCalledCommandsInfo().Failed + FailedCommandCalls;
+    public ulong AllTimeCommandCalls => DatabaseService.GetCalledCommandsInfo().Total + SuccessfulCommandCalls + FailedCommandCalls;
+    public ulong AllTimeSuccessfulCommandCalls => DatabaseService.GetCalledCommandsInfo().Successful + SuccessfulCommandCalls;
+    public ulong AllTimeFailedCommandCalls => DatabaseService.GetCalledCommandsInfo().Failed + FailedCommandCalls;
     
     public ulong SuccessfulCommandCalls { get; private set; }
     public ulong FailedCommandCalls { get; private set; }

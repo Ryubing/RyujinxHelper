@@ -93,14 +93,14 @@ public class VolteImGuiLayer : ImGuiLayer<VolteImGuiState>
         ImGui.Text("Bot status:");
         if (ImGui.BeginMenu($"  {State.Client.Status}"))
         {
-            if (ImGui.MenuItem("Online"))
-                TaskQueue.Enqueue(() => State.Client.SetStatusAsync(UserStatus.Online));
-            if (ImGui.MenuItem("Idle"))
-                TaskQueue.Enqueue(() => State.Client.SetStatusAsync(UserStatus.Idle));
-            if (ImGui.MenuItem("Do Not Disturb"))
-                TaskQueue.Enqueue(() => State.Client.SetStatusAsync(UserStatus.DoNotDisturb));
-            if (ImGui.MenuItem("Invisible"))
-                TaskQueue.Enqueue(() => State.Client.SetStatusAsync(UserStatus.Invisible));
+            if (ImGui.MenuItem("Online", enabled: State.Client.Status != UserStatus.Online)) 
+                Await(() => State.Client.SetStatusAsync(UserStatus.Online));
+            if (ImGui.MenuItem("Idle", enabled: State.Client.Status != UserStatus.Idle)) 
+                Await(() => State.Client.SetStatusAsync(UserStatus.Idle));
+            if (ImGui.MenuItem("Do Not Disturb", enabled: State.Client.Status != UserStatus.DoNotDisturb)) 
+                Await(() => State.Client.SetStatusAsync(UserStatus.DoNotDisturb));
+            if (ImGui.MenuItem("Invisible", enabled: State.Client.Status != UserStatus.Invisible)) 
+                Await(() => State.Client.SetStatusAsync(UserStatus.Invisible));
             ImGui.EndMenu();
         }
     }
@@ -111,4 +111,6 @@ public class VolteImGuiLayer : ImGuiLayer<VolteImGuiState>
         var framerate = ImGui.GetIO().Framerate;
         ImGui.Text($"{framerate:###} FPS ({1000f / framerate:0.##} ms/frame)");
     }
+
+    private void Await(Func<Task> task) => TaskQueue.Enqueue(task);
 }

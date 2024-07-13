@@ -7,7 +7,7 @@ namespace Volte.Helpers;
 
 public static partial class Logger
 {
-    public static bool IsDebugLoggingEnabled => Config.EnableDebugLogging || Version.IsDevelopment;
+    public static bool IsDebugLoggingEnabled => Config.DebugEnabled || Version.IsDevelopment;
     
     public static void HandleLogEvent(LogEventArgs args) =>
         Log<object>(args.LogMessage.Severity, args.LogMessage.Source,

@@ -62,7 +62,7 @@ public static partial class Logger
     
     private static void Log<TData>(LogSeverity s, LogSource from, string message, Exception e, InvocationInfo<TData> caller = default)
     {
-        if (s is LogSeverity.Debug && !Config.EnableDebugLogging)
+        if (s is LogSeverity.Debug && !Config.DebugEnabled)
             return;
         
         LogSync.Lock(() => Execute(s, from, message, e, caller));

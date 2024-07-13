@@ -52,7 +52,7 @@ public static class Config
             Owner = 0,
             Game = "game here",
             Streamer = "streamer here",
-            EnableDebugLogging = false,
+            EnableDebug = false,
             SuccessEmbedColor = 0x7000FB,
             ErrorEmbedColor = 0xFF0000,
             LogAllCommands = true,
@@ -124,7 +124,7 @@ public static class Config
 
     public static string Streamer => _configuration.Streamer;
 
-    public static bool EnableDebugLogging => _configuration.EnableDebugLogging;
+    public static bool DebugEnabled => _configuration.EnableDebug;
 
     public static string FormattedStreamUrl => $"https://twitch.tv/{Streamer}";
 
@@ -160,7 +160,7 @@ public static class Config
         public string Streamer { get; set; }
 
         [JsonPropertyName("enable_debug_logging")]
-        public bool EnableDebugLogging { get; set; }
+        public bool EnableDebug { get; set; }
 
         [JsonPropertyName("color_success")]
         public uint SuccessEmbedColor { get; set; }

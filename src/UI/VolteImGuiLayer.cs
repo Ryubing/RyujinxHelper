@@ -27,10 +27,9 @@ public class VolteImGuiLayer : ImGuiLayer<VolteImGuiState>
         {
             if (ImGui.BeginMainMenuBar())
             {
-                MenuBar();
+                MenuBar(delta);
                 ImGui.EndMainMenuBar();
             }
-
         }
         
         {
@@ -44,22 +43,25 @@ public class VolteImGuiLayer : ImGuiLayer<VolteImGuiState>
             BotManagement();
             ImGui.End();
         }
-
-        if (Config.EnableDebugLogging || Version.IsDevelopment)
-        {
-            ImGui.Begin("Debug Info");
-            DebugPanel(delta);
-            ImGui.End();
-        }
     }
     
-    public void MenuBar()
+    public void MenuBar(double delta)
     {
         if (ImGui.BeginMenu("File"))
         {
             if (ImGui.Button("Shutdown"))
                 State.Cts.Cancel();
-                
+            
+            ImGui.EndMenu();
+        }
+
+        if (ImGui.BeginMenu("UI Stats"))
+        {
+            if (Config.DebugEnabled || Version.IsDevelopment)
+                ImGui.MenuItem($"Delta: {delta}", false);
+            
+            var framerate = ImGui.GetIO().Framerate;
+            ImGui.MenuItem($"{framerate:###} FPS ({1000f / framerate:0.##} ms/frame)", false);
             ImGui.EndMenu();
         }
     }
@@ -74,6 +76,8 @@ public class VolteImGuiLayer : ImGuiLayer<VolteImGuiState>
     public void BotManagement()
     {
         ImGui.Text("Discord status:");
+        // ReSharper disable once SwitchStatementHandlesSomeKnownEnumValuesWithDefault
+        // default is a meaningless case here i dont fucking care rider
         switch (State.Client.ConnectionState)
         {
             case ConnectionState.Connected:
@@ -90,27 +94,24 @@ public class VolteImGuiLayer : ImGuiLayer<VolteImGuiState>
                 break;
         }
 
-        ImGui.Text("Bot status:");
-        if (ImGui.BeginMenu($"  {State.Client.Status}"))
+        if (State.Client.ConnectionState == ConnectionState.Connected)
         {
-            if (ImGui.MenuItem("Online", enabled: State.Client.Status != UserStatus.Online)) 
-                Await(() => State.Client.SetStatusAsync(UserStatus.Online));
-            if (ImGui.MenuItem("Idle", enabled: State.Client.Status != UserStatus.Idle)) 
-                Await(() => State.Client.SetStatusAsync(UserStatus.Idle));
-            if (ImGui.MenuItem("Do Not Disturb", enabled: State.Client.Status != UserStatus.DoNotDisturb)) 
-                Await(() => State.Client.SetStatusAsync(UserStatus.DoNotDisturb));
-            if (ImGui.MenuItem("Invisible", enabled: State.Client.Status != UserStatus.Invisible)) 
-                Await(() => State.Client.SetStatusAsync(UserStatus.Invisible));
-            ImGui.EndMenu();
+            if (ImGui.BeginMenu($"Bot status:                {State.Client.Status}"))
+            {
+                if (ImGui.MenuItem("Online", State.Client.Status != UserStatus.Online)) 
+                    Await(() => State.Client.SetStatusAsync(UserStatus.Online));
+                if (ImGui.MenuItem("Idle", State.Client.Status != UserStatus.Idle)) 
+                    Await(() => State.Client.SetStatusAsync(UserStatus.Idle));
+                if (ImGui.MenuItem("Do Not Disturb", State.Client.Status != UserStatus.DoNotDisturb)) 
+                    Await(() => State.Client.SetStatusAsync(UserStatus.DoNotDisturb));
+                if (ImGui.MenuItem("Invisible", State.Client.Status != UserStatus.Invisible)) 
+                    Await(() => State.Client.SetStatusAsync(UserStatus.Invisible));
+            
+                ImGui.EndMenu();
+            }
         }
     }
 
-    public void DebugPanel(double delta)
-    {
-        ImGui.Text($"Delta: {delta}");
-        var framerate = ImGui.GetIO().Framerate;
-        ImGui.Text($"{framerate:###} FPS ({1000f / framerate:0.##} ms/frame)");
-    }
-
     private void Await(Func<Task> task) => TaskQueue.Enqueue(task);
+    private void Await(Task task) => Await(() => task);
 }

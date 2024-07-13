@@ -38,7 +38,6 @@
         <PackageReference Include="Silk.NET.OpenGL" Version="2.20.0-build4753.0" />
         <PackageReference Include="Silk.NET.OpenGL.Extensions.ImGui" Version="2.20.0-build4753.0" />
         <PackageReference Include="Silk.NET.Windowing" Version="2.20.0-build4753.0" />
-        <PackageReference Include="ImGui.NET" Version="1.90.9.1" />
         <PackageReference Include="SixLabors.ImageSharp" Version="3.1.4" />
     </ItemGroup>
 </Project>

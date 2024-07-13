@@ -1,9 +1,9 @@
-﻿using System.Numerics;
-using Silk.NET.Input;
+﻿using Silk.NET.Input;
 using Silk.NET.OpenGL;
 using Silk.NET.OpenGL.Extensions.ImGui;
 using Silk.NET.Windowing;
-using Color = System.Drawing.Color;
+
+#nullable enable
 
 namespace Volte.UI;
 
@@ -12,9 +12,9 @@ public class ImGuiManager<TState> : IDisposable where TState : ImGuiLayerState
 {
     private readonly IWindow window;
 
-    private ImGuiController controller;
-    private GL gl;
-    private IInputContext inputContext;
+    private ImGuiController? controller;
+    private GL? gl;
+    private IInputContext? inputContext;
 
     public ImGuiLayer<TState> Layer { get; }
 
@@ -37,61 +37,36 @@ public class ImGuiManager<TState> : IDisposable where TState : ImGuiLayerState
 
         window.Closing += () =>
         {
-            controller.Dispose();
-            inputContext.Dispose();
-            gl.Dispose();
+            controller?.Dispose();
+            inputContext?.Dispose();
+            gl?.Dispose();
         };
 
         window.Render += delta =>
         {
-            controller.Update((float)delta);
+            controller?.Update((float)delta);
 
-            gl.ClearColor(ImGuiLayerState.Vector3ToColor(Layer?.State?.Background ?? ImGuiLayerState.DefaultBackground));
-            gl.Clear((uint)ClearBufferMask.ColorBufferBit);
+            gl?.ClearColor((Layer.State?.Background ?? ImGuiLayerState.DefaultBackground).AsColor());
+            gl?.Clear((uint)ClearBufferMask.ColorBufferBit);
 
-            Layer?.Render(delta);
+            Layer.Render(delta);
 
-            controller.Render();
+            controller?.Render();
         };
     }
 
-    public void Run() => window.Run();
-
-    void IDisposable.Dispose() => window?.Dispose();
-}
-
-public static class ImGuiManager
-{
-    public static Thread CreateUiThread<TState>(ImGuiLayer<TState> layer) where TState : ImGuiLayerState
+    public void Run()
     {
-        var thread = new Thread(() =>
+        ExecuteBackgroundAsync(async () =>
         {
-            using var manager = new ImGuiManager<TState>(layer);
-            manager.Run();
-        })
-        {
-            Name = "Volte UI Thread"
-        };
-        return thread;
+            while (true)
+            {
+                if (Layer.TaskQueue.TryDequeue(out var task))
+                    await task!();
+            }
+        });
+        window.Run();
     }
-}
 
-public abstract class ImGuiLayer<TState> where TState : ImGuiLayerState
-{
-    public TState State { get; protected set; }
-
-    public abstract void Render(double delta);
-}
-
-public abstract class ImGuiLayerState
-{
-    public static Vector3 DefaultBackground => new(.45f, .55f, .60f);
-
-    public Vector3 Background = DefaultBackground;
-
-    public static Color Vector3ToColor(Vector3 vec3)
-        => Color.FromArgb(255,
-            (int)(Math.Min(vec3.X, 1) * 255),
-            (int)(Math.Min(vec3.Y, 1) * 255),
-            (int)(Math.Min(vec3.Z, 1) * 255));
+    void IDisposable.Dispose() => window.Dispose();
 }

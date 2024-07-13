@@ -15,6 +15,8 @@ public class VolteBot
     private DiscordSocketClient _client;
     private CancellationTokenSource _cts;
 
+    public static ImGuiManager<VolteImGuiState> ImGui { get; private set; }
+
     private VolteBot()
         => Console.CancelKeyPress += (_, _) => _cts?.Cancel();
 
@@ -29,9 +31,32 @@ public class VolteBot
         LogFileRestartNotice();
 
         _provider = new ServiceCollection().AddAllServices().BuildServiceProvider();
+        
+        try
+        {
+            if (ui)
+            {
+                ImGui = new ImGuiManager<VolteImGuiState>(new VolteImGuiLayer(_provider));
+                new Thread(ImGui.Run) { Name = "Volte UI Thread" }.Start();
+
+                ExecuteBackgroundAsync(async () =>
+                {
+                    while (true)
+                    {
+                        if (ImGui.Layer.TaskQueue.TryDequeue(out var task))
+                            await task();
+                    }
+                });
+            }
+        }
+        catch (Exception e)
+        {
+            Error(LogSource.UI, "Could not create UI thread", e);
+        }
+        
         _client = _provider.Get<DiscordSocketClient>();
         _cts = _provider.Get<CancellationTokenSource>();
-
+        
         AdminUtilityModule.AllowedPasteSites = await HttpHelper.GetAllowedPasteSitesAsync(_provider);
 
         await _client.LoginAsync(TokenType.Bot, Config.Token);
@@ -58,14 +83,13 @@ public class VolteBot
 
         try
         {
-            if (ui)
-                ImGuiManager.CreateUiThread(new VolteImGuiLayer(_provider)).Start();
-            
             await Task.Delay(-1, _cts.Token);
         }
         catch (Exception e)
         {
-            SentrySdk.CaptureException(e);
+            if (e is not TaskCanceledException && e is not OperationCanceledException)
+                SentrySdk.CaptureException(e); //only capture ACTUAL errors to Sentry, Canceled exceptions get thrown when the CTS is cancelled
+            
             await ShutdownAsync(_client, _provider);
         }
     }

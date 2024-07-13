@@ -123,12 +123,12 @@ public sealed class DatabaseService : VolteService, IDisposable
         {
             CalledCommandsFile.Create();
             using var writeStream = CalledCommandsFile.OpenWrite();
-            cci.WriteTo(writeStream);
+            cci.Write(writeStream);
         }
         else
         {
             using var readStream = CalledCommandsFile.OpenRead();
-            cci.LoadFrom(readStream);
+            cci.Read(readStream);
         }
         
         return cci;
@@ -137,7 +137,7 @@ public sealed class DatabaseService : VolteService, IDisposable
     public static void SaveCalledCommandsInfo(CalledCommandsInfo calledCommandsInfo)
     {
         using var fileStream = CalledCommandsFile.OpenWrite();
-        calledCommandsInfo.WriteTo(fileStream);
+        calledCommandsInfo.Write(fileStream);
     }
     
     public void UpdateCalledCommandsInfo(ulong newSuccesses, ulong newFailures)

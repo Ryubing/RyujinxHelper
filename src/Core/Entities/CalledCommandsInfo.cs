@@ -9,18 +9,17 @@ public class CalledCommandsInfo
 
     public ulong Total => Successful + Failed;
 
-    public void WriteTo(FileStream stream)
+    public void Write(Stream stream)
     {
         using var bw = new BinaryWriter(stream);
         bw.Write(Successful);
         bw.Write(Failed);
     }
 
-    public void LoadFrom(FileStream stream)
+    public void Read(Stream stream)
     {
         using var br = new BinaryReader(stream);
-        if (stream.Length < (2 * sizeof(ulong)))
-            return;
+        if (!stream.LengthEquals(sizeof(ulong) * 2) /* 16 */) return;
         
         Successful = br.ReadUInt64();
         Failed = br.ReadUInt64();

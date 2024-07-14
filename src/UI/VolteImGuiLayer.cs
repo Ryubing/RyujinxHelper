@@ -157,42 +157,38 @@ public class VolteImGuiLayer : ImGuiLayer<VolteImGuiState>
     
     public void GuildManager()
     {
-        if (State.SelectedGuildId == 0) GuildSelect();
-        else
+        if (State.SelectedGuildId != 0)
         {
-            if (State.SelectedGuildId != 0)
-            {
-                var selectedGuild = State.Client.GetGuild(State.SelectedGuildId);
-                var selectedGuildMembers = selectedGuild.Users.ToImmutableArray();
-                var botMembers = selectedGuildMembers.Count(sgu => sgu.IsBot);
-                var realMembers = selectedGuildMembers.Length - botMembers;
+            var selectedGuild = State.Client.GetGuild(State.SelectedGuildId);
+            var selectedGuildMembers = selectedGuild.Users.ToImmutableArray();
+            var botMembers = selectedGuildMembers.Count(sgu => sgu.IsBot);
+            var realMembers = selectedGuildMembers.Length - botMembers;
             
-                ImGui.Text(selectedGuild.Name);
-                ImGui.Text($"Owner: @{selectedGuild.Owner}");
-                ImGui.Text($"Text Channels: {selectedGuild.TextChannels.Count}");
-                ImGui.Text($"Voice Channels: {selectedGuild.VoiceChannels.Count}");
-                ImGui.Text($"{selectedGuildMembers.Length} members");
-                ColoredText($" + {realMembers} users", Color.LawnGreen);
-                ColoredText($" - {botMembers} bots", Color.OrangeRed);
-                ImGui.Separator();
-
-                var destructiveMenuEnabled = AllKeysPressed(Key.ShiftLeft, Key.ControlLeft);
-                
-                if (ImGui.BeginMenu("Destructive Actions (Shift + Ctrl)", destructiveMenuEnabled))
-                {
-                    if (ImGui.MenuItem("Leave Guild", destructiveMenuEnabled))
-                    {
-                        Await(() => selectedGuild.LeaveAsync());
-                        State.SelectedGuildId = 0;
-                    }
-                    ImGui.EndMenu();
-                }
-            }
-            
+            ImGui.Text(selectedGuild.Name);
+            ImGui.Text($"Owner: @{selectedGuild.Owner}");
+            ImGui.Text($"Text Channels: {selectedGuild.TextChannels.Count}");
+            ImGui.Text($"Voice Channels: {selectedGuild.VoiceChannels.Count}");
+            ImGui.Text($"{selectedGuildMembers.Length} members");
+            ColoredText($" + {realMembers} users", Color.LawnGreen);
+            ColoredText($" - {botMembers} bots", Color.OrangeRed);
             ImGui.Separator();
-            
-            GuildSelect();
+
+            var destructiveMenuEnabled = AllKeysPressed(Key.ShiftLeft, Key.ControlLeft);
+                
+            if (ImGui.BeginMenu("Destructive Actions (Shift + Ctrl)", destructiveMenuEnabled))
+            {
+                if (ImGui.MenuItem("Leave Guild", destructiveMenuEnabled))
+                {
+                    Await(() => selectedGuild.LeaveAsync());
+                    State.SelectedGuildId = 0; //resets this pane back to just the "select a guild" button
+                }
+                ImGui.EndMenu();
+            }
+                
+            ImGui.Separator();
         }
+
+        GuildSelect();
     }
     
     private void GuildSelect()

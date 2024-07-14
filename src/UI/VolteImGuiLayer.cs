@@ -1,5 +1,6 @@
 ﻿using System.Collections.Immutable;
 using ImGuiNET;
+using Silk.NET.Input;
 using Color = System.Drawing.Color;
 
 namespace Volte.UI;
@@ -10,10 +11,12 @@ public sealed class VolteImGuiState : ImGuiLayerState
     {
         Cts = provider.Get<CancellationTokenSource>();
         Client = provider.Get<DiscordSocketClient>();
+        Messages = provider.Get<MessageService>();
     }
 
     public CancellationTokenSource Cts { get; }
     public DiscordSocketClient Client { get; }
+    public MessageService Messages { get; }
     
     public ulong SelectedGuildId { get; set; }
 }
@@ -27,6 +30,8 @@ public class VolteImGuiLayer : ImGuiLayer<VolteImGuiState>
     
     public override void Render(double delta)
     {
+        if (!VolteBot.IsRunning) return;
+        
         {
             if (ImGui.BeginMainMenuBar())
             {
@@ -52,6 +57,24 @@ public class VolteImGuiLayer : ImGuiLayer<VolteImGuiState>
             BotManagement();
             ImGui.End();
         }
+
+        {
+            ImGui.Begin("Command Stats");
+            CommandStats();
+            ImGui.End();
+        }
+    }
+
+    public void CommandStats()
+    {
+        ImGui.Text($"Total executions: {State.Messages.AllTimeCommandCalls}");
+        ColoredText($"  - Successful: {State.Messages.AllTimeSuccessfulCommandCalls}", Color.LawnGreen);
+        ColoredText($"  - Failed: {State.Messages.AllTimeFailedCommandCalls}", Color.OrangeRed);
+        ImGui.SeparatorText("This Session");
+        ImGui.Text($"Executions: {State.Messages.FailedCommandCalls + State.Messages.SuccessfulCommandCalls}");
+        ColoredText($"  - Successful: {State.Messages.SuccessfulCommandCalls}", Color.LawnGreen);
+        ColoredText($"  - Failed: {State.Messages.FailedCommandCalls}", Color.OrangeRed);
+        ImGui.Separator();
     }
     
     public void MenuBar(double delta)
@@ -63,15 +86,19 @@ public class VolteImGuiLayer : ImGuiLayer<VolteImGuiState>
             
             ImGui.EndMenu();
         }
-
-        if (ImGui.BeginMenu("UI Stats"))
+        
+        if (ImGui.BeginMenu("Debug Stats"))
         {
-            if (Config.DebugEnabled || Version.IsDevelopment)
-                ImGui.MenuItem($"Delta: {delta}", false);
-
-            var framerate = Io.Framerate;
+            ImGui.MenuItem($"{Io.Framerate:###} FPS ({1000f / Io.Framerate:0.##} ms/frame)", false);
             
-            ImGui.MenuItem($"{framerate:###} FPS ({1000f / framerate:0.##} ms/frame)", false);
+            if (Config.DebugEnabled || Version.IsDevelopment)
+            {
+                ImGui.MenuItem($"Delta: {delta:0.00000}", false);
+                
+                var process = Process.GetCurrentProcess();
+                ImGui.MenuItem($"Process memory: {process.GetMemoryUsage()} ({process.GetMemoryUsage(MemoryType.Kilobytes)})", false);
+            }
+            
             ImGui.EndMenu();
         }
     }
@@ -108,7 +135,11 @@ public class VolteImGuiLayer : ImGuiLayer<VolteImGuiState>
 
         if (State.Client.ConnectionState == ConnectionState.Connected)
         {
-            if (ImGui.BeginMenu($"Bot status:                {State.Client.Status}"))
+            ImGui.Text($"Connected as: {State.Client.CurrentUser.Username}#{State.Client.CurrentUser.DiscriminatorValue}");
+            // ToString()ing the CurrentUser has weird question marks on both sides of Volte-dev's name,
+            // so we do it manually in case that happens on other bot accounts too
+            
+            if (ImGui.BeginMenu($"Bot status: {State.Client.Status}"))
             {
                 if (ImGui.MenuItem("Online", State.Client.Status != UserStatus.Online)) 
                     Await(() => State.Client.SetStatusAsync(UserStatus.Online));
@@ -121,19 +152,6 @@ public class VolteImGuiLayer : ImGuiLayer<VolteImGuiState>
             
                 ImGui.EndMenu();
             }
-        }
-    }
-
-    private void GuildSelect()
-    {
-        if (ImGui.BeginMenu("Select a Guild           ")) // cheap hack to make the initial pane wider
-        {
-            State.Client.Guilds.ForEach(guild =>
-            {
-                if (ImGui.MenuItem(guild.Name, guild.Id != State.SelectedGuildId))
-                    State.SelectedGuildId = guild.Id;
-            });
-            ImGui.EndMenu();
         }
     }
     
@@ -156,11 +174,37 @@ public class VolteImGuiLayer : ImGuiLayer<VolteImGuiState>
                 ImGui.Text($"{selectedGuildMembers.Length} members");
                 ColoredText($" + {realMembers} users", Color.LawnGreen);
                 ColoredText($" - {botMembers} bots", Color.OrangeRed);
+                ImGui.Separator();
+
+                var destructiveMenuEnabled = AllKeysPressed(Key.ShiftLeft, Key.ControlLeft);
+                
+                if (ImGui.BeginMenu("Destructive Actions (Shift + Ctrl)", destructiveMenuEnabled))
+                {
+                    if (ImGui.MenuItem("Leave Guild", destructiveMenuEnabled))
+                    {
+                        Await(() => selectedGuild.LeaveAsync());
+                        State.SelectedGuildId = 0;
+                    }
+                    ImGui.EndMenu();
+                }
             }
             
             ImGui.Separator();
             
             GuildSelect();
+        }
+    }
+    
+    private void GuildSelect()
+    {
+        if (ImGui.BeginMenu("Select a Guild"))
+        {
+            State.Client.Guilds.ForEach(guild =>
+            {
+                if (ImGui.MenuItem(guild.Name, guild.Id != State.SelectedGuildId))
+                    State.SelectedGuildId = guild.Id;
+            });
+            ImGui.EndMenu();
         }
     }
     

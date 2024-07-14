@@ -186,7 +186,7 @@ public static class DiscordHelper
                     $"Set {client.CurrentUser.Username}'s activity to \"{type}: {name}\", at Twitch user {Config.Streamer}.");
             }
 
-            Executor.ExecuteBackgroundAsync(async () =>
+            ExecuteBackgroundAsync(async () =>
             {
                 foreach (var g in client.Guilds)
                 {

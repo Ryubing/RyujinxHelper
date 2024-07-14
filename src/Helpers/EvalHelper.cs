@@ -11,7 +11,7 @@ public static partial class EvalHelper
         "System", "System.IO", "System.Linq", "System.Text", "System.Threading", "System.Threading.Tasks",
         "System.Collections.Generic", "System.Diagnostics", "System.Globalization", "System.Net.Http",
 
-        "Volte.Core", "Volte.Core.Helpers", "Volte.Core.Entities", "Volte.Commands", "Volte.Services",
+        "Volte", "Volte.Helpers", "Volte.Entities", "Volte.Commands.Text", "Volte.Services",
 
         "Discord", "Discord.WebSocket",
 

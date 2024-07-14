@@ -6,6 +6,8 @@ namespace Volte;
 
 public class VolteBot
 {
+    public static bool IsRunning { get; private set; } = false;
+    
     public static Task StartAsync(Dictionary<string, string> commandLine)
     {
         Console.Title = $"Volte {Version.InformationVersion}";
@@ -50,6 +52,7 @@ public class VolteBot
             {
                 ImGui.Run();
                 ImGui.Dispose();
+                ImGui = null;
             }) { Name = "Volte UI Thread" }.Start();
         }
         catch (Exception e)
@@ -79,6 +82,8 @@ public class VolteBot
 
         _provider = new ServiceCollection().AddAllServices().BuildServiceProvider();
 
+        IsRunning = true;
+        
         if (commandLine.TryGetValue("ui", out _))
             TryCreateUi(_provider, out _);
         
@@ -93,7 +98,7 @@ public class VolteBot
         {
             var commandService = _provider.Get<CommandService>();
 
-            var (sw1, addedParsers) =
+            var (sw1, addedParsers) = 
                 Timed(() => commandService.AddTypeParsers());
             Info(LogSource.Volte,
                 $"Loaded TypeParsers: [{addedParsers.Select(x => x.Name.Replace("Parser", string.Empty)).JoinToString(", ")}] in {sw1.ElapsedMilliseconds}ms.");
@@ -115,6 +120,7 @@ public class VolteBot
         }
         catch (Exception e)
         {
+            IsRunning = false;
             if (e is not TaskCanceledException && e is not OperationCanceledException)
                 SentrySdk.CaptureException(e); //only capture ACTUAL errors to Sentry, Canceled exceptions get thrown when the CTS is cancelled
             

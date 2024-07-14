@@ -81,6 +81,5 @@ public sealed class ImGuiManager<TState> : IDisposable where TState : ImGuiLayer
     public void Dispose()
     {
         _window.Dispose();
-        VolteBot.ImGui = null;
     }
 }

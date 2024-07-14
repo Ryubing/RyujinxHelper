@@ -199,7 +199,6 @@ public sealed class StarboardService(DatabaseService _db, DiscordSocketClient _c
     /// <param name="starboard">The guild's starboard configuration</param>
     /// <param name="message">The message to star (must be from a <see cref="IGuildChannel"/>)</param>
     /// <param name="entry"></param>
-    /// <returns></returns>
     private async Task UpdateOrPostToStarboardAsync(StarboardOptions starboard, IMessage message, StarboardEntry entry)
     {
         var starboardChannel = _client.GetChannel(starboard.StarboardChannel);

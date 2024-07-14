@@ -12,11 +12,13 @@ public sealed class VolteImGuiState : ImGuiLayerState
         Cts = provider.Get<CancellationTokenSource>();
         Client = provider.Get<DiscordSocketClient>();
         Messages = provider.Get<MessageService>();
+        Database = provider.Get<DatabaseService>();
     }
 
     public CancellationTokenSource Cts { get; }
     public DiscordSocketClient Client { get; }
     public MessageService Messages { get; }
+    public DatabaseService Database { get; }
     
     public ulong SelectedGuildId { get; set; }
 }
@@ -26,7 +28,14 @@ public class VolteImGuiLayer : ImGuiLayer<VolteImGuiState>
     public VolteImGuiLayer(IServiceProvider provider)
     {
         State = new VolteImGuiState(provider);
+        
+        Panels.Add("UI Settings", UiSettings);
+        Panels.Add("Command Stats", CommandStats);
+        Panels.Add("Bot Management", BotManagement);
+        Panels.Add("Guild Manager", GuildManager);
     }
+
+    public readonly Dictionary<string, Action<double>> Panels = new();
     
     public override void Render(double delta)
     {
@@ -39,33 +48,16 @@ public class VolteImGuiLayer : ImGuiLayer<VolteImGuiState>
                 ImGui.EndMainMenuBar();
             }
         }
-        
-        {
-            ImGui.Begin("UI Settings");
-            UiSettings();
-            ImGui.End();
-        }
-        
-        {
-            ImGui.Begin("Guild Manager");
-            GuildManager();
-            ImGui.End();
-        }
 
+        foreach (var (panelName, renderPanel) in Panels)
         {
-            ImGui.Begin("Bot Management");
-            BotManagement();
-            ImGui.End();
-        }
-
-        {
-            ImGui.Begin("Command Stats");
-            CommandStats();
+            ImGui.Begin(panelName);
+            renderPanel(delta);
             ImGui.End();
         }
     }
 
-    public void CommandStats()
+    private void CommandStats(double _)
     {
         ImGui.Text($"Total executions: {State.Messages.AllTimeCommandCalls}");
         ColoredText($"  - Successful: {State.Messages.AllTimeSuccessfulCommandCalls}", Color.LawnGreen);
@@ -76,8 +68,8 @@ public class VolteImGuiLayer : ImGuiLayer<VolteImGuiState>
         ColoredText($"  - Failed: {State.Messages.FailedCommandCalls}", Color.OrangeRed);
         ImGui.Separator();
     }
-    
-    public void MenuBar(double delta)
+
+    private void MenuBar(double delta)
     {
         if (ImGui.BeginMenu("File"))
         {
@@ -103,7 +95,7 @@ public class VolteImGuiLayer : ImGuiLayer<VolteImGuiState>
         }
     }
 
-    public void UiSettings()
+    private void UiSettings(double _)
     {
         ImGui.Text("Background");
         ImGui.ColorPicker3("", ref State.Background, ImGuiColorEditFlags.NoSidePreview | ImGuiColorEditFlags.NoLabel);
@@ -112,7 +104,7 @@ public class VolteImGuiLayer : ImGuiLayer<VolteImGuiState>
         //ImGui.Separator();
     }
 
-    public void BotManagement()
+    private void BotManagement(double _)
     {
         ImGui.Text("Discord Gateway:");
         // ReSharper disable once SwitchStatementHandlesSomeKnownEnumValuesWithDefault
@@ -154,22 +146,23 @@ public class VolteImGuiLayer : ImGuiLayer<VolteImGuiState>
             }
         }
     }
-    
-    public void GuildManager()
+
+    #region Guild Manager Panel
+
+    private void GuildManager(double _)
     {
         if (State.SelectedGuildId != 0)
         {
             var selectedGuild = State.Client.GetGuild(State.SelectedGuildId);
             var selectedGuildMembers = selectedGuild.Users.ToImmutableArray();
             var botMembers = selectedGuildMembers.Count(sgu => sgu.IsBot);
-            var realMembers = selectedGuildMembers.Length - botMembers;
             
             ImGui.Text(selectedGuild.Name);
             ImGui.Text($"Owner: @{selectedGuild.Owner}");
             ImGui.Text($"Text Channels: {selectedGuild.TextChannels.Count}");
             ImGui.Text($"Voice Channels: {selectedGuild.VoiceChannels.Count}");
             ImGui.Text($"{selectedGuildMembers.Length} members");
-            ColoredText($" + {realMembers} users", Color.LawnGreen);
+            ColoredText($" + {selectedGuildMembers.Length - botMembers} users", Color.LawnGreen);
             ColoredText($" - {botMembers} bots", Color.OrangeRed);
             ImGui.Separator();
 
@@ -182,6 +175,10 @@ public class VolteImGuiLayer : ImGuiLayer<VolteImGuiState>
                     Await(() => selectedGuild.LeaveAsync());
                     State.SelectedGuildId = 0; //resets this pane back to just the "select a guild" button
                 }
+
+                if (ImGui.MenuItem("Reset Configuration", destructiveMenuEnabled))
+                    State.Database.Save(GuildData.CreateFrom(selectedGuild));
+                
                 ImGui.EndMenu();
             }
                 
@@ -203,6 +200,8 @@ public class VolteImGuiLayer : ImGuiLayer<VolteImGuiState>
             ImGui.EndMenu();
         }
     }
+
+    #endregion
     
     private static void ColoredText(string fmt, Color color) =>
         ImGui.TextColored(color.AsVec4(), fmt);

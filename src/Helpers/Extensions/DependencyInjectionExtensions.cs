@@ -12,12 +12,6 @@ public static partial class Extensions
             {
                 Timeout = 10.Seconds()
             })
-            .AddSingleton(SentrySdk.Init(opts =>
-            {
-                opts.Dsn = Config.SentryDsn;
-                opts.Debug = IsDebugLoggingEnabled;
-                opts.DiagnosticLogger = new SentryTranslator();
-            }))
             .AddSingleton(new CommandService(new CommandServiceConfiguration
             {
                 IgnoresExtraArguments = true,
@@ -29,7 +23,9 @@ public static partial class Extensions
             }))
             .AddSingleton(new DiscordSocketClient(new DiscordSocketConfig
             {
-                LogLevel = Version.IsDevelopment ? LogSeverity.Debug : LogSeverity.Verbose,
+                LogLevel = Config.DebugEnabled || Version.IsDevelopment 
+                    ? LogSeverity.Debug 
+                    : LogSeverity.Verbose,
                 GatewayIntents = _intents,
                 AlwaysDownloadUsers = true,
                 ConnectionTimeout = 10000,
@@ -37,6 +33,14 @@ public static partial class Extensions
             }))
             .Apply(_ =>
             {
+                if (!Config.SentryDsn.IsNullOrEmpty())
+                    coll.AddSingleton(SentrySdk.Init(opts =>
+                    {
+                        opts.Dsn = Config.SentryDsn;
+                        opts.Debug = IsDebugLoggingEnabled;
+                        opts.DiagnosticLogger = new SentryTranslator();
+                    }));
+                
                 //get all the classes that inherit IVolteService, and aren't abstract.
                 var l = Assembly.GetExecutingAssembly().GetTypes()
                     .Where(IsEligibleService)

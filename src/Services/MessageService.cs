@@ -13,12 +13,18 @@ public sealed class MessageService : VolteService
         _quoteService = quoteService;
     }
     
-    public ulong AllTimeCommandCalls => DatabaseService.GetCalledCommandsInfo().Total + SuccessfulCommandCalls + FailedCommandCalls;
-    public ulong AllTimeSuccessfulCommandCalls => DatabaseService.GetCalledCommandsInfo().Successful + SuccessfulCommandCalls;
-    public ulong AllTimeFailedCommandCalls => DatabaseService.GetCalledCommandsInfo().Failed + FailedCommandCalls;
+    public ulong AllTimeCommandCalls => CalledCommandsInfo.Instance.Total + SuccessfulCommandCalls + FailedCommandCalls;
+    public ulong AllTimeSuccessfulCommandCalls => CalledCommandsInfo.Instance.Successful + SuccessfulCommandCalls;
+    public ulong AllTimeFailedCommandCalls => CalledCommandsInfo.Instance.Failed + FailedCommandCalls;
     
     public ulong SuccessfulCommandCalls { get; private set; }
     public ulong FailedCommandCalls { get; private set; }
+
+    public void ResetCalledCommands()
+    {
+        SuccessfulCommandCalls = 0;
+        FailedCommandCalls = 0;
+    }
 
     public async Task HandleMessageAsync(MessageReceivedEventArgs args)
     {

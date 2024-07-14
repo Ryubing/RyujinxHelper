@@ -10,23 +10,20 @@ public partial class ReminderService(
     private static readonly Regex JumpUrl = MessageUrlPattern();
     
     private readonly PeriodicTimer _ticker = new(30.Seconds());
-
-    public readonly CancellationTokenSource TickerTokenSource = new();
-
-    /// <summary>
-    ///     If its value is already set; this method returns immediately.
-    /// </summary>
+    private readonly CancellationTokenSource _tickerTokenSource = new();
+    
     public void Initialize() =>
-        Executor.ExecuteBackgroundAsync(async () =>
+        ExecuteBackgroundAsync(async () =>
         {
-            while (await _ticker.WaitForNextTickAsync(TickerTokenSource.Token))
+            while (await _ticker.WaitForNextTickAsync(_tickerTokenSource.Token))
             {
                 Debug(LogSource.Service, "Checking all reminders.");
+                var currentTicks = DateTime.Now.Ticks;
                 foreach (var (reminder, index) in _db.GetAllReminders().WithIndex()) 
                 {
                     Debug(LogSource.Service,
                         $"Reminder '{reminder.ReminderText}', set for {reminder.TargetTime} at index {index}");
-                    if (reminder.TargetTime.Ticks <= DateTime.Now.Ticks) 
+                    if (reminder.TargetTime.Ticks <= currentTicks) 
                         await SendAsync(reminder);
                 }
             }
@@ -56,16 +53,17 @@ public partial class ReminderService(
             return;
         }
 
-        var timestamp = (await channel.GetMessageAsync(reminder.MessageId).AsOptional())
-            .Convert(msg => Format.Url(reminder.CreationTime.ToDiscordTimestamp(TimestampType.Relative), msg.GetJumpUrl()))
-            .OrElseGet(() => reminder.CreationTime.ToDiscordTimestamp(TimestampType.Relative));
+        var timestamp = reminder.CreationTime.ToDiscordTimestamp(TimestampType.Relative);
+        var timestampStr = (await channel.GetMessageAsync(reminder.MessageId).AsOptional())
+            .Convert(msg => Format.Url(timestamp, msg.GetJumpUrl()))
+            .OrElse(timestamp);
 
         await channel.SendMessageAsync(author.Mention, embed: new EmbedBuilder()
             .WithTitle("Reminder")
             .WithRelevantColor(author)
             .WithDescription(IsMessageUrl(reminder)
-                ? $"You asked me {timestamp} to remind you about {Format.Url("this message", reminder.ReminderText)}."
-                : $"You asked me {timestamp} to remind you about:\n{new string('-', 20)} {reminder.ReminderText}")
+                ? $"You asked me {timestampStr} to remind you about {Format.Url("this message", reminder.ReminderText)}."
+                : $"You asked me {timestampStr} to remind you about:\n{new string('-', 20)}\n{reminder.ReminderText}")
             .Build());
         _db.TryDeleteReminder(reminder);
     }
@@ -80,9 +78,9 @@ public partial class ReminderService(
     public void Dispose()
     {
         GC.SuppressFinalize(this);
-        TickerTokenSource?.Cancel();
+        _tickerTokenSource?.Cancel();
             
         _ticker?.Dispose();
-        TickerTokenSource?.Dispose();
+        _tickerTokenSource?.Dispose();
     }
 }

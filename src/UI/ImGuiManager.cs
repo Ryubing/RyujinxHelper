@@ -9,36 +9,33 @@ using Silk.NET.Windowing;
 namespace Volte.UI;
 
 // adapted from https://github.com/dotnet/Silk.NET/blob/main/examples/CSharp/OpenGL%20Demos/ImGui/Program.cs
-public class ImGuiManager<TState> : IDisposable where TState : ImGuiLayerState
+public sealed class ImGuiManager<TState> : IDisposable where TState : ImGuiLayerState
 {
-    private bool _isActive = false;
+    private bool _isActive;
+
+    private readonly IWindow _window;
+
+    private ImGuiController? _controller;
+    private GL? _gl;
+    private IInputContext? _inputContext;
+
+    public ImGuiLayer<TState> Layer { get; private set; }
     
-    private readonly IWindow window;
-
-    private ImGuiController? controller;
-    private GL? gl;
-    private IInputContext? inputContext;
-
-    public ImGuiLayer<TState> Layer { get; }
-
-
-
-    public ImGuiManager(ImGuiLayer<TState> igLayer, Gommon.Optional<WindowOptions> windowOptions = default)
+    public ImGuiManager(ImGuiLayer<TState> igLayer, WindowOptions windowOptions)
     {
         Layer = igLayer;
-        window = Window.Create(windowOptions.OrElse(WindowOptions.Default));
+        _window = Window.Create(windowOptions);
 
-        window.Load += OnWindowLoad;
-        window.Render += OnWindowRender;
+        _window.Load += OnWindowLoad;
+        _window.Render += OnWindowRender;
+        _window.FramebufferResize += sz => _gl?.Viewport(sz);
 
-        window.FramebufferResize += sz => gl.Viewport(sz);
-
-        window.Closing += () =>
+        _window.Closing += () =>
         {
             _isActive = false;
-            controller?.Dispose();
-            inputContext?.Dispose();
-            gl?.Dispose();
+            _controller?.Dispose();
+            _inputContext?.Dispose();
+            _gl?.Dispose();
         };
     }
 
@@ -47,42 +44,43 @@ public class ImGuiManager<TState> : IDisposable where TState : ImGuiLayerState
         _isActive = true;
         ExecuteBackgroundAsync(async () =>
         {
-            while (_isActive)
-            {
+            while (_isActive) 
                 if (Layer.TaskQueue.TryDequeue(out var task))
                     await task!();
-            }
         });
-        window.Run();
+        _window.Run();
     }
-    
+
     private void OnWindowLoad()
     {
-        controller = new ImGuiController(
-            gl = window.CreateOpenGL(),
-            window,
-            inputContext = window.CreateInput(),
-            () =>
+        _gl = _window.CreateOpenGL();
+        _inputContext = _window.CreateInput();
+
+        _controller = new ImGuiController(_gl, _window, _inputContext, () =>
             {
                 var io = ImGui.GetIO();
                 io.ConfigFlags |= ImGuiConfigFlags.DockingEnable;
                 io.ConfigDockingWithShift = false;
             }
         );
-        Info(LogSource.UI, $"Window 0x{window.Handle:X} loaded");
+        Info(LogSource.UI, $"Window 0x{_window.Handle:X} loaded");
     }
-    
+
     private void OnWindowRender(double delta)
     {
-        controller?.Update((float)delta);
+        _controller?.Update((float)delta);
 
-        gl?.ClearColor((Layer.State?.Background ?? ImGuiLayerState.DefaultBackground).AsColor());
-        gl?.Clear((uint)ClearBufferMask.ColorBufferBit);
+        _gl?.ClearColor((Layer.State?.Background ?? ImGuiLayerState.DefaultBackground).AsColor());
+        _gl?.Clear((uint)ClearBufferMask.ColorBufferBit);
 
         Layer.Render(delta);
 
-        controller?.Render();
+        _controller?.Render();
     }
 
-    void IDisposable.Dispose() => window.Dispose();
+    public void Dispose()
+    {
+        _window.Dispose();
+        VolteBot.ImGui = null;
+    }
 }

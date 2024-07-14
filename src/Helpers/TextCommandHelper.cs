@@ -157,7 +157,9 @@ public static class TextCommandHelper
 
     internal static IEnumerable<Type> AddTypeParsers(this CommandService service)
     {
-        var parsers = Assembly.GetExecutingAssembly().ExportedTypes.Where(x => x.HasAttribute<InjectTypeParserAttribute>()).ToList();
+        var parsers = Assembly.GetExecutingAssembly().ExportedTypes
+            .Where(x => x.HasAttribute<InjectTypeParserAttribute>())
+            .ToList();
 
         var csMirror = Mirror.Reflect(service);
 

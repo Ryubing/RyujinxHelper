@@ -33,7 +33,8 @@ public static partial class Logger
             });
     }
 
-    private static readonly StyledString VolteAscii = new Figlet().ToAscii("Volte");
+    private static readonly string[] VolteAscii =
+        new Figlet().ToAscii("Volte").ConcreteValue.Split("\n", StringSplitOptions.RemoveEmptyEntries);
         
     static Logger() => FilePath.Logs.Create();
         
@@ -42,8 +43,7 @@ public static partial class Logger
     internal static void PrintHeader()
     {
         Info(LogSource.Volte, MessageService.Separator.Trim());
-        VolteAscii.ConcreteValue.Split("\n", StringSplitOptions.RemoveEmptyEntries)
-            .ForEach(ln => Info(LogSource.Volte, ln));
+        VolteAscii.ForEach(ln => Info(LogSource.Volte, ln));
         Info(LogSource.Volte, MessageService.Separator.Trim());
         Info(LogSource.Volte, $"Currently running Volte V{Version.InformationVersion}.");
     }

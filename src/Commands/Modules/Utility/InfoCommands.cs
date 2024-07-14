@@ -39,20 +39,11 @@ public sealed partial class UtilityModule
         SocketGuildUser user = null)
     {
         user ??= Context.User;
-            
-        string GetRelevantActivity() => user.Activities.FirstOrDefault() switch
-        {
-            //we are ignoring custom emojis because there is no guarantee that volte is in the guild where the emoji is from; which could lead to a massive (and ugly) embed field value
-            CustomStatusGame {Emote: Emoji _} csg => $"{csg.Emote} {csg.State}",
-            CustomStatusGame csg => $"{csg.State}",
-            SpotifyGame _ => "Listening to Spotify",
-            _ => user.Activities.FirstOrDefault()?.Name
-        } ?? "Nothing";
 
         return Ok(Context.CreateEmbedBuilder()
             .WithTitle(user.ToString())
             .AddField("ID", user.Id, true)
-            .AddField("Activity", GetRelevantActivity(), true)
+            .AddField("Activity", getRelevantActivity(), true)
             .AddField("Status", user.Status, true)
             .AddField("Is Bot", user.IsBot ? "Yes" : "No", true)
             .AddField("Role Hierarchy", user.Hierarchy, true)
@@ -61,6 +52,15 @@ public sealed partial class UtilityModule
             .AddField("Joined This Guild",
                 $"{(user.JoinedAt.HasValue ? user.JoinedAt.Value.ToDiscordTimestamp(TimestampType.LongDateTime) : DiscordHelper.Zws)}")
             .WithThumbnailUrl(user.GetEffectiveAvatarUrl(size: 512)));
+        
+        string getRelevantActivity() => user.Activities.FirstOrDefault() switch
+        {
+            //we are ignoring custom emojis because there is no guarantee that volte is in the guild where the emoji is from; which could lead to a massive (and ugly) embed field value
+            CustomStatusGame {Emote: Emoji} csg => $"{csg.Emote} {csg.State}",
+            CustomStatusGame csg => $"{csg.State}",
+            SpotifyGame sg => $"Listening to {Format.Url(sg.TrackTitle, sg.TrackUrl)} on Spotify",
+            _ => user.Activities.FirstOrDefault()?.Name
+        } ?? "Nothing";
     }
 
     [Command("GuildInfo", "Gi")]

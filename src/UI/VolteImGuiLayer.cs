@@ -1,4 +1,5 @@
-﻿using ImGuiNET;
+﻿using System.Collections.Immutable;
+using ImGuiNET;
 using Color = System.Drawing.Color;
 
 namespace Volte.UI;
@@ -13,6 +14,8 @@ public sealed class VolteImGuiState : ImGuiLayerState
 
     public CancellationTokenSource Cts { get; }
     public DiscordSocketClient Client { get; }
+    
+    public ulong SelectedGuildId { get; set; }
 }
 
 public class VolteImGuiLayer : ImGuiLayer<VolteImGuiState>
@@ -37,6 +40,12 @@ public class VolteImGuiLayer : ImGuiLayer<VolteImGuiState>
             UiSettings();
             ImGui.End();
         }
+        
+        {
+            ImGui.Begin("Guild Manager");
+            GuildManager();
+            ImGui.End();
+        }
 
         {
             ImGui.Begin("Bot Management");
@@ -59,8 +68,9 @@ public class VolteImGuiLayer : ImGuiLayer<VolteImGuiState>
         {
             if (Config.DebugEnabled || Version.IsDevelopment)
                 ImGui.MenuItem($"Delta: {delta}", false);
+
+            var framerate = Io.Framerate;
             
-            var framerate = ImGui.GetIO().Framerate;
             ImGui.MenuItem($"{framerate:###} FPS ({1000f / framerate:0.##} ms/frame)", false);
             ImGui.EndMenu();
         }
@@ -68,29 +78,31 @@ public class VolteImGuiLayer : ImGuiLayer<VolteImGuiState>
 
     public void UiSettings()
     {
-        if (ImGui.Button("Reset Background Color"))
+        ImGui.Text("Background");
+        ImGui.ColorPicker3("", ref State.Background, ImGuiColorEditFlags.NoSidePreview | ImGuiColorEditFlags.NoLabel);
+        if (ImGui.SmallButton("Reset"))
             State.Background = ImGuiLayerState.DefaultBackground;
-        ImGui.ColorPicker3("Background", ref State.Background, ImGuiColorEditFlags.NoSidePreview);
+        //ImGui.Separator();
     }
 
     public void BotManagement()
     {
-        ImGui.Text("Discord status:");
+        ImGui.Text("Discord Gateway:");
         // ReSharper disable once SwitchStatementHandlesSomeKnownEnumValuesWithDefault
         // default is a meaningless case here i dont fucking care rider
         switch (State.Client.ConnectionState)
         {
             case ConnectionState.Connected:
-                ImGui.TextColored(Color.LawnGreen.AsVec4(), "  Connected!");
+                ColoredText("  Connected", Color.LawnGreen);
                 break;
             case ConnectionState.Connecting:
-                ImGui.TextColored(Color.Yellow.AsVec4(), "  Connecting...");
-                break;
-            case ConnectionState.Disconnected:
-                ImGui.TextColored(Color.Red.AsVec4(), "  Disconnected!");
+                ColoredText("  Connecting...", Color.Yellow);
                 break;
             case ConnectionState.Disconnecting:
-                ImGui.TextColored(Color.OrangeRed.AsVec4(), "  Disconnecting...");
+                ColoredText("  Disconnecting...", Color.OrangeRed);
+                break;
+            case ConnectionState.Disconnected:
+                ColoredText("  Disconnected!", Color.Red);
                 break;
         }
 
@@ -112,6 +124,47 @@ public class VolteImGuiLayer : ImGuiLayer<VolteImGuiState>
         }
     }
 
-    private void Await(Func<Task> task) => TaskQueue.Enqueue(task);
-    private void Await(Task task) => Await(() => task);
+    private void GuildSelect()
+    {
+        if (ImGui.BeginMenu("Select a Guild           ")) // cheap hack to make the initial pane wider
+        {
+            State.Client.Guilds.ForEach(guild =>
+            {
+                if (ImGui.MenuItem(guild.Name, guild.Id != State.SelectedGuildId))
+                    State.SelectedGuildId = guild.Id;
+            });
+            ImGui.EndMenu();
+        }
+    }
+    
+    public void GuildManager()
+    {
+        if (State.SelectedGuildId == 0) GuildSelect();
+        else
+        {
+            if (State.SelectedGuildId != 0)
+            {
+                var selectedGuild = State.Client.GetGuild(State.SelectedGuildId);
+                var selectedGuildMembers = selectedGuild.Users.ToImmutableArray();
+                var botMembers = selectedGuildMembers.Count(sgu => sgu.IsBot);
+                var realMembers = selectedGuildMembers.Length - botMembers;
+            
+                ImGui.Text(selectedGuild.Name);
+                ImGui.Text($"Owner: @{selectedGuild.Owner}");
+                ImGui.Text($"Text Channels: {selectedGuild.TextChannels.Count}");
+                ImGui.Text($"Voice Channels: {selectedGuild.VoiceChannels.Count}");
+                ImGui.Text($"{selectedGuildMembers.Length} members");
+                ColoredText($" + {realMembers} users", Color.LawnGreen);
+                ColoredText($" - {botMembers} bots", Color.OrangeRed);
+            }
+            
+            ImGui.Separator();
+            
+            GuildSelect();
+        }
+    }
+    
+    private static void ColoredText(string fmt, Color color) =>
+        ImGui.TextColored(color.AsVec4(), fmt);
+    
 }

@@ -25,11 +25,11 @@ public static class Version
         InformationVersion = $"{DotNetVersion} {infoVer.Trim()}";
     }
     
-    
-    public static readonly bool IsDevelopment = ReleaseType is DevelopmentStage.Development;
     public static readonly DevelopmentStage ReleaseType = InformationVersion.ContainsIgnoreCase("dev") 
         ? DevelopmentStage.Development 
         : DevelopmentStage.Release;
+    
+    public static readonly bool IsDevelopment = ReleaseType is DevelopmentStage.Development;
 
 
     public static string DiscordNetVersion => DiscordConfig.Version;

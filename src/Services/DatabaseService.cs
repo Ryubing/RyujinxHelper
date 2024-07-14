@@ -8,7 +8,6 @@ namespace Volte.Services;
 public sealed class DatabaseService : VolteService, IDisposable
 {
     public static readonly LiteDatabase Database = new($"filename={FilePath.Data / "Volte.db"};connection=direct");
-    public static readonly FilePath CalledCommandsFile = FilePath.Data / "commandstats.bin";
 
     private readonly DiscordSocketClient _client;
     private readonly IServiceProvider _provider;
@@ -23,9 +22,9 @@ public sealed class DatabaseService : VolteService, IDisposable
         _client = discordSocketClient;
         _guildData = Database.GetCollection<GuildData>("guilds");
         _reminderData = Database.GetCollection<Reminder>("reminders");
-        _starboardData = Database.GetCollection<StarboardDbEntry>("starboard").Apply(sd =>
-            sd.EnsureIndex("composite_id",
-                $"$.{nameof(StarboardDbEntry.GuildId)} + '_' + $.{nameof(StarboardDbEntry.Key)}"));
+        _starboardData = Database.GetCollection<StarboardDbEntry>("starboard");
+        _starboardData.EnsureIndex("composite_id",
+            $"$.{nameof(StarboardDbEntry.GuildId)} + '_' + $.{nameof(StarboardDbEntry.Key)}");
     }
 
     public GuildData GetData(SocketGuild guild) => GetData(guild.Id);
@@ -114,38 +113,6 @@ public sealed class DatabaseService : VolteService, IDisposable
             coll.Delete($"{entry.GuildId}_{entry.StarboardMessageId}");
             coll.Delete($"{entry.GuildId}_{entry.StarredMessageId}");
         });
-    }
-
-    public static CalledCommandsInfo GetCalledCommandsInfo()
-    {
-        var cci = new CalledCommandsInfo();
-        if (!CalledCommandsFile.ExistsAsFile)
-        {
-            CalledCommandsFile.Create();
-            using var writeStream = CalledCommandsFile.OpenWrite();
-            cci.Write(writeStream);
-        }
-        else
-        {
-            using var readStream = CalledCommandsFile.OpenRead();
-            cci.Read(readStream);
-        }
-        
-        return cci;
-    }
-
-    public static void SaveCalledCommandsInfo(CalledCommandsInfo calledCommandsInfo)
-    {
-        using var fileStream = CalledCommandsFile.OpenWrite();
-        calledCommandsInfo.Write(fileStream);
-    }
-    
-    public void UpdateCalledCommandsInfo(ulong newSuccesses, ulong newFailures)
-    {
-        var current = GetCalledCommandsInfo();
-        current.Successful += newSuccesses;
-        current.Failed += newFailures;
-        SaveCalledCommandsInfo(current);
     }
 
     public void Dispose() 

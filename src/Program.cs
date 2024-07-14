@@ -2,8 +2,14 @@
 
 public static class Program
 {
-    static async Task Main(string[] args)
+    private static async Task Main(string[] args)
     {
-        await VolteBot.StartAsync(args.ContainsIgnoreCase("--ui"));
+        if (UnixHelper.TryParseNamedArguments(args.JoinToString(' '), out var output))
+            await VolteBot.StartAsync(output.Parsed);
+        else
+        {
+            Error(output.Error);
+            await VolteBot.StartAsync([]);
+        }
     }
 }

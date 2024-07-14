@@ -1,26 +1,73 @@
+using Silk.NET.Maths;
+using Silk.NET.Windowing;
 using Volte.UI;
 
 namespace Volte;
 
 public class VolteBot
 {
-    public static Task StartAsync(bool ui)
+    public static Task StartAsync(Dictionary<string, string> commandLine)
     {
-        Console.Title = "Volte";
+        Console.Title = $"Volte {Version.InformationVersion}";
         Console.CursorVisible = false;
-        return new VolteBot().LoginAsync(ui);
+        return new VolteBot().LoginAsync(commandLine);
     }
 
     private ServiceProvider _provider;
     private DiscordSocketClient _client;
     private CancellationTokenSource _cts;
 
-    public static ImGuiManager<VolteImGuiState> ImGui { get; private set; }
+    public static ImGuiManager<VolteImGuiState> ImGui { get; set; } = null;
+
+    public static WindowOptions WndOpt = new(
+        isVisible: true,
+        position: new Vector2D<int>(50, 50),
+        size: new Vector2D<int>(1280, 720),
+        framesPerSecond: 0.0,
+        updatesPerSecond: 0.0,
+        api: GraphicsAPI.Default,
+        title: $"Volte {Version.InformationVersion}",
+        windowState: WindowState.Normal,
+        windowBorder: WindowBorder.Resizable,
+        isVSync: true,
+        shouldSwapAutomatically: true,
+        videoMode: VideoMode.Default
+    );
+
+    public static bool TryCreateUi(IServiceProvider provider, out string error)
+    {
+        if (ImGui is not null)
+        {
+            error = "UI is already open.";
+            return false;
+        }
+        try
+        {
+            ImGui = new ImGuiManager<VolteImGuiState>(new VolteImGuiLayer(provider), WndOpt);
+            
+            // declared as illegal code by the Silk God (Main thread isn't the controller of the Window)
+            new Thread(() =>
+            {
+                ImGui.Run();
+                ImGui.Dispose();
+            }) { Name = "Volte UI Thread" }.Start();
+        }
+        catch (Exception e)
+        {
+            Error(LogSource.UI, "Could not create UI thread", e);
+            error = $"Error opening UI: {e.Message}";
+            return false;
+        }
+        
+        error = null;
+
+        return true;
+    }
 
     private VolteBot()
         => Console.CancelKeyPress += (_, _) => _cts?.Cancel();
 
-    private async Task LoginAsync(bool ui)
+    private async Task LoginAsync(Dictionary<string, string> commandLine)
     {
         if (!Config.StartupChecks()) return;
 
@@ -31,28 +78,9 @@ public class VolteBot
         LogFileRestartNotice();
 
         _provider = new ServiceCollection().AddAllServices().BuildServiceProvider();
-        
-        try
-        {
-            if (ui)
-            {
-                ImGui = new ImGuiManager<VolteImGuiState>(new VolteImGuiLayer(_provider));
-                new Thread(ImGui.Run) { Name = "Volte UI Thread" }.Start();
 
-                ExecuteBackgroundAsync(async () =>
-                {
-                    while (true)
-                    {
-                        if (ImGui.Layer.TaskQueue.TryDequeue(out var task))
-                            await task();
-                    }
-                });
-            }
-        }
-        catch (Exception e)
-        {
-            Error(LogSource.UI, "Could not create UI thread", e);
-        }
+        if (commandLine.TryGetValue("ui", out _))
+            TryCreateUi(_provider, out _);
         
         _client = _provider.Get<DiscordSocketClient>();
         _cts = _provider.Get<CancellationTokenSource>();
@@ -100,9 +128,8 @@ public class VolteBot
         Critical(LogSource.Volte, "Bot shutdown requested; shutting down and cleaning up.");
 
         var messageService = provider.Get<MessageService>();
-        var db = provider.Get<DatabaseService>();
 
-        db.UpdateCalledCommandsInfo(messageService.SuccessfulCommandCalls, messageService.FailedCommandCalls);
+        CalledCommandsInfo.UpdateSaved(messageService);
 
         await provider.DisposeAsync();
 

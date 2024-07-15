@@ -1,8 +1,14 @@
-﻿using ImGuiNET;
+﻿using System.IO;
+using System.Runtime.InteropServices;
+using ImGuiNET;
+using Silk.NET.Core;
 using Silk.NET.Input;
 using Silk.NET.OpenGL;
 using Silk.NET.OpenGL.Extensions.ImGui;
 using Silk.NET.Windowing;
+using SixLabors.ImageSharp.Advanced;
+using SixLabors.ImageSharp.PixelFormats;
+using Image = SixLabors.ImageSharp.Image;
 
 #nullable enable
 
@@ -63,6 +69,33 @@ public sealed class ImGuiManager<TState> : IDisposable where TState : ImGuiLayer
                 io.ConfigDockingWithShift = false;
             }
         );
+        
+        // shoutout https://github.com/dotnet/Silk.NET/blob/b079b28cd51ce447183cfedde0a85412b9b226ee/src/Lab/Experiments/BlankWindow/Program.cs#L82-L95
+        Stream? iconStream;
+        if ((iconStream = Assembly.GetExecutingAssembly().GetManifestResourceStream("VolteIcon")) != null)
+        {
+            unsafe
+            {
+                var img = Image.Load<Rgba32>(iconStream);
+                var memoryGroup = img.GetPixelMemoryGroup();
+                
+                Memory<byte> array = new byte[memoryGroup.TotalLength * sizeof(Rgba32)];
+                var block = MemoryMarshal.Cast<byte, Rgba32>(array.Span);
+                
+                foreach (var memory in memoryGroup)
+                {
+                    memory.Span.CopyTo(block);
+                    block = block[memory.Length..];
+                }
+
+                var rawIcon = new RawImage(img.Width, img.Height, array);
+                
+                img.Dispose();
+                
+                _window.SetWindowIcon(ref rawIcon);
+            }
+        }
+        
         Info(LogSource.UI, $"Window 0x{_window.Handle:X} loaded");
     }
 
@@ -73,7 +106,7 @@ public sealed class ImGuiManager<TState> : IDisposable where TState : ImGuiLayer
         _gl?.ClearColor((Layer.State?.Background ?? ImGuiLayerState.DefaultBackground).AsColor());
         _gl?.Clear((uint)ClearBufferMask.ColorBufferBit);
 
-        Layer.Render(delta);
+        Layer.RenderInternal(delta);
 
         _controller?.Render();
     }

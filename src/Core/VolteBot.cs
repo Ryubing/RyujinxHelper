@@ -6,7 +6,7 @@ namespace Volte;
 
 public class VolteBot
 {
-    public static bool IsRunning { get; private set; } = false;
+    public static bool IsRunning { get; private set; }
     
     public static Task StartAsync(Dictionary<string, string> commandLine)
     {
@@ -19,9 +19,9 @@ public class VolteBot
     private DiscordSocketClient _client;
     private CancellationTokenSource _cts;
 
-    public static ImGuiManager<VolteImGuiState> ImGui { get; set; } = null;
+    public static ImGuiManager<VolteImGuiState> ImGui { get; set; }
 
-    public static WindowOptions WndOpt = new(
+    private static readonly WindowOptions WndOpt = new(
         isVisible: true,
         position: new Vector2D<int>(50, 50),
         size: new Vector2D<int>(1280, 720),
@@ -50,7 +50,7 @@ public class VolteBot
             // declared as illegal code by the Silk God (Main thread isn't the controller of the Window)
             new Thread(() =>
             {
-                ImGui.Run();
+                ImGui.Run(); //returns when UI is closed
                 ImGui.Dispose();
                 ImGui = null;
             }) { Name = "Volte UI Thread" }.Start();

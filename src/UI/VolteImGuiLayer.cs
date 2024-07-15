@@ -28,34 +28,18 @@ public class VolteImGuiLayer : ImGuiLayer<VolteImGuiState>
     public VolteImGuiLayer(IServiceProvider provider)
     {
         State = new VolteImGuiState(provider);
+
+        PreRenderCheck = _ => VolteBot.IsRunning;
+        
+        MainMenuBar = MenuBar;
         
         Panels.Add("UI Settings", UiSettings);
         Panels.Add("Command Stats", CommandStats);
         Panels.Add("Bot Management", BotManagement);
         Panels.Add("Guild Manager", GuildManager);
     }
-
-    public readonly Dictionary<string, Action<double>> Panels = new();
     
-    public override void Render(double delta)
-    {
-        if (!VolteBot.IsRunning) return;
-        
-        {
-            if (ImGui.BeginMainMenuBar())
-            {
-                MenuBar(delta);
-                ImGui.EndMainMenuBar();
-            }
-        }
-
-        foreach (var (panelName, renderPanel) in Panels)
-        {
-            ImGui.Begin(panelName);
-            renderPanel(delta);
-            ImGui.End();
-        }
-    }
+    #region Panels
 
     private void CommandStats(double _)
     {
@@ -201,9 +185,10 @@ public class VolteImGuiLayer : ImGuiLayer<VolteImGuiState>
         }
     }
 
-    #endregion
+    #endregion Guild Manager Panel
+    
+    #endregion Panels
     
     private static void ColoredText(string fmt, Color color) =>
         ImGui.TextColored(color.AsVec4(), fmt);
-    
 }

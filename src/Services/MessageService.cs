@@ -5,25 +5,28 @@ public sealed class MessageService : VolteService
     private readonly CommandService _commandService;
     private readonly QuoteService _quoteService;
         
-    public MessageService(
+    public MessageService(IServiceProvider provider,
         CommandService commandService,
         QuoteService quoteService)
     {
         _commandService = commandService;
         _quoteService = quoteService;
+        CalledCommandsInfo.StartPersistence(provider, saveEvery: 2.Minutes());
     }
     
-    public ulong AllTimeCommandCalls => CalledCommandsInfo.Instance.Total + SuccessfulCommandCalls + FailedCommandCalls;
-    public ulong AllTimeSuccessfulCommandCalls => CalledCommandsInfo.Instance.Successful + SuccessfulCommandCalls;
-    public ulong AllTimeFailedCommandCalls => CalledCommandsInfo.Instance.Failed + FailedCommandCalls;
+    public ulong AllTimeCommandCalls => CalledCommandsInfo.Sum + 
+                                        UnsavedSuccessfulCommandCalls + 
+                                        UnsavedFailedCommandCalls;
+    public ulong AllTimeSuccessfulCommandCalls => CalledCommandsInfo.Successes + UnsavedSuccessfulCommandCalls;
+    public ulong AllTimeFailedCommandCalls => CalledCommandsInfo.Failures + UnsavedFailedCommandCalls;
     
-    public ulong SuccessfulCommandCalls { get; private set; }
-    public ulong FailedCommandCalls { get; private set; }
+    public ulong UnsavedSuccessfulCommandCalls { get; private set; }
+    public ulong UnsavedFailedCommandCalls { get; private set; }
 
     public void ResetCalledCommands()
     {
-        SuccessfulCommandCalls = 0;
-        FailedCommandCalls = 0;
+        UnsavedSuccessfulCommandCalls = 0;
+        UnsavedFailedCommandCalls = 0;
     }
 
     public async Task HandleMessageAsync(MessageReceivedEventArgs args)
@@ -83,7 +86,7 @@ public sealed class MessageService : VolteService
 
                 if (actionRes is BadRequestResult badreq)
                 {
-                    FailedCommandCalls += 1;
+                    UnsavedFailedCommandCalls += 1;
                     OnBadRequest(new CommandBadRequestEventArgs(badreq, data, args));
                     return;
                 }
@@ -93,7 +96,7 @@ public sealed class MessageService : VolteService
 
             case FailedResult failedRes:
             {
-                FailedCommandCalls += 1;
+                UnsavedFailedCommandCalls += 1;
                 await OnCommandFailureAsync(new CommandFailedEventArgs(failedRes, args));
                 return;
             }
@@ -110,7 +113,7 @@ public sealed class MessageService : VolteService
             }
         }
 
-        SuccessfulCommandCalls += 1;
+        UnsavedSuccessfulCommandCalls += 1;
         if (!Config.LogAllCommands) return;
 
         var sb = new StringBuilder()

@@ -21,7 +21,7 @@ public static class HttpHelper
         }
         catch (Exception e)
         {
-            SentrySdk.CaptureException(e);
+            e.SentryCapture();
             return string.Empty;
         }
 
@@ -44,17 +44,17 @@ public static class HttpHelper
     /// </summary>
     /// <param name="provider">The <see cref="IServiceProvider"/> containing the <see cref="HttpClient"/>.</param>
     /// <returns>An array of strings where each one represents a valid site, or empty if any errors occurred.</returns>
-    public static async Task<string[]> GetAllowedPasteSitesAsync(IServiceProvider provider)
+    public static async Task<string[]> GetAllowedPasteSitesAsync(IServiceProvider _)
     {
         try
         {
             /*return (await (await provider.Get<HttpClient>().GetAsync("https://paste.greemdev.net/raw/volteAllowedPasteSites")).Content
                 .ReadAsStringAsync()).Split(" ");*/
-            return [];
+            return ["gist.githubusercontent.com", "pastebin.com"]; //just for now
         }
         catch (Exception e)
         {
-            SentrySdk.CaptureException(e);
+            e.SentryCapture();
             return [];
         }
 

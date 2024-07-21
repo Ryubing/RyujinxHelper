@@ -30,6 +30,27 @@ public static partial class Extensions
 
     public static string FormatBoldString(this DateTimeOffset dt) 
         => dt.DateTime.FormatBoldString();
+
+
+    public static string Truncate(this string value, int limit, Func<int, string> truncationString)
+    {
+        var content = value.Take(limit).JoinToString(string.Empty);
+        var truncatedCharacters = value.Length - content.Length;
+        if (truncatedCharacters > 0)
+            content += truncationString(truncatedCharacters);
+
+        return content;
+    }
+
+    public static void SentryCapture(this Exception e, Action<Scope> configureScope = null)
+    {
+        if (e is TaskCanceledException or OperationCanceledException) return;
+        
+        if (configureScope != null)
+            SentrySdk.CaptureException(e, configureScope);
+        else SentrySdk.CaptureException(e);
+
+    }
     
     #nullable enable
     

@@ -44,7 +44,7 @@ public sealed partial class ModerationModule
         var daysToDelete = (modifications.TryGetValue("days", out var result) ||
                             modifications.TryGetValue("deleteDays", out result)) &&
                            result.TryParse<int>(out var intResult)
-            ? intResult
+            ? intResult.CoerceAtMost(7).CoerceAtLeast(0)
             : 0;
 
         var reason = modifications.TryGetValue("reason", out result) ? result : "Banned by a Moderator.";
@@ -53,8 +53,7 @@ public sealed partial class ModerationModule
             .CreateEmbedBuilder(
                 $"You've been banned from {Format.Bold(Context.Guild.Name)} for {Format.Bold(reason)}.");
 
-        if (!Context.GuildData.Configuration.Moderation.ShowResponsibleModerator ||
-            modifications.TryGetValue("shadow", out _))
+        if (!Context.GuildData.Configuration.Moderation.ShowResponsibleModerator || modifications.TryGetValue("shadow", out _))
         {
             e = e.WithAuthor(author: null).WithSuccessColor();
         }

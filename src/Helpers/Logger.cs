@@ -186,7 +186,7 @@ public static class InvocationInfo
     public static string GetSourceFileName(this InvocationInfo<SourceFileLocation> sflInvocation)
         => sflInvocation.Data.FilePath[(sflInvocation.Data.FilePath.LastIndexOf(Path.DirectorySeparatorChar) + 1)..];
     
-        /// <summary>
+    /// <summary>
     ///     Creates an <see cref="InvocationInfo"/> with information about the current source file, line, and member name.
     ///     Do not provide the arguments!
     /// </summary>

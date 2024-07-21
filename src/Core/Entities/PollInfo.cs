@@ -32,9 +32,8 @@ public sealed class PollInfo
             return FromInvalid("No options specified.");
         var fields = new List<(object Name, object Value)>();
 
-        foreach (var (_, index) in collection.WithIndex())
+        foreach (var (_, index) in collection.WithIndex().Skip(1))
         {
-            if (index is 0) continue;
             fields.Add((emojis[index - 1], collection[index]));
         }
 
@@ -43,7 +42,7 @@ public sealed class PollInfo
         
 
     public static PollInfo FromInvalid(string reason)
-        => new PollInfo
+        => new()
         {
             Validation = (false, reason)
         };
@@ -55,15 +54,9 @@ public sealed class PollInfo
     }
 
     public string Prompt { get; set; }
-    public Dictionary<string, object> Fields { get; }
-    public (bool IsValid, string InvalidationReason) Validation { get; set; }
+    public Dictionary<string, object> Fields { get; } = new();
+    public (bool IsValid, string InvalidationReason) Validation { get; set; } = (true, null);
     public const string Footer = "Click one of the numbers below to vote.";
-
-    public PollInfo()
-    {
-        Fields = new Dictionary<string, object>();
-        Validation = (true, null);
-    }
 
     public PollInfo AddFields(IEnumerable<(object Name, object Value)> fields)
     {

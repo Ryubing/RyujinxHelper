@@ -7,6 +7,7 @@ public class LogSources
         "rest" => LogSource.Rest,
         "discord" => LogSource.Discord,
         "gateway" => LogSource.Gateway,
+        "app commands" => LogSource.Discord,
         _ => LogSource.Unknown
     };
 }

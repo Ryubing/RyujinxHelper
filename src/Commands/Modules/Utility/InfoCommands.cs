@@ -16,20 +16,19 @@ public sealed partial class UtilityModule
     [Description("Provides basic information about this instance of Volte.")]
     public async Task<ActionResult> InfoAsync()
         => Ok(Context.CreateEmbedBuilder()
-            .AddField("Version", Version.InformationVersion, true)
-            .AddField("Author",
-                $"{await Context.Client.Rest.GetUserAsync(168548441939509248)}, contributors on {Format.Url("GitHub", "https://github.com/Polyhaze/Volte")}, and members of the Ultz organization.",
-                true)
-            .AddField("Language/Library", $"C# 12, Discord.Net {Version.DiscordNetVersion}", true)
-            .AddField("Discord Application Created", (await Context.Client.GetApplicationInfoAsync()).CreatedAt.ToDiscordTimestamp(TimestampType.LongDateTime))
+            .WithTitle($"About {Context.Client.CurrentUser.Username}#{Context.Client.CurrentUser.DiscriminatorValue}")
+            .AddField("Successful Command Usages", CalledCommandsInfo.Successes + MessageService.UnsavedSuccessfulCommandCalls, true)
+            .AddField("Failed Command Usages", CalledCommandsInfo.Failures + MessageService.UnsavedFailedCommandCalls, true)
+            .AddField("Author", $"{await Context.Client.Rest.GetUserAsync(168548441939509248)}, contributors on {Format.Url("GitHub", "https://github.com/Polyhaze/Volte")}, and members of the Polyhaze organization.")
+            .AddField("Discord Application Created", (await Context.Client.GetApplicationInfoAsync()).CreatedAt.ToDiscordTimestamp(TimestampType.LongDateTime), true)
+            .AddField("Uptime", Process.GetCurrentProcess().CalculateUptime(), true)
+            .AddField("Language/Library", $"C# 12, Discord.Net {Version.DiscordNetVersion}")
             .AddField("Guilds", Context.Client.Guilds.Count, true)
             .AddField("Channels",
                 Context.Client.Guilds.SelectMany(x => x.Channels).Where(x => x is not SocketCategoryChannel)
                     .DistinctBy(x => x.Id).Count(),
                 true)
-            .AddField("Uptime", Process.GetCurrentProcess().CalculateUptime())
-            .AddField("Successful Commands", MessageService.SuccessfulCommandCalls, true)
-            .AddField("Failed Commands", MessageService.FailedCommandCalls, true)
+            .WithFooter($"Version: {Version.InformationVersion}")
             .WithThumbnailUrl(Context.Client.CurrentUser.GetEffectiveAvatarUrl(size: 512)));
 
     [Command("UserInfo", "Ui")]

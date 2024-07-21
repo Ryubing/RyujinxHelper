@@ -21,6 +21,12 @@ public partial class Extensions
     public static Vector4 AsVec4(this System.Drawing.Color color)
         => new(color.R / 255f, color.G / 255f, color.B / 255f, color.A / 255f);
     
+    public static Vector3 AsVec3(this Color color)
+        => new(color.R / 255f, color.G / 255f, color.B / 255f);
+    
+    public static Vector4 AsVec4(this Color color)
+        => new(color.R / 255f, color.G / 255f, color.B / 255f, 1f);
+    
     public static bool LengthEquals(this Stream stream, long exactLength) => stream.Length == exactLength;
     
     public static MemoryStream CreateColorImage(this Rgba32 color, int width = 125, int height = 200) => new MemoryStream().Apply(ms =>

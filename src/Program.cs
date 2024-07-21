@@ -8,7 +8,8 @@ public static class Program
             await VolteBot.StartAsync(output.Parsed);
         else
         {
-            Error(output.Error);
+            if (output.Error is not InvalidOperationException)
+                Error(output.Error);
             await VolteBot.StartAsync([]);
         }
     }

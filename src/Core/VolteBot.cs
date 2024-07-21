@@ -18,55 +18,7 @@ public class VolteBot
     private ServiceProvider _provider;
     private DiscordSocketClient _client;
     private CancellationTokenSource _cts;
-
-    public static ImGuiManager<VolteImGuiState> ImGui { get; set; }
-
-    private static readonly WindowOptions WndOpt = new(
-        isVisible: true,
-        position: new Vector2D<int>(50, 50),
-        size: new Vector2D<int>(1280, 720),
-        framesPerSecond: 0.0,
-        updatesPerSecond: 0.0,
-        api: GraphicsAPI.Default,
-        title: $"Volte {Version.InformationVersion}",
-        windowState: WindowState.Normal,
-        windowBorder: WindowBorder.Resizable,
-        isVSync: true,
-        shouldSwapAutomatically: true,
-        videoMode: VideoMode.Default
-    );
-
-    public static bool TryCreateUi(IServiceProvider provider, out string error)
-    {
-        if (ImGui is not null)
-        {
-            error = "UI is already open.";
-            return false;
-        }
-        try
-        {
-            ImGui = new ImGuiManager<VolteImGuiState>(new VolteImGuiLayer(provider), WndOpt);
-            
-            // declared as illegal code by the Silk God (Main thread isn't the controller of the Window)
-            new Thread(() =>
-            {
-                ImGui.Run(); //returns when UI is closed
-                ImGui.Dispose();
-                ImGui = null;
-            }) { Name = "Volte UI Thread" }.Start();
-        }
-        catch (Exception e)
-        {
-            Error(LogSource.UI, "Could not create UI thread", e);
-            error = $"Error opening UI: {e.Message}";
-            return false;
-        }
-        
-        error = null;
-
-        return true;
-    }
-
+    
     private VolteBot()
         => Console.CancelKeyPress += (_, _) => _cts?.Cancel();
 
@@ -83,9 +35,15 @@ public class VolteBot
         _provider = new ServiceCollection().AddAllServices().BuildServiceProvider();
 
         IsRunning = true;
-        
-        if (commandLine.TryGetValue("ui", out _))
-            TryCreateUi(_provider, out _);
+
+        if (commandLine.TryGetValue("ui", out var sizeStr))
+        {
+            if (sizeStr.TryParse<int>(out var fsz))
+                TryCreateUi(_provider, fsz, out _);
+            else
+                TryCreateUi(_provider, 17, out _);
+        }
+            
         
         _client = _provider.Get<DiscordSocketClient>();
         _cts = _provider.Get<CancellationTokenSource>();
@@ -121,8 +79,7 @@ public class VolteBot
         catch (Exception e)
         {
             IsRunning = false;
-            if (e is not TaskCanceledException && e is not OperationCanceledException)
-                SentrySdk.CaptureException(e); //only capture ACTUAL errors to Sentry, Canceled exceptions get thrown when the CTS is cancelled
+            e.SentryCapture();
             
             await ShutdownAsync(_client, _provider);
         }
@@ -142,6 +99,61 @@ public class VolteBot
         await client.SetStatusAsync(UserStatus.Invisible);
         await client.LogoutAsync();
         await client.StopAsync();
+        
         Environment.Exit(0);
     }
+
+    #region UI
+
+    public static UiManager<VolteUiState> Ui { get; private set; }
+
+    // WindowOptions.Default with custom title
+    private static readonly WindowOptions WndOpt = new(
+        isVisible: true,
+        position: new Vector2D<int>(50, 50),
+        size: new Vector2D<int>(1280, 720),
+        framesPerSecond: 0.0,
+        updatesPerSecond: 0.0,
+        api: GraphicsAPI.Default,
+        title: Console.Title,
+        windowState: WindowState.Normal,
+        windowBorder: WindowBorder.Resizable,
+        isVSync: true,
+        shouldSwapAutomatically: true,
+        videoMode: VideoMode.Default
+    );
+
+    public static bool TryCreateUi(IServiceProvider provider, int fontSize, out string error)
+    {
+        if (Ui is not null)
+        {
+            error = "UI is already open.";
+            return false;
+        }
+        
+        try
+        {
+            Ui = UiManager.Create(new VolteUiLayer(provider), WndOpt, fontSize);
+            
+            // declared as illegal code by the Silk God (Main thread isn't the controller of the Window)
+            new Thread(() =>
+            {
+                Ui.Run(); //returns when UI is closed
+                Ui.Dispose();
+                Ui = null;
+            }) { Name = "Volte UI Thread" }.Start();
+        }
+        catch (Exception e)
+        {
+            Error(LogSource.UI, "Could not create UI thread", e);
+            error = $"Error opening UI: {e.Message}";
+            return false;
+        }
+        
+        error = null;
+
+        return true;
+    }
+
+    #endregion
 }

@@ -110,8 +110,10 @@ public static partial class EvalHelper
         }
         catch (Exception ex)
         {
-            SentrySdk.AddBreadcrumb("This exception comes from a dynamically executed C# script.");
-            SentrySdk.CaptureException(ex);
+            ex.SentryCapture(scope =>
+                scope.AddBreadcrumb("This exception comes from a dynamically executed C# script.")
+            );
+            
             await msg.ModifyAsync(m =>
                 m.Embed = embed
                     .AddField("Exception Type", ex.GetType().AsPrettyString(), true)

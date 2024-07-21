@@ -113,8 +113,11 @@ public static class TextCommandHelper
     }
 
     public static string FormatUsage(VolteContext ctx, Command cmd)
+        => FormatUsage(ctx.GuildData.Configuration.CommandPrefix, cmd);
+    
+    public static string FormatUsage(string commandPrefix, Command cmd)
     {
-        return new StringBuilder($"{ctx.GuildData.Configuration.CommandPrefix}{cmd.FullAliases[0].ToLower()} ")
+        return new StringBuilder($"{commandPrefix}{cmd.FullAliases[0].ToLower()} ")
             .Append(cmd.Parameters.Select(formatUsageParameter).JoinToString(" "))
             .ToString().Trim();
 

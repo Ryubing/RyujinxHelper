@@ -51,7 +51,7 @@ public sealed partial class UtilityModule
                     .WithImageUrl("attachment://role.png")
                     .WithCurrentTimestamp()
                     .Build(),
-                reference: new MessageReference(Context.Message.Id));
+                reference: new MessageReference(Context.Message.Id, Context.Channel.Id, Context.Guild.Id));
         });
     }
 }

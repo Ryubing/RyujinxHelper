@@ -15,7 +15,7 @@ public sealed class HelpModule : VolteModule
         if (query != null)
         {
             if (query.EqualsAnyIgnoreCase("pages", "pager"))
-                return Ok(PaginatedMessage.Builder.New(true).WithPages(await GetPagesAsync().ToListAsync()));
+                return Ok(await GetPagesAsync().ToListAsync());
 
             var searchRes = CommandService.GetCommand(query);
             if (searchRes is null)

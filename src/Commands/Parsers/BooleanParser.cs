@@ -27,9 +27,9 @@ public sealed class BooleanParser : VolteTypeParser<bool>
         "negative", "0"
     ];
 
-    public override ValueTask<TypeParserResult<bool>> ParseAsync(string value, VolteContext _) => Parse(value, _);
+    public override ValueTask<TypeParserResult<bool>> ParseAsync(string value, VolteContext _) => Parse(value);
     
-    public static TypeParserResult<bool> Parse(string value, VolteContext _)
+    public static TypeParserResult<bool> Parse(string value)
     {
         if (_trueValues.ContainsIgnoreCase(value))
             return Success(true);

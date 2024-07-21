@@ -113,7 +113,8 @@ public static partial class Logger
 
         if (e != null)
         {
-            SentrySdk.CaptureException(e);
+            e.SentryCapture(scope => 
+                scope.AddBreadcrumb("This exception might not have been thrown, and may not be important; it is merely being logged."));
             Append(Environment.NewLine + (e.Message.IsNullOrEmpty() ? "No message provided" : e.Message) + 
                    Environment.NewLine + e.StackTrace, 
                 Color.IndianRed, ref content);

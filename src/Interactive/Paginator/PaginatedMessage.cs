@@ -4,8 +4,7 @@ public class PaginatedMessage
 {
     public class Builder
     {
-
-        public static Builder New(bool useButtonPaginator = false) => new()
+        public static Builder New(bool useButtonPaginator = true) => new()
         {
             UseButtonPaginator = useButtonPaginator
         };

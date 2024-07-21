@@ -10,17 +10,12 @@ public sealed partial class UtilityModule
     {
         user ??= Context.User;
 
-        string FormatEmbedString(params ushort[] sizes) => String(sb =>
-        {
-            sb.Append(sizes.Take(1)
-                .Select(x => $"{Format.Url(x.ToString(), user.GetEffectiveAvatarUrl(size: x))} ").First());
-            sb.Append(sizes.Skip(1)
-                .Select(x => $"| {Format.Url(x.ToString(), user.GetEffectiveAvatarUrl(size: x))} ").JoinToString(string.Empty));
-        }).Trim();
-
-
-        return Ok(Context.CreateEmbedBuilder(FormatEmbedString(128, 256, 512, 1024))
+        return Ok(Context.CreateEmbedBuilder(formatAvatarSizesToUrls(128, 256, 512, 1024))
             .WithAuthor(user)
             .WithImageUrl(user.GetEffectiveAvatarUrl()));
+        
+        string formatAvatarSizesToUrls(params ushort[] sizes) => 
+            sizes.Select(x => $"{Format.Url(x.ToString(), user.GetEffectiveAvatarUrl(size: x))} ")
+                .JoinToString('|').Trim();
     }
 }

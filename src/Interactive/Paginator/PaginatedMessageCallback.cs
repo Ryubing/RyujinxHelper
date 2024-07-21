@@ -115,7 +115,7 @@ public sealed class PaginatedMessageCallback : IReactionCallback, IAsyncDisposab
             await Interactive.ReplyAndDeleteAsync(Context, _pager.Options.InformationText, timeout: _pager.Options.InfoTimeout);
             return false;
         } 
-        else if (emote.Name.Equals(DiscordHelper.OctagonalSign))
+        else if (emote.Name.Equals("🛑"))
         {
             await DisposeAsync();
             return true;

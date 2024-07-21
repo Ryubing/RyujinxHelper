@@ -88,7 +88,6 @@ public static partial class Logger
                 
                 case InvocationInfo<SourceFileLocation> fdi:
                     debugInfo = $"{fdi.GetSourceFileName()}:{fdi.Data.LineInFile}";
-                    
                     break;
             }
 

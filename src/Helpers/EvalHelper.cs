@@ -103,10 +103,10 @@ public static partial class EvalHelper
                             .AddField("Return Type", state.ReturnValue.GetType().AsPrettyString(), true)
                             .WithDescription(Format.Code(res, res.IsNullOrEmpty() ? string.Empty : "ini")).Build());
                 else
-                    await msg.DeleteAsync().Then(() => env.ReactAsync(DiscordHelper.BallotBoxWithCheck));
+                    await msg.DeleteAsync().Then(() => env.ReactAsync(Emojis.BallotBoxWithCheck));
             }
             else
-                await msg.DeleteAsync().Then(() => env.ReactAsync(DiscordHelper.BallotBoxWithCheck));
+                await msg.DeleteAsync().Then(() => env.ReactAsync(Emojis.BallotBoxWithCheck));
         }
         catch (Exception ex)
         {

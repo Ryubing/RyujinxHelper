@@ -3,6 +3,7 @@ using System.Numerics;
 using SixLabors.ImageSharp;
 using SixLabors.ImageSharp.PixelFormats;
 using SixLabors.ImageSharp.Processing;
+using Volte.Commands.Text.Modules;
 using Color = Discord.Color;
 
 namespace Gommon;

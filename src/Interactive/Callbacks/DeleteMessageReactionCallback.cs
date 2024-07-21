@@ -9,7 +9,7 @@ public class DeleteMessageReactionCallback : IReactionCallback
     public RestUserMessage Message { get; private set; }
     public async ValueTask<bool> HandleAsync(SocketReaction reaction)
     {
-        if (reaction.Emote.Name.EqualsIgnoreCase(DiscordHelper.X))
+        if (reaction.Emote.Name.EqualsIgnoreCase(Emojis.X.Name))
         {
             return await reaction.Message.Value.TryDeleteAsync();
         }
@@ -21,6 +21,6 @@ public class DeleteMessageReactionCallback : IReactionCallback
     public DeleteMessageReactionCallback(VolteContext ctx, Embed embed)
     {
         Context = ctx;
-        _ = Task.Run(async () => await (Message = await Context.Channel.SendMessageAsync(embed: embed)).AddReactionAsync(DiscordHelper.X.ToEmoji()));
+        _ = Task.Run(async () => await (Message = await Context.Channel.SendMessageAsync(embed: embed)).AddReactionAsync(Emojis.X));
     }
 }

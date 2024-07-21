@@ -30,6 +30,16 @@ public static class UnixHelper
     }
 
     /// <summary>
+    ///     Attempts to parse the given string into a readable <see cref="Dictionary{TKey,TValue}"/>; and will return false if parsing fails.
+    /// </summary>
+    /// <param name="input">The unix command parts to parse.</param>
+    /// <param name="output">The dictionary of all parsed arguments and their values.</param>
+    /// <returns>True if parsing succeeded; false otherwise.</returns>
+    public static bool TryParseNamedArguments(string[] input,
+        out (Dictionary<string, string> Parsed, Exception Error) output)
+        => TryParseNamedArguments(input.JoinToString(' '), out output);
+
+    /// <summary>
     ///     Parses a "-unix command" string into a readable <see cref="Dictionary{TKey,TValue}"/>.
     ///     This does not have any specific requirements; if it's a basic "-unix 'command string'" it's parseable.
     /// </summary>

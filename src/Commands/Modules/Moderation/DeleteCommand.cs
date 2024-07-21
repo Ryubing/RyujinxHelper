@@ -19,7 +19,7 @@ public sealed partial class ModerationModule
         return None(async () =>
         {
             await Interactive.ReplyAndDeleteAsync(Context, 
-                $"{DiscordHelper.BallotBoxWithCheck} Deleted that message.", 
+                $"{Emojis.BallotBoxWithCheck} Deleted that message.", 
                 timeout: 3.Seconds());
             await Context.Message.TryDeleteAsync();
             

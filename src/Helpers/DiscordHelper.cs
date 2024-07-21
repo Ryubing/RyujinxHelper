@@ -7,34 +7,11 @@ public static class DiscordHelper
     public static ulong DevGuildId = 405806471578648588;
     
     public static string Zws => "\u200B";
-    public static string Wave => "\uD83D\uDC4B";
-    public static string X => "\u274C";
-    public static string BallotBoxWithCheck => "\u2611";
-    public static string Clap => "\uD83D\uDC4F";
-    public static string OkHand => "\uD83D\uDC4C";
-    public static string One => "1️⃣";
-    public static string Two => "2️⃣";
-    public static string Three => "3️⃣";
-    public static string Four => "4️⃣";
-    public static string Five => "5️⃣";
-    public static string Six => "6️⃣";
-    public static string Seven => "7️⃣";
-    public static string Eight => "8️⃣";
-    public static string Nine => "9️⃣";
-    public static string First => "⏮";
-    public static string Left => "◀";
-    public static string Right => "▶";
-    public static string Last => "⏭";
-    public static string WhiteSquare => "⏹";
-    public static string OctagonalSign => "🛑";
-    public static string E1234 => "🔢";
-    public static string Question => "\u2753";
-    public static string Star => "\u2B50";
 
     public static List<Emoji> GetPollEmojis()
         => [
-            One.ToEmoji(), Two.ToEmoji(), Three.ToEmoji(), Four.ToEmoji(), Five.ToEmoji(),
-            Six.ToEmoji(), Seven.ToEmoji(), Eight.ToEmoji(), Nine.ToEmoji()
+            Emojis.One, Emojis.Two, Emojis.Three, Emojis.Four, Emojis.Five,
+            Emojis.Six, Emojis.Seven, Emojis.Eight, Emojis.Nine
         ];
 
     public static RequestOptions CreateRequestOptions(Action<RequestOptions> initializer) 
@@ -46,11 +23,15 @@ public static class DiscordHelper
     /// </summary>
     /// <param name="user">The current user</param>
     /// <returns>True, if the current user is the bot's owner; false otherwise.</returns>
-    public static bool IsBotOwner(this SocketGuildUser user)
+    public static bool IsBotOwner(this IUser user)
         => Config.Owner == user.Id;
 
-    private static bool IsGuildOwner(this SocketGuildUser user)
+    private static bool IsGuildOwner(this IGuildUser user)
         => user.Guild.OwnerId == user.Id || IsBotOwner(user);
+    
+    public static bool IsAdmin(this VolteContext ctx, SocketGuildUser user)
+        => HasRole(user, ctx.GuildData.Configuration.Moderation.AdminRole) 
+           || IsGuildOwner(user);
 
     public static bool IsModerator(this VolteContext ctx, SocketGuildUser user)
         => user.HasRole(ctx.GuildData.Configuration.Moderation.ModRole) 
@@ -59,10 +40,6 @@ public static class DiscordHelper
 
     public static bool HasRole(this SocketGuildUser user, ulong roleId)
         => user.Roles.Select(x => x.Id).Contains(roleId);
-
-    public static bool IsAdmin(this VolteContext ctx, SocketGuildUser user)
-        => HasRole(user, ctx.GuildData.Configuration.Moderation.AdminRole) 
-           || IsGuildOwner(user);
 
     public static async Task<bool> TrySendMessageAsync(this SocketGuildUser user, string text = null,
         bool isTts = false, Embed embed = null, RequestOptions options = null)
@@ -137,23 +114,6 @@ public static class DiscordHelper
         
     public static async Task RegisterVolteEventHandlersAsync(this DiscordSocketClient client, ServiceProvider provider)
     {
-        var welcome = provider.Get<WelcomeService>();
-        var autorole = provider.Get<AutoroleService>();
-        var mod = provider.Get<ModerationService>();
-        var starboard = provider.Get<StarboardService>();
-        var msgService = provider.Get<MessageService>();
-            
-        client.MessageReceived += async socketMessage =>
-        {
-            if (socketMessage.ShouldHandle(out var msg))
-            {
-                if (msg.Channel is IDMChannel dm)
-                    await dm.SendMessageAsync("Currently, I do not support commands via DM.");
-                else
-                    await msgService.HandleMessageAsync(new MessageReceivedEventArgs(socketMessage, provider));
-            }
-        };
-            
         client.Log += async m =>
         {
             if (!m.Message.ContainsAnyIgnoreCase(_ignoredLogMessages))
@@ -203,29 +163,6 @@ public static class DiscordHelper
             
             await provider.Get<VolteInteractionService>().InitAsync();
         };
-            
-        if (provider.TryGet<GuildService>(out var guild))
-        {
-            client.JoinedGuild += async g => await guild.OnJoinAsync(new JoinedGuildEventArgs(g));
-        }
-
-        client.UserJoined += async user =>
-        {
-            if (Config.EnabledFeatures.Welcome) await welcome.JoinAsync(new UserJoinedEventArgs(user));
-            if (Config.EnabledFeatures.Autorole) await autorole.ApplyRoleAsync(new UserJoinedEventArgs(user));
-            if (provider.Get<DatabaseService>().GetData(user.Guild).Configuration.Moderation.CheckAccountAge &&
-                Config.EnabledFeatures.ModLog)
-                await mod.CheckAccountAgeAsync(new UserJoinedEventArgs(user));
-        };
-
-        client.UserLeft += async (guild, user) =>
-        {
-            if (Config.EnabledFeatures.Welcome) await welcome.LeaveAsync(new UserLeftEventArgs(guild, user));
-        };
-            
-        client.ReactionAdded += (message, channel, reaction) => starboard.HandleReactionAddAsync(message, channel, reaction);
-        client.ReactionRemoved += (message, channel, reaction) => starboard.HandleReactionRemoveAsync(message, channel, reaction);
-        client.ReactionsCleared += (message, channel) => starboard.HandleReactionsClearAsync(message, channel);
     }
 
     public static Task<IUserMessage> SendToAsync(this EmbedBuilder e, IMessageChannel c) =>
@@ -248,7 +185,7 @@ public static class DiscordHelper
     public static async Task<IUserMessage> SendToAsync(this Embed e, IGuildUser u) =>
         await (await u.CreateDMChannelAsync()).SendMessageAsync(embed: e);
 
-    public static Emoji ToEmoji(this string str) => new Emoji(str);
+    public static Emoji ToEmoji(this string str) => new(str);
 
     public static bool ShouldHandle(this SocketMessage message, out SocketUserMessage userMessage)
     {

@@ -4,13 +4,13 @@ public class PaginatedAppearanceOptions
 {
     public static PaginatedAppearanceOptions New => new();
 
-    public readonly IEmote First = DiscordHelper.First.ToEmoji();
-    public readonly IEmote Back = DiscordHelper.Left.ToEmoji();
-    public readonly IEmote Next = DiscordHelper.Right.ToEmoji();
-    public readonly IEmote Last = DiscordHelper.Last.ToEmoji();
-    public readonly IEmote Stop = DiscordHelper.WhiteSquare.ToEmoji();
-    public readonly IEmote Jump = DiscordHelper.E1234.ToEmoji();
-    public readonly IEmote Info = DiscordHelper.Question.ToEmoji();
+    public readonly IEmote First = Emojis.TrackLast;
+    public readonly IEmote Back = Emojis.ArrowLeft;
+    public readonly IEmote Next = Emojis.ArrowRight;
+    public readonly IEmote Last = Emojis.TrackNext;
+    public readonly IEmote Stop = Emojis.WhiteLargeSquare;
+    public readonly IEmote Jump = Emojis.OneTwoThreeFour;
+    public readonly IEmote Info = Emojis.Question;
 
     public readonly string FooterFormat = "Page {0} / {1}";
 

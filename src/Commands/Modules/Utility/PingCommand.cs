@@ -15,8 +15,8 @@ public sealed partial class UtilityModule
             await msg.ModifyAsync(x =>
             {
                 e.WithDescription(new StringBuilder()
-                    .AppendLine($"{DiscordHelper.Clap} **Gateway**: {Context.Client.Latency} milliseconds")
-                    .AppendLine($"{DiscordHelper.OkHand} **REST**: {sw.Elapsed.Humanize(3)}"));
+                    .AppendLine($"{Emojis.Clap} **Gateway**: {Context.Client.Latency} milliseconds")
+                    .AppendLine($"{Emojis.OkHand} **REST**: {sw.Elapsed.Humanize(3)}"));
                 x.Embed = e.Build();
             });
         }, false);

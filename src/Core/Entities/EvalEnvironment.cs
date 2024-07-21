@@ -68,6 +68,7 @@ public sealed class EvalEnvironment
     public async ValueTask<IUserMessage> ReplyAsync(EmbedBuilder embed) => await embed.SendToAsync(Context.Channel);
 
     public Task ReactAsync(string unicode) => Context.Message.AddReactionAsync(new Emoji(unicode));
+    public Task ReactAsync(Emoji emoji) => Context.Message.AddReactionAsync(emoji);
 
     public string Inheritance<T>() => Inheritance(typeof(T));
     public string Inheritance(object obj) => Inheritance(obj.GetType());

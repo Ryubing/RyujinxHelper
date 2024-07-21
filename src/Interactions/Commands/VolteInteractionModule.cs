@@ -5,6 +5,14 @@ namespace Volte.Interactions.Commands;
 
 public class VolteInteractionModule<T> : InteractionModuleBase<SocketInteractionContext<T>> where T : SocketInteraction
 {
+    public bool IsInGuild() => Context.Guild != null;
+
+    public GuildData GetData() 
+        => VolteBot.ServiceProvider.Get<DatabaseService>().GetData(Context.Guild);
+    
+    public void ModifyData(DataEditor modifier)
+        => VolteBot.ServiceProvider.Get<DatabaseService>().Modify(Context.Guild.Id, modifier);
+
     protected InteractionBadRequestResult BadRequest(string reason) => new(reason);
 
     protected InteractionOkResult<T> Ok(ReplyBuilder<T> reply) => new(reply);

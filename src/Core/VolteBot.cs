@@ -16,7 +16,7 @@ public class VolteBot
         return new VolteBot().LoginAsync();
     }
 
-    private ServiceProvider _provider;
+    public static ServiceProvider ServiceProvider { get; private set; }
     private DiscordSocketClient _client;
     private CancellationTokenSource _cts;
     
@@ -33,28 +33,28 @@ public class VolteBot
 
         LogFileRestartNotice();
 
-        _provider = new ServiceCollection().AddAllServices().BuildServiceProvider();
+        ServiceProvider = new ServiceCollection().AddAllServices().BuildServiceProvider();
 
         IsRunning = true;
 
         if (Program.CommandLineArguments.TryGetValue("ui", out var sizeStr))
         {
-            TryCreateUi(_provider, 
+            TryCreateUi(ServiceProvider, 
                 sizeStr.TryParse<int>(out var fsz) ? fsz : 17, 
                 out _);
         }
             
         
-        _client = _provider.Get<DiscordSocketClient>();
-        _cts = _provider.Get<CancellationTokenSource>();
+        _client = ServiceProvider.Get<DiscordSocketClient>();
+        _cts = ServiceProvider.Get<CancellationTokenSource>();
         
-        AdminUtilityModule.AllowedPasteSites = await HttpHelper.GetAllowedPasteSitesAsync(_provider);
+        AdminUtilityModule.AllowedPasteSites = await HttpHelper.GetAllowedPasteSitesAsync(ServiceProvider);
 
         await _client.LoginAsync(TokenType.Bot, Config.Token);
         await _client.StartAsync();
 
         {
-            var commandService = _provider.Get<CommandService>();
+            var commandService = ServiceProvider.Get<CommandService>();
 
             var addedParsers = commandService.AddTypeParsers();
             Info(LogSource.Volte,
@@ -67,10 +67,10 @@ public class VolteBot
                 $"Loaded {addedModules.Count} modules and {addedModules.Sum(m => m.Commands.Count)} commands.");
         }
 
-        await _client.RegisterVolteEventHandlersAsync(_provider);
+        await _client.RegisterVolteEventHandlersAsync(ServiceProvider);
 
-        ExecuteBackgroundAsync(async () => await _provider.Get<AddonService>().InitAsync());
-        _provider.Get<ReminderService>().Initialize();
+        ExecuteBackgroundAsync(async () => await ServiceProvider.Get<AddonService>().InitAsync());
+        ServiceProvider.Get<ReminderService>().Initialize();
 
         try
         {
@@ -81,7 +81,7 @@ public class VolteBot
             IsRunning = false;
             e.SentryCapture();
             
-            await ShutdownAsync(_client, _provider);
+            await ShutdownAsync(_client, ServiceProvider);
         }
     }
 

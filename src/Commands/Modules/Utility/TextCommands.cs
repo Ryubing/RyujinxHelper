@@ -96,7 +96,7 @@ public partial class UtilityModule
                 .SplitPages(12));
 
         // ReSharper disable once (Im) PossibleNullReferenceException
-        //this legit cant happen because of the if statement above
+        // this legit cant happen because of the if statement above
         return TryCatch<ActionResult, ArgumentOutOfRangeException>(() =>
                 Ok(Context.CreateEmbedBuilder()
                     .AddField("Input", Format.Code(input))

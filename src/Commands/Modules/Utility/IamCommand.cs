@@ -4,7 +4,7 @@ public sealed partial class UtilityModule
 {
     [Command("Iam")]
     [Description("Gives yourself a role, if it is in the current guild's self role list.")]
-    public async Task<ActionResult> IamAsync([Remainder, Description("The SelfRole you want to give yourself.")]
+    public async Task<ActionResult> IamAsync([Remainder, Description("The Self Role you want to give yourself.")]
         SocketRole role)
     {
         if (!Context.GuildData.Extras.SelfRoles.Any())

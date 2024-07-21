@@ -1,6 +1,6 @@
 ﻿namespace Volte.Interactions;
 
- public static class Buttons
+public static class Buttons
     {
         private static ButtonBuilder CreateBuilder(MessageComponentId id, ButtonStyle style, IEmote emote = null) 
             => new ButtonBuilder().WithStyle(style).WithCustomId(id).WithEmote(emote);

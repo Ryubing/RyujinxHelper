@@ -3,16 +3,11 @@
 namespace Volte.Interactions;
 
 #nullable enable
-public class ReplyBuilder<TInteraction> : RuntimeResult where TInteraction : SocketInteraction
+public class ReplyBuilder<TInteraction> where TInteraction : SocketInteraction
 {
     public SocketInteractionContext<TInteraction> Context { get; }
 
-    public ReplyBuilder(SocketInteractionContext<TInteraction> context, InteractionCommandError? error = null, string reason = null) : base(error, reason)
-    {
-        Context = context;
-    }
-
-    public string Content { get; private set; }
+    public string? Content { get; private set; }
     public HashSet<Embed> Embeds { get; } = [];
     public bool IsTts { get; private set; }
     public bool IsEphemeral { get; private set; }
@@ -21,7 +16,7 @@ public class ReplyBuilder<TInteraction> : RuntimeResult where TInteraction : Soc
     private Task? _updateTask;
     public HashSet<ActionRowBuilder> ActionRows { get; } = [];
 
-    public ReplyBuilder(SocketInteractionContext<TInteraction> ctx) : base(null, null) => Context = ctx;
+    public ReplyBuilder(SocketInteractionContext<TInteraction> ctx) => Context = ctx;
 
     public ReplyBuilder<TInteraction> WithContent(string content)
     {
@@ -80,7 +75,7 @@ public class ReplyBuilder<TInteraction> : RuntimeResult where TInteraction : Soc
     }
 
     public ReplyBuilder<TInteraction> WithComponentMessageUpdate(Action<MessageProperties> modifier,
-        RequestOptions options = null)
+        RequestOptions? options = null)
     {
         if (Context.Interaction is SocketMessageComponent smc)
             _updateTask = smc.UpdateAsync(modifier, options);
@@ -88,11 +83,8 @@ public class ReplyBuilder<TInteraction> : RuntimeResult where TInteraction : Soc
         return this;
     }
 
-    public ReplyBuilder<TInteraction> WithComponent(ComponentBuilder builder)
-    {
-        WithActionRows(builder.ActionRows);
-        return this;
-    }
+    public ReplyBuilder<TInteraction> WithComponent(ComponentBuilder builder) 
+        => WithActionRows(builder.ActionRows);
 
     public ReplyBuilder<TInteraction> WithActionRows(params ActionRowBuilder[] actionRows)
     {
@@ -116,13 +108,13 @@ public class ReplyBuilder<TInteraction> : RuntimeResult where TInteraction : Soc
         return this;
     }
 
-    public Task RespondAsync(RequestOptions options = null)
+    public Task RespondAsync(RequestOptions? options = null)
         => Context.Interaction.RespondAsync(Content, Embeds.ToArray(), IsTts, IsEphemeral,
                 AllowedMentions, new ComponentBuilder().AddActionRows(ActionRows).Build(), options: options)
             .Then(() => UpdateOrNoopTask);
 
 
-    public Task<RestFollowupMessage> FollowupAsync(RequestOptions options = null)
+    public Task<RestFollowupMessage> FollowupAsync(RequestOptions? options = null)
         => Context.Interaction.FollowupAsync(Content, Embeds.ToArray(), IsTts, IsEphemeral,
                 AllowedMentions, new ComponentBuilder().AddActionRows(ActionRows).Build(), options: options)
             .ThenApply(_ => UpdateOrNoopTask);

@@ -1,7 +1,11 @@
+using Volte.Interactions;
+
 namespace Volte.Helpers;
 
 public static class DiscordHelper
 {
+    public static ulong DevGuildId = 405806471578648588;
+    
     public static string Zws => "\u200B";
     public static string Wave => "\uD83D\uDC4B";
     public static string X => "\u274C";
@@ -196,6 +200,8 @@ public static class DiscordHelper
                     else provider.Get<DatabaseService>().GetData(g); //ensuring all guilds have data available to prevent exceptions later on 
                 }
             });
+            
+            await provider.Get<VolteInteractionService>().InitAsync();
         };
             
         if (provider.TryGet<GuildService>(out var guild))

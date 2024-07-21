@@ -72,7 +72,15 @@ public sealed class UiManager<TState> : IDisposable where TState : UiLayerState
                 var io = ImGui.GetIO();
                 io.ConfigFlags |= ImGuiConfigFlags.DockingEnable;
                 io.ConfigDockingWithShift = false;
+                
                 Layer.SetColors(ref Spectrum.Dark);
+                
+                var fonts = FilePath.Data.Resolve("fonts", true);
+                if (fonts.ExistsAsDirectory)
+                    fonts.GetFiles().Where(x => x.Extension is "ttf")
+                        .ForEach(fp => io.Fonts.AddFontFromFileTTF(fp.Path, 17));
+                else
+                    fonts.Create();
             }
         );
 

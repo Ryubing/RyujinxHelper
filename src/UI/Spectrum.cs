@@ -34,7 +34,7 @@ internal static class Spectrum
     public static ThemedColors Dark = new DarkThemedColors();
     public static ThemedColors Light = new LightThemeColors();
 
-    private class DarkThemedColors : ThemedColors
+    public class DarkThemedColors : ThemedColors
     {
         internal override Color Gray50 => Color(0x252525);
         internal override Color Gray75 => Color(0x2F2F2F);
@@ -97,7 +97,7 @@ internal static class Spectrum
         internal override Color Purple700 => Color(0xB483F0);
     }
 
-    private class LightThemeColors : ThemedColors
+    public class LightThemeColors : ThemedColors
     {
         internal override Color Gray50 => Color(0xFFFFFF);
         internal override Color Gray75 => Color(0xFAFAFA);

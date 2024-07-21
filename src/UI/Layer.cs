@@ -21,9 +21,11 @@ public abstract class UiLayer<TState> where TState : UiLayerState
 
     protected void Panel(string label, Action<double> render) => Panels.Add(delta =>
     {
-        ImGui.Begin(label);
-        render(delta);
-        ImGui.End();
+        if (ImGui.Begin(label))
+        {
+            render(delta);
+            ImGui.End();
+        }
     });
 
     protected void Panel(Action<double> render) => Panels.Add(render);
@@ -64,18 +66,46 @@ public abstract class UiLayer<TState> where TState : UiLayerState
     internal void RenderInternal(double delta)
     {
         if (!VolteBot.IsRunning) return;
+        
+        // shoutout https://gist.github.com/moebiussurfing/8dbc7fef5964adcd29428943b78e45d2
+        // for showing me how to properly setup dock space
+        
+        const ImGuiWindowFlags windowFlags = 
+            ImGuiWindowFlags.MenuBar | ImGuiWindowFlags.NoDocking | ImGuiWindowFlags.NoTitleBar | 
+            ImGuiWindowFlags.NoCollapse | ImGuiWindowFlags.NoResize | ImGuiWindowFlags.NoMove | 
+            ImGuiWindowFlags.NoBringToFrontOnFocus | ImGuiWindowFlags.NoNavFocus;
 
+        var viewport = ImGui.GetMainViewport();
+        
+        ImGui.SetNextWindowPos(viewport.WorkPos);
+        ImGui.SetNextWindowSize(viewport.WorkSize);
+        ImGui.SetNextWindowViewport(viewport.ID);
+        
+        ImGui.PushStyleVar(ImGuiStyleVar.WindowRounding, 0f);
+        ImGui.PushStyleVar(ImGuiStyleVar.WindowBorderSize, 0f);
+        ImGui.PushStyleColor(ImGuiCol.WindowBg, State.Background.AsColor().AsVec4());
+
+        ImGui.Begin("Dock Space", windowFlags);
+        
+        ImGui.PopStyleVar(2);
+        ImGui.PopStyleColor(1);
+
+        var dockspaceId = ImGui.GetID("DockSpace");
+        ImGui.DockSpace(dockspaceId, Vector2.Zero);
+        
         if (MainMenuBar is not null)
         {
-            if (ImGui.BeginMainMenuBar())
+            if (ImGui.BeginMenuBar())
             {
                 MainMenuBar(delta);
-                ImGui.EndMainMenuBar();
+                ImGui.EndMenuBar();
             }
         }
 
         Render(delta);
         RenderPanels(delta);
+        
+        ImGui.End();
     }
 
     private void RenderPanels(double delta)
@@ -88,6 +118,12 @@ public abstract class UiLayer<TState> where TState : UiLayerState
     {
         var style = ImGui.GetStyle();
         style.GrabRounding = 4f;
+        style.FrameRounding = 6f;
+        style.WindowMenuButtonPosition = ImGuiDir.None;
+        style.FrameBorderSize = 1f;
+        style.TabBorderSize = 1f;
+        style.WindowTitleAlign = new Vector2(0.5f);
+        style.SeparatorTextBorderSize = 9f;
 
         set(ImGuiCol.Text, theme.Gray800);
         set(ImGuiCol.TextDisabled, theme.Gray500);

@@ -24,7 +24,7 @@ public record FilePath
         Path = path;
         IsDirectory = isDirectory ?? (Directory.Exists(path) && !File.Exists(path));
     }
-
+    
     public FilePath Resolve(string subPath, bool? isDirectory = null)
         => new(
             !Path.EndsWith('/') && !subPath.StartsWith('/')
@@ -33,7 +33,7 @@ public record FilePath
             isDirectory
         );
 
-
+    
     public static FilePath operator /(FilePath left, string right) => left.Resolve(right);
 
     public static FilePath operator --(FilePath curr) =>

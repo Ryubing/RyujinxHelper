@@ -21,6 +21,13 @@ public partial class VolteUiLayer
         ColoredText($"  - Failed: {CalledCommandsInfo.ThisSessionFailed + State.Messages.UnsavedFailedCommandCalls}", Color.OrangeRed);
         ImGui.Separator();
     }
+    
+    private static Color GetRandomColor() =>
+        typeof(Color)
+            .GetProperties(BindingFlags.Static | BindingFlags.Public)
+            .Select(x => x.GetValue(null))
+            .OfType<Color>()
+            .GetRandomElement();
 
     private void UiSettings(double _)
     {
@@ -28,6 +35,9 @@ public partial class VolteUiLayer
         ImGui.ColorPicker3("", ref State.Background, ImGuiColorEditFlags.NoSidePreview | ImGuiColorEditFlags.NoLabel);
         if (ImGui.SmallButton("Reset"))
             State.Background = UiLayerState.DefaultBackground;
+        if (ImGui.SmallButton("Randomize"))
+            State.Background = GetRandomColor().AsVec3();
+        
         ImGui.Separator();
         if (ImGui.Button("Swap Theme"))
         {

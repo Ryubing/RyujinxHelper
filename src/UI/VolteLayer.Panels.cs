@@ -5,78 +5,21 @@ using Color = System.Drawing.Color;
 
 namespace Volte.UI;
 
-public sealed class VolteImGuiState : ImGuiLayerState
+public partial class VolteUiLayer
 {
-    public VolteImGuiState(IServiceProvider provider)
-    {
-        Cts = provider.Get<CancellationTokenSource>();
-        Client = provider.Get<DiscordSocketClient>();
-        Messages = provider.Get<MessageService>();
-        Database = provider.Get<DatabaseService>();
-    }
-
-    public CancellationTokenSource Cts { get; }
-    public DiscordSocketClient Client { get; }
-    public MessageService Messages { get; }
-    public DatabaseService Database { get; }
-    
-    public ulong SelectedGuildId { get; set; }
-}
-
-public class VolteImGuiLayer : ImGuiLayer<VolteImGuiState>
-{
-    public VolteImGuiLayer(IServiceProvider provider)
-    {
-        State = new VolteImGuiState(provider);
-
-        PreRenderCheck = _ => VolteBot.IsRunning;
-        
-        MainMenuBar = MenuBar;
-        
-        Panels.Add("UI Settings", UiSettings);
-        Panels.Add("Command Stats", CommandStats);
-        Panels.Add("Bot Management", BotManagement);
-        Panels.Add("Guild Manager", GuildManager);
-    }
-    
-    #region Panels
-
     private void CommandStats(double _)
     {
         ImGui.Text($"Total executions: {State.Messages.AllTimeCommandCalls}");
         ColoredText($"  - Successful: {State.Messages.AllTimeSuccessfulCommandCalls}", Color.LawnGreen);
         ColoredText($"  - Failed: {State.Messages.AllTimeFailedCommandCalls}", Color.OrangeRed);
         ImGui.SeparatorText("This Session");
-        ImGui.Text($"Executions: {State.Messages.FailedCommandCalls + State.Messages.SuccessfulCommandCalls}");
-        ColoredText($"  - Successful: {State.Messages.SuccessfulCommandCalls}", Color.LawnGreen);
-        ColoredText($"  - Failed: {State.Messages.FailedCommandCalls}", Color.OrangeRed);
+        ImGui.Text($"Executions: {
+            CalledCommandsInfo.ThisSessionSuccess + CalledCommandsInfo.ThisSessionFailed + 
+            State.Messages.UnsavedFailedCommandCalls + State.Messages.UnsavedSuccessfulCommandCalls
+        }");
+        ColoredText($"  - Successful: {CalledCommandsInfo.ThisSessionSuccess + State.Messages.UnsavedSuccessfulCommandCalls}", Color.LawnGreen);
+        ColoredText($"  - Failed: {CalledCommandsInfo.ThisSessionFailed + State.Messages.UnsavedFailedCommandCalls}", Color.OrangeRed);
         ImGui.Separator();
-    }
-
-    private void MenuBar(double delta)
-    {
-        if (ImGui.BeginMenu("File"))
-        {
-            if (ImGui.Button("Shutdown"))
-                State.Cts.Cancel();
-            
-            ImGui.EndMenu();
-        }
-        
-        if (ImGui.BeginMenu("Debug Stats"))
-        {
-            ImGui.MenuItem($"{Io.Framerate:###} FPS ({1000f / Io.Framerate:0.##} ms/frame)", false);
-            
-            if (Config.DebugEnabled || Version.IsDevelopment)
-            {
-                ImGui.MenuItem($"Delta: {delta:0.00000}", false);
-                
-                var process = Process.GetCurrentProcess();
-                ImGui.MenuItem($"Process memory: {process.GetMemoryUsage()} ({process.GetMemoryUsage(MemoryType.Kilobytes)})", false);
-            }
-            
-            ImGui.EndMenu();
-        }
     }
 
     private void UiSettings(double _)
@@ -84,7 +27,7 @@ public class VolteImGuiLayer : ImGuiLayer<VolteImGuiState>
         ImGui.Text("Background");
         ImGui.ColorPicker3("", ref State.Background, ImGuiColorEditFlags.NoSidePreview | ImGuiColorEditFlags.NoLabel);
         if (ImGui.SmallButton("Reset"))
-            State.Background = ImGuiLayerState.DefaultBackground;
+            State.Background = UiLayerState.DefaultBackground;
         //ImGui.Separator();
     }
 
@@ -115,23 +58,29 @@ public class VolteImGuiLayer : ImGuiLayer<VolteImGuiState>
             // ToString()ing the CurrentUser has weird question marks on both sides of Volte-dev's name,
             // so we do it manually in case that happens on other bot accounts too
             
-            if (ImGui.BeginMenu($"Bot status: {State.Client.Status}"))
+            var currentStatus = State.Client.Status;
+            
+            if (ImGui.BeginMenu($"Bot status: {currentStatus}"))
             {
-                if (ImGui.MenuItem("Online", State.Client.Status != UserStatus.Online)) 
+                if (ImGui.MenuItem("Online", currentStatus != UserStatus.Online)) 
                     Await(() => State.Client.SetStatusAsync(UserStatus.Online));
-                if (ImGui.MenuItem("Idle", State.Client.Status != UserStatus.Idle)) 
+                if (ImGui.MenuItem("Idle", currentStatus != UserStatus.Idle)) 
                     Await(() => State.Client.SetStatusAsync(UserStatus.Idle));
-                if (ImGui.MenuItem("Do Not Disturb", State.Client.Status != UserStatus.DoNotDisturb)) 
+                if (ImGui.MenuItem("Do Not Disturb", currentStatus != UserStatus.DoNotDisturb)) 
                     Await(() => State.Client.SetStatusAsync(UserStatus.DoNotDisturb));
-                if (ImGui.MenuItem("Invisible", State.Client.Status != UserStatus.Invisible)) 
+                if (ImGui.MenuItem("Invisible", currentStatus != UserStatus.Invisible)) 
                     Await(() => State.Client.SetStatusAsync(UserStatus.Invisible));
             
                 ImGui.EndMenu();
             }
         }
+
+        if (ImGui.Button("Reload Config"))
+            Config.Reload();
+        
     }
 
-    #region Guild Manager Panel
+    #region Guild Manager
 
     private void GuildManager(double _)
     {
@@ -141,7 +90,7 @@ public class VolteImGuiLayer : ImGuiLayer<VolteImGuiState>
             var selectedGuildMembers = selectedGuild.Users.ToImmutableArray();
             var botMembers = selectedGuildMembers.Count(sgu => sgu.IsBot);
             
-            ImGui.Text(selectedGuild.Name);
+            ImGui.SeparatorText(selectedGuild.Name);
             ImGui.Text($"Owner: @{selectedGuild.Owner}");
             ImGui.Text($"Text Channels: {selectedGuild.TextChannels.Count}");
             ImGui.Text($"Voice Channels: {selectedGuild.VoiceChannels.Count}");
@@ -185,10 +134,5 @@ public class VolteImGuiLayer : ImGuiLayer<VolteImGuiState>
         }
     }
 
-    #endregion Guild Manager Panel
-    
-    #endregion Panels
-    
-    private static void ColoredText(string fmt, Color color) =>
-        ImGui.TextColored(color.AsVec4(), fmt);
+    #endregion Guild Manager
 }

@@ -2,14 +2,15 @@
 using System.Numerics;
 using ImGuiNET;
 using Silk.NET.Input;
+using Silk.NET.OpenGL.Extensions.ImGui;
 
 namespace Volte.UI;
 
-public abstract class ImGuiLayer<TState> where TState : ImGuiLayerState
+public abstract class UiLayer<TState> where TState : UiLayerState
 {
     public readonly ConcurrentQueue<AsyncFunction> TaskQueue = new();
     
-    protected readonly Dictionary<string, Action<double>> Panels = new();
+    private readonly Dictionary<string, Action<double>> Panels = new();
 
     protected Func<double, bool> PreRenderCheck;
 
@@ -17,10 +18,11 @@ public abstract class ImGuiLayer<TState> where TState : ImGuiLayerState
     
     protected void Await(AsyncFunction task) => TaskQueue.Enqueue(task);
     protected void Await(Task task) => Await(() => task);
-    
+
+    protected void Panel(string label, Action<double> render) => Panels.Add(label, render);
     public TState State { get; protected set; }
 
-    public ImGuiIOPtr Io => ImGui.GetIO();
+    protected ImGuiIOPtr Io => ImGui.GetIO();
 
     public bool IsKeyPressed(Key key)
         => Io.KeysDown[(int)key];
@@ -30,26 +32,31 @@ public abstract class ImGuiLayer<TState> where TState : ImGuiLayerState
 
     public bool AllKeysPressed(params Key[] keys)
     {
+        if (keys.Length == 1)
+            return IsKeyPressed(keys[0]);
+        
         var io = Io;
         return keys.Select(key => io.KeysDown[(int)key])
             .All(x => x);
     }
     
-    public bool AllMouseButtonsPressed(params MouseButton[] keys)
+    public bool AllMouseButtonsPressed(params MouseButton[] mouseButtons)
     {
+        if (mouseButtons.Length == 1)
+            return Io.MouseDown[(int)mouseButtons[0]];
+        
         var io = Io;
-        return keys.Select(key => io.MouseDown[(int)key])
+        return mouseButtons.Select(mb => io.MouseDown[(int)mb])
             .All(x => x);
     }
 
-    public virtual void Render(double delta)
+    protected virtual void Render(double _)
     {
-        
     }
 
-    public void RenderInternal(double delta)
+    internal void RenderInternal(double delta)
     {
-        if (!PreRenderCheck?.Invoke(delta) ?? false) return;
+        if (!VolteBot.IsRunning) return;
 
         if (MainMenuBar is not null)
         {
@@ -64,7 +71,7 @@ public abstract class ImGuiLayer<TState> where TState : ImGuiLayerState
         RenderPanels(delta);
     }
 
-    protected void RenderPanels(double delta)
+    private void RenderPanels(double delta)
     {
         foreach (var (panelName, renderPanel) in Panels)
         {
@@ -73,9 +80,11 @@ public abstract class ImGuiLayer<TState> where TState : ImGuiLayerState
             ImGui.End();
         }
     }
+
+    public virtual ImGuiFontConfig? GetFontConfig(int size) => null;
 }
 
-public abstract class ImGuiLayerState
+public abstract class UiLayerState
 {
     public static Vector3 DefaultBackground => new(.45f, .55f, .60f);
 

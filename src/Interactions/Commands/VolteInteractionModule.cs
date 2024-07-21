@@ -7,10 +7,10 @@ public class VolteInteractionModule<T> : InteractionModuleBase<SocketInteraction
 {
     protected InteractionBadRequestResult BadRequest(string reason) => new(reason);
 
-    protected InteractionOkResult<T> Ok(ReplyBuilder<T> reply) => new()
-    {
-        Reply = reply
-    };
+    protected InteractionOkResult<T> Ok(ReplyBuilder<T> reply) => new(reply);
+
+    protected InteractionOkResult<T> Ok(string message, bool ephemeral = false) 
+        => Ok(Context.CreateReplyBuilder(ephemeral).WithEmbedFrom(message));
 }
 
 public class VolteSlashCommandModule : VolteInteractionModule<SocketSlashCommand>;

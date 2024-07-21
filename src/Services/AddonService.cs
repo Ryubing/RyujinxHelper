@@ -17,24 +17,12 @@ public class AddonService : VolteService
         _provider = serviceProvider;
         LoadedAddons = new Dictionary<VolteAddon, ScriptState>();
     }
-
-    private static IEnumerable<VolteAddon> GetAvailableAddons()
-    {
-        foreach (var dir in AddonsDir.GetSubdirectories())
-        {
-            if (TryGetAddonContent(dir, out var addon))
-                yield return addon;
-                
-            if (addon.Meta != null && addon.Script is null)
-                Error(LogSource.Service,
-                    $"Attempted to load addon {addon.Meta.Name} but there were no C# source files in its directory. These are necessary as an addon with no logic does nothing.");
-        }
-    }
-
+    
     public async Task InitAsync()
     {
         var sw = Stopwatch.StartNew();
-        if (_isInitialized || !AddonsDir.ExistsAsDirectory) return; //don't auto-create a directory; if someone wants to use addons they need to make it themselves.
+        if (_isInitialized || !AddonsDir.ExistsAsDirectory) 
+            return; //don't auto-create a directory; if someone wants to use addons they need to make it themselves.
         if (AddonsDir.GetSubdirectories().Count < 1)
         {
             Info(LogSource.Service, "No addons are in the addons directory; skipping initialization.");
@@ -55,6 +43,19 @@ public class AddonService : VolteService
         sw.Stop();
         Info(LogSource.Service, $"{"addon".ToQuantity(LoadedAddons.Count)} loaded in {sw.Elapsed.Humanize(2)}.");
         _isInitialized = true;
+    }
+    
+    private static IEnumerable<VolteAddon> GetAvailableAddons()
+    {
+        foreach (var dir in AddonsDir.GetSubdirectories())
+        {
+            if (TryGetAddonContent(dir, out var addon))
+                yield return addon;
+                
+            if (addon.Meta != null && addon.Script is null)
+                Error(LogSource.Service,
+                    $"Attempted to load addon {addon.Meta.Name} but there were no C# source files in its directory. These are necessary as an addon with no logic does nothing.");
+        }
     }
 
     private static bool TryGetAddonContent(FilePath addonDir, out VolteAddon addon)

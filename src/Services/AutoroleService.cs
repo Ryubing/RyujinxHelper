@@ -1,7 +1,16 @@
 ﻿namespace Volte.Services;
 
-public sealed class AutoroleService(DatabaseService _db) : VolteService
+public sealed class AutoroleService : VolteService
 {
+    private readonly DatabaseService _db;
+    
+    public AutoroleService(DiscordSocketClient client, DatabaseService databaseService)
+    {
+        _db = databaseService;
+        client.UserJoined += user => ApplyRoleAsync(new UserJoinedEventArgs(user));
+    }
+    
+    
     public async Task ApplyRoleAsync(UserJoinedEventArgs args)
     {
         var data = _db.GetData(args.Guild);

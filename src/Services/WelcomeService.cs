@@ -1,9 +1,20 @@
 ﻿namespace Volte.Services;
 
-public sealed class WelcomeService(DatabaseService _db) : VolteService
+public sealed class WelcomeService : VolteService
 {
+    private readonly DatabaseService _db;
+
+    public WelcomeService(DiscordSocketClient client, DatabaseService databaseService)
+    {
+        _db = databaseService;
+        client.UserJoined += user => JoinAsync(new UserJoinedEventArgs(user));
+        client.UserLeft += (guild, user) => LeaveAsync(new UserLeftEventArgs(guild, user));
+    }
+    
     public async Task JoinAsync(UserJoinedEventArgs args)
     {
+        if (!Config.EnabledFeatures.Welcome) return;
+        
         var data = _db.GetData(args.Guild);
 
         if (data.Configuration.Welcome.WelcomeMessage.IsNullOrEmpty())
@@ -35,6 +46,8 @@ public sealed class WelcomeService(DatabaseService _db) : VolteService
 
     public async Task LeaveAsync(UserLeftEventArgs args)
     {
+        if (!Config.EnabledFeatures.Welcome) return;
+        
         var data = _db.GetData(args.Guild);
         if (data.Configuration.Welcome.LeavingMessage.IsNullOrEmpty()) return;
         Debug(LogSource.Volte,

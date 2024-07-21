@@ -5,13 +5,25 @@ public sealed class MessageService : VolteService
     private readonly CommandService _commandService;
     private readonly QuoteService _quoteService;
         
-    public MessageService(IServiceProvider provider,
+    public MessageService(DiscordSocketClient client,
+        IServiceProvider provider,
         CommandService commandService,
         QuoteService quoteService)
     {
         _commandService = commandService;
         _quoteService = quoteService;
         CalledCommandsInfo.StartPersistence(provider, saveEvery: 2.Minutes());
+        
+        client.MessageReceived += async socketMessage =>
+        {
+            if (socketMessage.ShouldHandle(out var msg))
+            {
+                if (msg.Channel is IDMChannel dm)
+                    await dm.SendMessageAsync("Currently, I do not support commands via DM.");
+                else
+                    await HandleMessageAsync(new MessageReceivedEventArgs(socketMessage, provider));
+            }
+        };
     }
     
     public ulong AllTimeCommandCalls => CalledCommandsInfo.Sum + 

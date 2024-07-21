@@ -1,7 +1,15 @@
 namespace Volte.Services;
 
-public sealed class GuildService(DiscordSocketClient discordSocketClient) : VolteService
+public sealed class GuildService : VolteService
 {
+    private readonly DiscordSocketClient _client;
+
+    public GuildService(DiscordSocketClient client)
+    {
+        _client = client;
+        client.JoinedGuild += async g => await OnJoinAsync(new JoinedGuildEventArgs(g));
+    }
+    
     public async Task OnJoinAsync(JoinedGuildEventArgs args)
     {
         Debug(LogSource.Volte, "Joined a guild.");
@@ -15,7 +23,7 @@ public sealed class GuildService(DiscordSocketClient discordSocketClient) : Volt
 
         var embed = new EmbedBuilder()
             .WithTitle("Hey there!")
-            .WithAuthor(await discordSocketClient.Rest.GetUserAsync(Config.Owner))
+            .WithAuthor(await _client.Rest.GetUserAsync(Config.Owner))
             .WithColor(Config.SuccessColor)
             .WithDescription("Thanks for inviting me! Here's some basic instructions on how to set me up.")
             .AddField("Set your staff roles", "$setup", true)

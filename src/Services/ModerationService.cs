@@ -1,11 +1,18 @@
 namespace Volte.Services;
 
-public class ModerationService(DatabaseService _db) : VolteService
+public class ModerationService : VolteService
 {
+    private readonly DatabaseService _db;
+    
+    public ModerationService(DiscordSocketClient client, DatabaseService databaseService)
+    {
+        client.UserJoined += user => CheckAccountAgeAsync(new UserJoinedEventArgs(user));
+    }
+    
     public async Task CheckAccountAgeAsync(UserJoinedEventArgs args)
     {
         var modConfig = _db.GetData(args.Guild).Configuration.Moderation;
-        if (args.User.IsBot || !modConfig.CheckAccountAge) return;
+        if (args.User.IsBot || !modConfig.CheckAccountAge || !Config.EnabledFeatures.ModLog) return;
             
         Debug(LogSource.Volte, "Attempting to post a VerifyAge message.");
             

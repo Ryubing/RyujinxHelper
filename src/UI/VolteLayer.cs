@@ -23,6 +23,8 @@ public sealed class VolteUiState : UiLayerState
     public DatabaseService Database { get; }
     
     public ulong SelectedGuildId { get; set; }
+
+    public bool ShowStyleEditor = false;
 }
 
 public partial class VolteUiLayer : UiLayer<VolteUiState>
@@ -37,6 +39,15 @@ public partial class VolteUiLayer : UiLayer<VolteUiState>
         Panel("Command Stats", CommandStats);
         Panel("Bot Management", BotManagement);
         Panel("Guild Manager", GuildManager);
+        Panel(_ =>
+        {
+            if (State.ShowStyleEditor)
+            {
+                ImGui.Begin("Style Editor");
+                ImGui.ShowStyleEditor(ImGui.GetStyle());
+                ImGui.End();
+            }
+        });
     }
     
     private void MenuBar(double delta)
@@ -56,9 +67,6 @@ public partial class VolteUiLayer : UiLayer<VolteUiState>
             if (Config.DebugEnabled || Version.IsDevelopment)
             {
                 ImGui.MenuItem($"Delta: {delta:0.00000}", false);
-                
-                var process = Process.GetCurrentProcess();
-                ImGui.MenuItem($"Process memory: {process.GetMemoryUsage()} ({process.GetMemoryUsage(MemoryType.Kilobytes)})", false);
             }
             
             ImGui.EndMenu();

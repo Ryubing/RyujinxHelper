@@ -1,4 +1,5 @@
 using System.Collections;
+using Volte.Commands.Text.Modules;
 using Module = Qmmands.Module;
 
 namespace Volte.Helpers;
@@ -133,7 +134,7 @@ public static class TextCommandHelper
     {
         var result = await cba.CheckAsync(context);
         var message = GetCheckFriendlyMessage(context, cba);
-        return $"- {(result.IsSuccessful ? DiscordHelper.BallotBoxWithCheck : DiscordHelper.X)} {message}";
+        return $"- {(result.IsSuccessful ? Emojis.BallotBoxWithCheck : Emojis.X)} {message}";
     }
 
     private static string GetCheckFriendlyMessage(VolteContext ctx, CheckAttribute cba)

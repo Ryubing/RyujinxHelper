@@ -1,5 +1,6 @@
 using Silk.NET.Maths;
 using Silk.NET.Windowing;
+using Volte.Commands.Text.Modules;
 using Volte.UI;
 
 namespace Volte;
@@ -8,21 +9,21 @@ public class VolteBot
 {
     public static bool IsRunning { get; private set; }
     
-    public static Task StartAsync(Dictionary<string, string> commandLine)
+    public static Task StartAsync()
     {
-        Console.Title = $"Volte {Version.InformationVersion}";
+        Console.Title = WndOpt.Title;
         Console.CursorVisible = false;
-        return new VolteBot().LoginAsync(commandLine);
+        return new VolteBot().LoginAsync();
     }
 
     private ServiceProvider _provider;
     private DiscordSocketClient _client;
     private CancellationTokenSource _cts;
     
-    private VolteBot()
+    private VolteBot() 
         => Console.CancelKeyPress += (_, _) => _cts?.Cancel();
-
-    private async Task LoginAsync(Dictionary<string, string> commandLine)
+    
+    private async Task LoginAsync()
     {
         if (!Config.StartupChecks()) return;
 
@@ -36,12 +37,11 @@ public class VolteBot
 
         IsRunning = true;
 
-        if (commandLine.TryGetValue("ui", out var sizeStr))
+        if (Program.CommandLineArguments.TryGetValue("ui", out var sizeStr))
         {
-            if (sizeStr.TryParse<int>(out var fsz))
-                TryCreateUi(_provider, fsz, out _);
-            else
-                TryCreateUi(_provider, 17, out _);
+            TryCreateUi(_provider, 
+                sizeStr.TryParse<int>(out var fsz) ? fsz : 17, 
+                out _);
         }
             
         
@@ -56,15 +56,15 @@ public class VolteBot
         {
             var commandService = _provider.Get<CommandService>();
 
-            var (sw1, addedParsers) = 
-                Timed(() => commandService.AddTypeParsers());
+            var addedParsers = commandService.AddTypeParsers();
             Info(LogSource.Volte,
-                $"Loaded TypeParsers: [{addedParsers.Select(x => x.Name.Replace("Parser", string.Empty)).JoinToString(", ")}] in {sw1.ElapsedMilliseconds}ms.");
+                $"Loaded TypeParsers: [{
+                    addedParsers.Select(x => x.Name.Replace("Parser", string.Empty)).JoinToString(", ")
+                }]");
 
-            var (sw2, addedModules) =
-                Timed(() => commandService.AddModules(Assembly.GetExecutingAssembly()));
-            Info(LogSource.Volte,
-                $"Loaded {addedModules.Count} modules and {addedModules.Sum(m => m.Commands.Count)} commands in {sw2.ElapsedMilliseconds}ms.");
+            var addedModules = commandService.AddModules(Assembly.GetExecutingAssembly());
+            Info(LogSource.Volte, 
+                $"Loaded {addedModules.Count} modules and {addedModules.Sum(m => m.Commands.Count)} commands.");
         }
 
         await _client.RegisterVolteEventHandlersAsync(_provider);
@@ -107,18 +107,22 @@ public class VolteBot
 
     public static UiManager<VolteUiState> Ui { get; private set; }
 
-    // WindowOptions.Default with custom title
+    // WindowOptions.Default with custom title and larger base window
     private static readonly WindowOptions WndOpt = new(
         isVisible: true,
         position: new Vector2D<int>(50, 50),
-        size: new Vector2D<int>(1280, 720),
-        framesPerSecond: 0.0,
+        size: new Vector2D<int>(1600, 900),
+        framesPerSecond: 1000,
         updatesPerSecond: 0.0,
         api: GraphicsAPI.Default,
-        title: Console.Title,
+        title: $"Volte {Version.InformationVersion}",
         windowState: WindowState.Normal,
         windowBorder: WindowBorder.Resizable,
+#if DEBUG
+        isVSync: false,
+#else
         isVSync: true,
+#endif
         shouldSwapAutomatically: true,
         videoMode: VideoMode.Default
     );

@@ -28,7 +28,16 @@ public partial class VolteUiLayer
         ImGui.ColorPicker3("", ref State.Background, ImGuiColorEditFlags.NoSidePreview | ImGuiColorEditFlags.NoLabel);
         if (ImGui.SmallButton("Reset"))
             State.Background = UiLayerState.DefaultBackground;
-        //ImGui.Separator();
+        ImGui.Separator();
+        if (ImGui.Button("Swap Theme"))
+        {
+            State.SelectedTheme = !State.SelectedTheme;
+            if (State.SelectedTheme) SetColors(ref Spectrum.Dark);
+            else SetColors(ref Spectrum.Light);
+        }
+
+        if (ImGui.RadioButton("Show Style Editor", State.ShowStyleEditor))
+            State.ShowStyleEditor = !State.ShowStyleEditor;
     }
 
     private void BotManagement(double _)
@@ -74,10 +83,12 @@ public partial class VolteUiLayer
                 ImGui.EndMenu();
             }
         }
+        
+        var process = Process.GetCurrentProcess();
+        ImGui.Text($"Process memory: {process.GetMemoryUsage()} ({process.GetMemoryUsage(MemoryType.Kilobytes)})");
 
         if (ImGui.Button("Reload Config"))
             Config.Reload();
-        
     }
 
     #region Guild Manager

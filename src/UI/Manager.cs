@@ -35,7 +35,9 @@ public sealed class UiManager<TState> : IDisposable where TState : UiLayerState
     {
         Layer = igLayer;
         _window = Window.Create(windowOptions ?? WindowOptions.Default);
-
+        
+        _fontConfig = Layer.GetFontConfig(fontSize);
+        
         _window.Load += OnWindowLoad;
         _window.Render += OnWindowRender;
         _window.FramebufferResize += sz => _gl?.Viewport(sz);
@@ -47,8 +49,6 @@ public sealed class UiManager<TState> : IDisposable where TState : UiLayerState
             _inputContext?.Dispose();
             _gl?.Dispose();
         };
-
-        _fontConfig = Layer.GetFontConfig(fontSize);
     }
 
     public void Run()
@@ -72,7 +72,7 @@ public sealed class UiManager<TState> : IDisposable where TState : UiLayerState
                 var io = ImGui.GetIO();
                 io.ConfigFlags |= ImGuiConfigFlags.DockingEnable;
                 io.ConfigDockingWithShift = false;
-                SetColors();
+                Layer.SetColors(ref Spectrum.Dark);
             }
         );
 
@@ -112,65 +112,6 @@ public sealed class UiManager<TState> : IDisposable where TState : UiLayerState
         Layer.RenderInternal(delta);
 
         _controller?.Render();
-    }
-
-    private static void SetColors()
-    {
-        var style = ImGui.GetStyle();
-        style.GrabRounding = 4f;
-
-        set(ImGuiCol.Text, Spectrum.Gray800);
-        set(ImGuiCol.TextDisabled, Spectrum.Gray500);
-        set(ImGuiCol.WindowBg, Spectrum.Gray100);
-        set(ImGuiCol.ChildBg, Spectrum.Static.None);
-        set(ImGuiCol.PopupBg, Spectrum.Gray50);
-        set(ImGuiCol.Border, Spectrum.Gray300);
-        set(ImGuiCol.BorderShadow, Spectrum.Static.None);
-        set(ImGuiCol.FrameBg, Spectrum.Gray75);
-        set(ImGuiCol.FrameBgHovered, Spectrum.Gray50);
-        set(ImGuiCol.FrameBgActive, Spectrum.Gray200);
-        set(ImGuiCol.TitleBg, Spectrum.Gray300);
-        set(ImGuiCol.TitleBgActive, Spectrum.Gray200);
-        set(ImGuiCol.TitleBgCollapsed, Spectrum.Gray400);
-        set(ImGuiCol.MenuBarBg, Spectrum.Gray100);
-        set(ImGuiCol.ScrollbarBg, Spectrum.Gray100);
-        set(ImGuiCol.ScrollbarGrab, Spectrum.Gray400);
-        set(ImGuiCol.ScrollbarGrabHovered, Spectrum.Gray600);
-        set(ImGuiCol.ScrollbarGrabActive, Spectrum.Gray700);
-        set(ImGuiCol.CheckMark, Spectrum.Blue500);
-        set(ImGuiCol.SliderGrab, Spectrum.Gray700);
-        set(ImGuiCol.SliderGrabActive, Spectrum.Gray800);
-        set(ImGuiCol.Button, Spectrum.Gray75);
-        set(ImGuiCol.ButtonHovered, Spectrum.Gray50);
-        set(ImGuiCol.ButtonActive, Spectrum.Gray200);
-        set(ImGuiCol.Header, Spectrum.Blue400);
-        set(ImGuiCol.HeaderHovered, Spectrum.Blue500);
-        set(ImGuiCol.HeaderActive, Spectrum.Blue600);
-        set(ImGuiCol.Separator, Spectrum.Gray400);
-        set(ImGuiCol.SeparatorHovered, Spectrum.Gray600);
-        set(ImGuiCol.SeparatorActive, Spectrum.Gray700);
-        set(ImGuiCol.ResizeGrip, Spectrum.Gray400);
-        set(ImGuiCol.ResizeGripHovered, Spectrum.Gray600);
-        set(ImGuiCol.ResizeGripActive, Spectrum.Gray700);
-        set(ImGuiCol.PlotLines, Spectrum.Blue400);
-        set(ImGuiCol.PlotLinesHovered, Spectrum.Blue600);
-        set(ImGuiCol.PlotHistogram, Spectrum.Blue400);
-        set(ImGuiCol.PlotHistogramHovered, Spectrum.Blue600);
-        
-        setVec(ImGuiCol.TextSelectedBg, ImGui.ColorConvertU32ToFloat4((Spectrum.Blue400 & 0x00FFFFFF) | 0x33000000));
-        setVec(ImGuiCol.DragDropTarget, new Vector4(1.00f, 1.00f, 0.00f, 0.90f));
-        setVec(ImGuiCol.NavHighlight, ImGui.ColorConvertU32ToFloat4((Spectrum.Gray900 & 0x00FFFFFF) | 0x0A000000));
-        setVec(ImGuiCol.NavWindowingHighlight, new Vector4(1.00f, 1.00f, 1.00f, 0.70f));
-        setVec(ImGuiCol.NavWindowingDimBg, new Vector4(0.80f, 0.80f, 0.80f, 0.20f));
-        setVec(ImGuiCol.ModalWindowDimBg, new Vector4(0.20f, 0.20f, 0.20f, 0.35f));
-
-        return;
-        
-        void set(ImGuiCol colorVar, Color color)
-            => style.Colors[(int)colorVar] = color.AsVec4();
-
-        void setVec(ImGuiCol colorVar, Vector4 colorVec)
-            => style.Colors[(int)colorVar] = colorVec;
     }
 
 

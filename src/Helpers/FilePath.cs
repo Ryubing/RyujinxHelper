@@ -11,9 +11,7 @@ public record FilePath
     #region Global common paths
 
     public static readonly FilePath Logs = new("logs", true);
-
     public static readonly FilePath Data = new("data", true);
-
     public static readonly FilePath ConfigFile = Data.Resolve("volte.json", false);
 
     #endregion

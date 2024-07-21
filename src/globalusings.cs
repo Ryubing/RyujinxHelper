@@ -26,7 +26,6 @@ global using Sentry;
 global using System.Diagnostics;
 global using Microsoft.Extensions.DependencyInjection;
 global using Qmmands;
-global using Volte.Commands.Text.Modules;
 global using Volte.Helpers;
 global using Gommon;
 global using static Gommon.Lambda;

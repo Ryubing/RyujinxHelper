@@ -8,11 +8,8 @@ public class RequireBotOwnerPreconditionAttribute : PreconditionAttribute
         IInteractionContext context,
         ICommandInfo commandInfo,
         IServiceProvider services
-    )
-    {
-        return Task.FromResult(context.User.Id == Config.Owner
-            ? PreconditionResult.FromSuccess()
-            : PreconditionResult.FromError("Insufficient permission.")
-        );
-    }
+    ) => Task.FromResult(context.User.IsBotOwner()
+        ? PreconditionResult.FromSuccess()
+        : PreconditionResult.FromError("Insufficient permission.")
+    );
 }

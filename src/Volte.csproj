@@ -26,7 +26,7 @@
     </ItemGroup>
     <ItemGroup>
         <EmbeddedResource Include="Resources/VolteIcon.png" LogicalName="VolteIcon"/>
-        <EmbeddedResource Include="Resources/Mono/JetBrainsMono-ExtraBold.ttf" LogicalName="UIFont"/>
+        <EmbeddedResource Include="Resources/Mono/JetBrainsMonoNL-Regular.ttf" LogicalName="UIFont"/>
     </ItemGroup>
     <ItemGroup>
         <PackageReference Include="Colorful.Console" Version="1.2.15" />

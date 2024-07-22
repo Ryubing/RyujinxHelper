@@ -1,5 +1,4 @@
 ﻿using System.IO;
-using System.Numerics;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using ImGuiNET;
@@ -22,18 +21,18 @@ public sealed class UiManager<TState> : IDisposable where TState : UiLayerState
     private bool _isActive;
 
     private readonly IWindow _window;
-
+    private readonly ImGuiFontConfig? _fontConfig;
+    
     private ImGuiController? _controller;
     private GL? _gl;
     private IInputContext? _inputContext;
-
-    private readonly ImGuiFontConfig? _fontConfig;
-
+    
     public UiLayer<TState> Layer { get; }
-
+    
     public UiManager(UiLayer<TState> igLayer, WindowOptions? windowOptions, int fontSize = 14)
     {
         Layer = igLayer;
+        
         _window = Window.Create(windowOptions ?? WindowOptions.Default);
         
         _fontConfig = Layer.GetFontConfig(fontSize);
@@ -84,28 +83,7 @@ public sealed class UiManager<TState> : IDisposable where TState : UiLayerState
             }
         );
 
-        // shoutout https://github.com/dotnet/Silk.NET/blob/b079b28cd51ce447183cfedde0a85412b9b226ee/src/Lab/Experiments/BlankWindow/Program.cs#L82-L95
-        Stream? iconStream;
-        if ((iconStream = Assembly.GetExecutingAssembly().GetManifestResourceStream("VolteIcon")) != null)
-        {
-            var img = Image.Load<Rgba32>(iconStream);
-            var memoryGroup = img.GetPixelMemoryGroup();
-
-            Memory<byte> array = new byte[memoryGroup.TotalLength * Unsafe.SizeOf<Rgba32>()];
-            var block = MemoryMarshal.Cast<byte, Rgba32>(array.Span);
-
-            foreach (var memory in memoryGroup)
-            {
-                memory.Span.CopyTo(block);
-                block = block[memory.Length..];
-            }
-
-            var rawIcon = new RawImage(img.Width, img.Height, array);
-
-            img.Dispose();
-
-            _window.SetWindowIcon(ref rawIcon);
-        }
+        SetWindowIcon();
 
         Info(LogSource.UI, $"Window 0x{_window.Handle:X} loaded");
     }
@@ -114,20 +92,75 @@ public sealed class UiManager<TState> : IDisposable where TState : UiLayerState
     {
         _controller?.Update((float)delta);
 
-        _gl?.ClearColor((Layer.State?.Background ?? UiLayerState.DefaultBackground).AsColor());
-        _gl?.Clear((uint)ClearBufferMask.ColorBufferBit);
-
         Layer.RenderInternal(delta);
 
         _controller?.Render();
     }
 
+    private void SetWindowIcon()
+    {
+        // shoutout https://github.com/dotnet/Silk.NET/blob/b079b28cd51ce447183cfedde0a85412b9b226ee/src/Lab/Experiments/BlankWindow/Program.cs#L82-L95
+        Stream? iconStream;
+        if ((iconStream = Assembly.GetExecutingAssembly().GetManifestResourceStream("VolteIcon")) == null) return;
+        
+        var img = Image.Load<Rgba32>(iconStream);
+        var memoryGroup = img.GetPixelMemoryGroup();
+
+        Memory<byte> array = new byte[memoryGroup.TotalLength * Unsafe.SizeOf<Rgba32>()];
+        var block = MemoryMarshal.Cast<byte, Rgba32>(array.Span);
+
+        foreach (var memory in memoryGroup)
+        {
+            memory.Span.CopyTo(block);
+            block = block[memory.Length..];
+        }
+
+        var rawIcon = new RawImage(img.Width, img.Height, array);
+
+        img.Dispose();
+
+        _window.SetWindowIcon(ref rawIcon);
+    }
 
     public void Dispose() => _window.Dispose();
 }
 
 public static class UiManager
 {
+    public static UiManager<VolteUiState>? Instance { get; private set; }
+    
+    public static bool TryCreateUi(IServiceProvider provider, WindowOptions? windowOptions, int fontSize, out string error)
+    {
+        if (Instance is not null)
+        {
+            error = "UI is already open.";
+            return false;
+        }
+        
+        try
+        {
+            Instance = Create(new VolteUiLayer(provider), windowOptions ?? VolteBot.DefaultWindowOptions, fontSize);
+            
+            // declared as illegal code by the Silk God (Main thread isn't the controller of the Window)
+            new Thread(() =>
+            {
+                Instance.Run(); //returns when UI is closed
+                Instance.Dispose();
+                Instance = null;
+            }) { Name = "Volte UI Thread" }.Start();
+        }
+        catch (Exception e)
+        {
+            Error(LogSource.UI, "Could not create UI thread", e);
+            error = $"Error opening UI: {e.Message}";
+            return false;
+        }
+        
+        error = null;
+
+        return true;
+    }
+    
     public static UiManager<TState> Create<TState>(UiLayer<TState> layer, WindowOptions? windowOptions = null,
         int fontSize = 14) where TState : UiLayerState
         => new(layer, windowOptions, fontSize);

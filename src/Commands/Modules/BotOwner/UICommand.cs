@@ -1,4 +1,6 @@
-﻿namespace Volte.Commands.Text.Modules;
+﻿using Volte.UI;
+
+namespace Volte.Commands.Text.Modules;
 
 public sealed partial class BotOwnerModule
 {
@@ -7,7 +9,7 @@ public sealed partial class BotOwnerModule
     public Task<ActionResult> UiAsync(
         [Description("Desired font size of the UI.")] int fontSize = 14)
     {
-        return VolteBot.TryCreateUi(Context.Services, fontSize, out var errorReason)
+        return UiManager.TryCreateUi(Context.Services, VolteBot.DefaultWindowOptions, fontSize, out var errorReason)
             ? None(() => Context.Message.AddReactionAsync(Emojis.BallotBoxWithCheck)) 
             : BadRequest($"Could not create UI thread: {errorReason}");
     }

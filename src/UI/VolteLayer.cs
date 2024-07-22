@@ -1,7 +1,6 @@
-﻿using System.Collections.Immutable;
+﻿
 using System.IO;
 using ImGuiNET;
-using Silk.NET.Input;
 using Silk.NET.OpenGL.Extensions.ImGui;
 using Color = System.Drawing.Color;
 
@@ -17,12 +16,12 @@ public sealed class VolteUiState : UiLayerState
         Database = provider.Get<DatabaseService>();
     }
 
-    public CancellationTokenSource Cts { get; }
-    public DiscordSocketClient Client { get; }
-    public MessageService Messages { get; }
-    public DatabaseService Database { get; }
-    
-    public ulong SelectedGuildId { get; set; }
+    public readonly CancellationTokenSource Cts;
+    public readonly DiscordSocketClient Client;
+    public readonly MessageService Messages;
+    public readonly DatabaseService Database;
+
+    public ulong SelectedGuildId = 0;
 
     public bool ShowStyleEditor = false;
 }

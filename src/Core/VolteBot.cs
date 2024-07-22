@@ -8,10 +8,10 @@ namespace Volte;
 public class VolteBot
 {
     public static bool IsRunning { get; private set; }
-    
+
     public static Task StartAsync()
     {
-        Console.Title = WndOpt.Title;
+        Console.Title = DefaultWindowOptions.Title;
         Console.CursorVisible = false;
         return new VolteBot().LoginAsync();
     }
@@ -19,10 +19,10 @@ public class VolteBot
     public static ServiceProvider ServiceProvider { get; private set; }
     private DiscordSocketClient _client;
     private CancellationTokenSource _cts;
-    
-    private VolteBot() 
+
+    private VolteBot()
         => Console.CancelKeyPress += (_, _) => _cts?.Cancel();
-    
+
     private async Task LoginAsync()
     {
         if (!Config.StartupChecks()) return;
@@ -37,17 +37,17 @@ public class VolteBot
 
         IsRunning = true;
 
-        if (Program.CommandLineArguments.TryGetValue("ui", out var sizeStr))
-        {
-            TryCreateUi(ServiceProvider, 
-                sizeStr.TryParse<int>(out var fsz) ? fsz : 17, 
-                out _);
-        }
-            
-        
+        if (Program.CommandLineArguments.TryGetValue("ui", out var sizeStr)
+            && !UiManager.TryCreateUi(ServiceProvider,
+                DefaultWindowOptions,
+                sizeStr.TryParse<int>(out var fsz) ? fsz : 17,
+                out var uiStartError)
+           ) Error(LogSource.UI, $"Could not create UI: {uiStartError}");
+
+
         _client = ServiceProvider.Get<DiscordSocketClient>();
         _cts = ServiceProvider.Get<CancellationTokenSource>();
-        
+
         AdminUtilityModule.AllowedPasteSites = await HttpHelper.GetAllowedPasteSitesAsync(ServiceProvider);
 
         await _client.LoginAsync(TokenType.Bot, Config.Token);
@@ -63,7 +63,7 @@ public class VolteBot
                 }]");
 
             var addedModules = commandService.AddModules(Assembly.GetExecutingAssembly());
-            Info(LogSource.Volte, 
+            Info(LogSource.Volte,
                 $"Loaded {addedModules.Count} modules and {addedModules.Sum(m => m.Commands.Count)} commands.");
         }
 
@@ -80,7 +80,7 @@ public class VolteBot
         {
             IsRunning = false;
             e.SentryCapture();
-            
+
             await ShutdownAsync(_client, ServiceProvider);
         }
     }
@@ -99,65 +99,27 @@ public class VolteBot
         await client.SetStatusAsync(UserStatus.Invisible);
         await client.LogoutAsync();
         await client.StopAsync();
-        
+
         Environment.Exit(0);
     }
 
     #region UI
 
-    public static UiManager<VolteUiState> Ui { get; private set; }
-
     // WindowOptions.Default with custom title and larger base window
-    private static readonly WindowOptions WndOpt = new(
+    public static readonly WindowOptions DefaultWindowOptions = new(
         isVisible: true,
         position: new Vector2D<int>(50, 50),
         size: new Vector2D<int>(1600, 900),
-        framesPerSecond: 1000,
+        framesPerSecond: 0,
         updatesPerSecond: 0.0,
         api: GraphicsAPI.Default,
         title: $"Volte {Version.InformationVersion}",
         windowState: WindowState.Normal,
         windowBorder: WindowBorder.Resizable,
-#if DEBUG
-        isVSync: false,
-#else
         isVSync: true,
-#endif
         shouldSwapAutomatically: true,
         videoMode: VideoMode.Default
     );
-
-    public static bool TryCreateUi(IServiceProvider provider, int fontSize, out string error)
-    {
-        if (Ui is not null)
-        {
-            error = "UI is already open.";
-            return false;
-        }
-        
-        try
-        {
-            Ui = UiManager.Create(new VolteUiLayer(provider), WndOpt, fontSize);
-            
-            // declared as illegal code by the Silk God (Main thread isn't the controller of the Window)
-            new Thread(() =>
-            {
-                Ui.Run(); //returns when UI is closed
-                Ui.Dispose();
-                Ui = null;
-            }) { Name = "Volte UI Thread" }.Start();
-        }
-        catch (Exception e)
-        {
-            Error(LogSource.UI, "Could not create UI thread", e);
-            error = $"Error opening UI: {e.Message}";
-            return false;
-        }
-        
-        error = null;
-
-        return true;
-    }
 
     #endregion
 }

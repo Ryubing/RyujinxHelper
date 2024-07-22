@@ -1,4 +1,5 @@
 ﻿using System.Collections.Immutable;
+// needed for commented code //using System.Numerics;
 using ImGuiNET;
 using Silk.NET.Input;
 using Color = System.Drawing.Color;
@@ -9,6 +10,8 @@ public partial class VolteUiLayer
 {
     private void CommandStats(double _)
     {
+        //using var __ = PushStyle(ImGuiStyleVar.WindowMinSize, new Vector2(201, 188));
+        
         ImGui.Text($"Total executions: {State.Messages.AllTimeCommandCalls}");
         ColoredText($"  - Successful: {State.Messages.AllTimeSuccessfulCommandCalls}", Color.LawnGreen);
         ColoredText($"  - Failed: {State.Messages.AllTimeFailedCommandCalls}", Color.OrangeRed);
@@ -19,7 +22,6 @@ public partial class VolteUiLayer
         }");
         ColoredText($"  - Successful: {CalledCommandsInfo.ThisSessionSuccess + State.Messages.UnsavedSuccessfulCommandCalls}", Color.LawnGreen);
         ColoredText($"  - Failed: {CalledCommandsInfo.ThisSessionFailed + State.Messages.UnsavedFailedCommandCalls}", Color.OrangeRed);
-        ImGui.Separator();
     }
     
     private static Color GetRandomColor() =>
@@ -31,6 +33,8 @@ public partial class VolteUiLayer
 
     private void UiSettings(double _)
     {
+        //using var __ = PushStyle(ImGuiStyleVar.WindowMinSize, new Vector2(361, 450));
+        
         ImGui.Text("Background");
         ImGui.ColorPicker3("", ref State.Background, ImGuiColorEditFlags.NoSidePreview | ImGuiColorEditFlags.NoLabel);
         if (ImGui.SmallButton("Reset"))
@@ -52,6 +56,7 @@ public partial class VolteUiLayer
 
     private void BotManagement(double _)
     {
+        //using var __ = PushStyle(ImGuiStyleVar.WindowMinSize, new Vector2(385, 299));
         ImGui.Text("Discord Gateway:");
         // ReSharper disable once SwitchStatementHandlesSomeKnownEnumValuesWithDefault
         // default is a meaningless case here i dont fucking care rider
@@ -105,6 +110,8 @@ public partial class VolteUiLayer
 
     private void GuildManager(double _)
     {
+        //using var __ = PushStyle(ImGuiStyleVar.WindowMinSize, new Vector2(418, 300));
+        
         if (State.SelectedGuildId != 0)
         {
             var selectedGuild = State.Client.GetGuild(State.SelectedGuildId);

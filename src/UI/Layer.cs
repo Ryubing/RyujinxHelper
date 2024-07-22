@@ -103,20 +103,17 @@ public abstract class UiLayer<TState> where TState : UiLayerState
         }
 
         Render(delta);
-        RenderPanels(delta);
         
-        ImGui.End();
-    }
-
-    private void RenderPanels(double delta)
-    {
         foreach (var renderPanel in Panels)
             renderPanel(delta);
+        
+        ImGui.End();
     }
 
     public void SetColors(ref ThemedColors theme)
     {
         var style = ImGui.GetStyle();
+        
         style.GrabRounding = 4f;
         style.FrameRounding = 6f;
         style.WindowMenuButtonPosition = ImGuiDir.None;
@@ -181,6 +178,19 @@ public abstract class UiLayer<TState> where TState : UiLayerState
     }
 
     public virtual ImGuiFontConfig? GetFontConfig(int size) => null;
+    
+    #region Scoped Styling
+
+    protected IDisposable PushStyle(ImGuiStyleVar styleVar, Vector2 value) => new ScopedStyleVar(styleVar, value);
+    protected IDisposable PushStyle(ImGuiStyleVar styleVar, float value) => new ScopedStyleVar(styleVar, value);
+    
+    protected IDisposable PushStyle(ImGuiCol colorVar, Vector4 value) => new ScopedStyleColor(colorVar, value);
+    protected IDisposable PushStyle(ImGuiCol colorVar, Vector3 value) => new ScopedStyleColor(colorVar, value);
+    protected IDisposable PushStyle(ImGuiCol colorVar, Color value) => new ScopedStyleColor(colorVar, value);
+    protected IDisposable PushStyle(ImGuiCol colorVar, System.Drawing.Color value) => new ScopedStyleColor(colorVar, value.AsVec4());
+    protected IDisposable PushStyle(ImGuiCol colorVar, uint value) => new ScopedStyleColor(colorVar, value);
+    
+    #endregion Scoped Styling
 }
 
 public abstract class UiLayerState
@@ -190,4 +200,29 @@ public abstract class UiLayerState
     public Vector3 Background = DefaultBackground;
 
     public bool SelectedTheme { get; set; } = true;
+}
+
+public struct ScopedStyleVar : IDisposable
+{
+    public ScopedStyleVar(ImGuiStyleVar styleVar, Vector2 value) 
+        => ImGui.PushStyleVar(styleVar, value);
+
+    public ScopedStyleVar(ImGuiStyleVar styleVar, float value) 
+        => ImGui.PushStyleVar(styleVar, value);
+
+    public void Dispose() => ImGui.PopStyleVar();
+}
+
+public struct ScopedStyleColor : IDisposable
+{
+    public ScopedStyleColor(ImGuiCol colorVar, Vector4 value) 
+        => ImGui.PushStyleColor(colorVar, value);
+
+    public ScopedStyleColor(ImGuiCol colorVar, Vector3 value) 
+        => ImGui.PushStyleColor(colorVar, new Vector4(value, 1f));
+
+    public ScopedStyleColor(ImGuiCol colorVar, uint value) => 
+        ImGui.PushStyleColor(colorVar, value);
+
+    public void Dispose() => ImGui.PopStyleColor();
 }

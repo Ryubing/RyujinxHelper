@@ -1,3 +1,3 @@
 ﻿namespace Volte.Interactions.Commands.Modules;
 
-public partial class InteractionUtilityModule : VolteSlashCommandModule;
+public sealed partial class InteractionUtilityModule : VolteSlashCommandModule;

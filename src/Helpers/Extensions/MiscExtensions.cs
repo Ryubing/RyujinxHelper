@@ -3,7 +3,6 @@ using System.Numerics;
 using SixLabors.ImageSharp;
 using SixLabors.ImageSharp.PixelFormats;
 using SixLabors.ImageSharp.Processing;
-using Volte.Commands.Text.Modules;
 using Color = Discord.Color;
 
 namespace Gommon;
@@ -39,8 +38,4 @@ public partial class Extensions
     });
 
     public static Rgba32 ToRgba32(this Color color) => new(color.R, color.G, color.B);
-
-    public static Task WarnAsync(this SocketGuildUser member, VolteContext ctx, string reason)
-        => ModerationModule.WarnAsync(ctx.User, ctx.GuildData, member,
-            ctx.Services.GetRequiredService<DatabaseService>(), reason);
 }

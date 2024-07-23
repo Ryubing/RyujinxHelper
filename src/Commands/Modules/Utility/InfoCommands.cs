@@ -12,7 +12,7 @@ namespace Volte.Commands.Text.Modules;
 
 public sealed partial class UtilityModule
 {
-    [Command("Info")]
+    [Command("Info", "Uptime")]
     [Description("Provides basic information about this instance of Volte.")]
     public async Task<ActionResult> InfoAsync()
         => Ok(Context.CreateEmbedBuilder()

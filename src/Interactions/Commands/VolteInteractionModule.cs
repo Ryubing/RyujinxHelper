@@ -19,6 +19,9 @@ public class VolteInteractionModule<T> : InteractionModuleBase<SocketInteraction
 
     protected InteractionOkResult<T> Ok(string message, bool ephemeral = false) 
         => Ok(Context.CreateReplyBuilder(ephemeral).WithEmbedFrom(message));
+    
+    protected InteractionOkResult<T> Ok(EmbedBuilder embed, bool ephemeral = false) 
+        => new(Context.CreateReplyBuilder(ephemeral).WithEmbeds(embed));
 }
 
 public class VolteSlashCommandModule : VolteInteractionModule<SocketSlashCommand>;

@@ -67,7 +67,7 @@ public class VolteBot
                 $"Loaded {addedModules.Count} modules and {addedModules.Sum(m => m.Commands.Count)} commands.");
         }
 
-        await _client.RegisterVolteEventHandlersAsync(ServiceProvider);
+        _client.RegisterVolteEventHandlers(ServiceProvider);
 
         ExecuteBackgroundAsync(async () => await ServiceProvider.Get<AddonService>().InitAsync());
         ServiceProvider.Get<ReminderService>().Initialize();
@@ -90,9 +90,7 @@ public class VolteBot
     {
         Critical(LogSource.Volte, "Bot shutdown requested; shutting down and cleaning up.");
 
-        var messageService = provider.Get<MessageService>();
-
-        CalledCommandsInfo.UpdateSaved(messageService);
+        CalledCommandsInfo.UpdateSaved(provider.Get<MessageService>());
 
         await provider.DisposeAsync();
 
@@ -102,8 +100,6 @@ public class VolteBot
 
         Environment.Exit(0);
     }
-
-    #region UI
 
     // WindowOptions.Default with custom title and larger base window
     public static readonly WindowOptions DefaultWindowOptions = new(
@@ -120,6 +116,4 @@ public class VolteBot
         shouldSwapAutomatically: true,
         videoMode: VideoMode.Default
     );
-
-    #endregion
 }

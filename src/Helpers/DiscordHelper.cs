@@ -1,3 +1,4 @@
+using Volte.Commands.Text.Modules;
 using Volte.Interactions;
 
 namespace Volte.Helpers;
@@ -40,6 +41,10 @@ public static class DiscordHelper
 
     public static bool HasRole(this SocketGuildUser user, ulong roleId)
         => user.Roles.Select(x => x.Id).Contains(roleId);
+    
+    public static Task WarnAsync(this SocketGuildUser member, VolteContext ctx, string reason)
+        => ModerationModule.WarnAsync(ctx.User, ctx.GuildData, member,
+            ctx.Services.GetRequiredService<DatabaseService>(), reason);
 
     public static async Task<bool> TrySendMessageAsync(this SocketGuildUser user, string text = null,
         bool isTts = false, Embed embed = null, RequestOptions options = null)
@@ -63,8 +68,8 @@ public static class DiscordHelper
             .Where(x => !requireColor || x.HasColor())
             .MaxBy(x => x.Position);
     }
-
-    public static bool TryGetSpotifyStatus(this IGuildUser user, out SpotifyGame spotify)
+    
+    public static bool TryGetSpotifyStatus(this IUser user, out SpotifyGame spotify)
     {
         spotify = user.Activities.FirstOrDefault(x => x is SpotifyGame).Cast<SpotifyGame>();
         return spotify != null;
@@ -104,21 +109,10 @@ public static class DiscordHelper
 
     public static SocketGuild GetPrimaryGuild(this BaseSocketClient client)
         => client.GetGuild(405806471578648588); // TODO: config option
-
-    private static readonly string[] _ignoredLogMessages =
-    [
-        "You're using the GuildPresences intent without listening to the PresenceUpdate event",
-        "application_command",
-        "unknown dispatch"
-    ];
-        
-    public static async Task RegisterVolteEventHandlersAsync(this DiscordSocketClient client, ServiceProvider provider)
+    
+    public static void RegisterVolteEventHandlers(this DiscordSocketClient client, ServiceProvider provider)
     {
-        client.Log += async m =>
-        {
-            if (!m.Message.ContainsAnyIgnoreCase(_ignoredLogMessages))
-                await Task.Run(() => HandleLogEvent(new LogEventArgs(m)));
-        };
+        Listen(client);
 
         client.Ready += async () =>
         {

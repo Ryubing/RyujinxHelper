@@ -11,7 +11,7 @@ public static partial class Logger
     
     public static void HandleLogEvent(LogEventArgs args) =>
         Log<object>(args.LogMessage.Severity, args.LogMessage.Source,
-            args.LogMessage.Message, args.LogMessage.Exception, default);
+            args.LogMessage.Message, args.LogMessage.Exception);
 
     #region Logger methods with invocation info
 
@@ -138,6 +138,24 @@ public static partial class Logger
         => Execute<object>(LogSeverity.Error, LogSource.Volte, string.Empty, e, default);
     
     #endregion
+    
+    private static readonly string[] _ignoredLogMessages =
+    [
+        "You're using the GuildPresences intent without listening to the PresenceUpdate event",
+        "application_command",
+        "unknown dispatch"
+    ];
+
+    public static void Listen(DiscordSocketClient client)
+    {
+        client.Log += m =>
+        {
+            if (!m.Message.ContainsAnyIgnoreCase(_ignoredLogMessages))
+                HandleLogEvent(new LogEventArgs(m));
+
+            return Task.CompletedTask;
+        };
+    }
 }
 
 public readonly struct FullDebugInfo

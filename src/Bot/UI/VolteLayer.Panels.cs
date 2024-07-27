@@ -12,46 +12,16 @@ public partial class VolteUiLayer
     {
         //using var __ = PushStyle(ImGuiStyleVar.WindowMinSize, new Vector2(201, 188));
         
-        ImGui.Text($"Total executions: {State.Messages.AllTimeCommandCalls}");
-        ColoredText($"  - Successful: {State.Messages.AllTimeSuccessfulCommandCalls}", Color.LawnGreen);
-        ColoredText($"  - Failed: {State.Messages.AllTimeFailedCommandCalls}", Color.OrangeRed);
+        ImGui.Text($"Total executions: {_state.Messages.AllTimeCommandCalls}");
+        ColoredText($"  - Successful: {_state.Messages.AllTimeSuccessfulCommandCalls}", Color.LawnGreen);
+        ColoredText($"  - Failed: {_state.Messages.AllTimeFailedCommandCalls}", Color.OrangeRed);
         ImGui.SeparatorText("This Session");
         ImGui.Text($"Executions: {
             CalledCommandsInfo.ThisSessionSuccess + CalledCommandsInfo.ThisSessionFailed + 
-            State.Messages.UnsavedFailedCommandCalls + State.Messages.UnsavedSuccessfulCommandCalls
+            _state.Messages.UnsavedFailedCommandCalls + _state.Messages.UnsavedSuccessfulCommandCalls
         }");
-        ColoredText($"  - Successful: {CalledCommandsInfo.ThisSessionSuccess + State.Messages.UnsavedSuccessfulCommandCalls}", Color.LawnGreen);
-        ColoredText($"  - Failed: {CalledCommandsInfo.ThisSessionFailed + State.Messages.UnsavedFailedCommandCalls}", Color.OrangeRed);
-    }
-    
-    private static Color GetRandomColor() =>
-        typeof(Color)
-            .GetProperties(BindingFlags.Static | BindingFlags.Public)
-            .Select(x => x.GetValue(null))
-            .OfType<Color>()
-            .GetRandomElement();
-
-    private void UiSettings(double _)
-    {
-        //using var __ = PushStyle(ImGuiStyleVar.WindowMinSize, new Vector2(361, 450));
-        
-        ImGui.Text("Background");
-        ImGui.ColorPicker3("", ref State.Background, ImGuiColorEditFlags.NoSidePreview | ImGuiColorEditFlags.NoLabel);
-        if (ImGui.SmallButton("Reset"))
-            State.Background = UiLayerState.DefaultBackground;
-        if (ImGui.SmallButton("Randomize"))
-            State.Background = GetRandomColor().AsVec3();
-        
-        ImGui.Separator();
-        if (ImGui.Button("Swap Theme"))
-        {
-            State.SelectedTheme = !State.SelectedTheme;
-            if (State.SelectedTheme) SetColors(ref Spectrum.Dark);
-            else SetColors(ref Spectrum.Light);
-        }
-
-        if (ImGui.RadioButton("Show Style Editor", State.ShowStyleEditor))
-            State.ShowStyleEditor = !State.ShowStyleEditor;
+        ColoredText($"  - Successful: {CalledCommandsInfo.ThisSessionSuccess + _state.Messages.UnsavedSuccessfulCommandCalls}", Color.LawnGreen);
+        ColoredText($"  - Failed: {CalledCommandsInfo.ThisSessionFailed + _state.Messages.UnsavedFailedCommandCalls}", Color.OrangeRed);
     }
 
     private void BotManagement(double _)
@@ -60,7 +30,7 @@ public partial class VolteUiLayer
         ImGui.Text("Discord Gateway:");
         // ReSharper disable once SwitchStatementHandlesSomeKnownEnumValuesWithDefault
         // default is a meaningless case here i dont fucking care rider
-        switch (State.Client.ConnectionState)
+        switch (_state.Client.ConnectionState)
         {
             case ConnectionState.Connected:
                 ColoredText("  Connected", Color.LawnGreen);
@@ -76,24 +46,24 @@ public partial class VolteUiLayer
                 break;
         }
 
-        if (State.Client.ConnectionState == ConnectionState.Connected)
+        if (_state.Client.ConnectionState == ConnectionState.Connected)
         {
-            ImGui.Text($"Connected as: {State.Client.CurrentUser.Username}#{State.Client.CurrentUser.DiscriminatorValue}");
+            ImGui.Text($"Connected as: {_state.Client.CurrentUser.Username}#{_state.Client.CurrentUser.DiscriminatorValue}");
             // ToString()ing the CurrentUser has weird question marks on both sides of Volte-dev's name,
             // so we do it manually in case that happens on other bot accounts too
             
-            var currentStatus = State.Client.Status;
+            var currentStatus = _state.Client.Status;
             
             if (ImGui.BeginMenu($"Bot status: {currentStatus}"))
             {
                 if (ImGui.MenuItem("Online", currentStatus != UserStatus.Online)) 
-                    Await(() => State.Client.SetStatusAsync(UserStatus.Online));
+                    Await(() => _state.Client.SetStatusAsync(UserStatus.Online));
                 if (ImGui.MenuItem("Idle", currentStatus != UserStatus.Idle)) 
-                    Await(() => State.Client.SetStatusAsync(UserStatus.Idle));
+                    Await(() => _state.Client.SetStatusAsync(UserStatus.Idle));
                 if (ImGui.MenuItem("Do Not Disturb", currentStatus != UserStatus.DoNotDisturb)) 
-                    Await(() => State.Client.SetStatusAsync(UserStatus.DoNotDisturb));
+                    Await(() => _state.Client.SetStatusAsync(UserStatus.DoNotDisturb));
                 if (ImGui.MenuItem("Invisible", currentStatus != UserStatus.Invisible)) 
-                    Await(() => State.Client.SetStatusAsync(UserStatus.Invisible));
+                    Await(() => _state.Client.SetStatusAsync(UserStatus.Invisible));
             
                 ImGui.EndMenu();
             }
@@ -112,9 +82,9 @@ public partial class VolteUiLayer
     {
         //using var __ = PushStyle(ImGuiStyleVar.WindowMinSize, new Vector2(418, 300));
         
-        if (State.SelectedGuildId != 0)
+        if (_state.SelectedGuildId != 0)
         {
-            var selectedGuild = State.Client.GetGuild(State.SelectedGuildId);
+            var selectedGuild = _state.Client.GetGuild(_state.SelectedGuildId);
             var selectedGuildMembers = selectedGuild.Users.ToImmutableArray();
             var botMembers = selectedGuildMembers.Count(sgu => sgu.IsBot);
             
@@ -134,11 +104,11 @@ public partial class VolteUiLayer
                 if (ImGui.MenuItem("Leave Guild", destructiveMenuEnabled))
                 {
                     Await(() => selectedGuild.LeaveAsync());
-                    State.SelectedGuildId = 0; //resets this pane back to just the "select a guild" button
+                    _state.SelectedGuildId = 0; //resets this pane back to just the "select a guild" button
                 }
 
                 if (ImGui.MenuItem("Reset Configuration", destructiveMenuEnabled))
-                    State.Database.Save(GuildData.CreateFrom(selectedGuild));
+                    _state.Database.Save(GuildData.CreateFrom(selectedGuild));
                 
                 ImGui.EndMenu();
             }
@@ -151,15 +121,15 @@ public partial class VolteUiLayer
     
     private void GuildSelect()
     {
-        if (ImGui.BeginMenu("Select a Guild"))
+        if (!ImGui.BeginMenu("Select a Guild")) return;
+        
+        _state.Client.Guilds.ForEach(guild =>
         {
-            State.Client.Guilds.ForEach(guild =>
-            {
-                if (ImGui.MenuItem(guild.Name, guild.Id != State.SelectedGuildId))
-                    State.SelectedGuildId = guild.Id;
-            });
-            ImGui.EndMenu();
-        }
+            if (ImGui.MenuItem(guild.Name, guild.Id != _state.SelectedGuildId))
+                _state.SelectedGuildId = guild.Id;
+        });
+        
+        ImGui.EndMenu();
     }
 
     #endregion Guild Manager

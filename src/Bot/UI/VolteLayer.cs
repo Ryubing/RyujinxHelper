@@ -1,13 +1,14 @@
-﻿
-using System.IO;
-using ImGuiNET;
-using Silk.NET.OpenGL.Extensions.ImGui;
+﻿using ImGuiNET;
 using Color = System.Drawing.Color;
+// ReSharper disable InvertIf
 
 namespace Volte.UI;
 
-public sealed class VolteUiState : UiLayerState
+public sealed class VolteUiState
 {
+    public bool SelectedTheme = true;
+    public bool ShowStyleEditor;
+    
     public VolteUiState(IServiceProvider provider)
     {
         Cts = provider.Get<CancellationTokenSource>();
@@ -22,25 +23,24 @@ public sealed class VolteUiState : UiLayerState
     public readonly DatabaseService Database;
 
     public ulong SelectedGuildId = 0;
-
-    public bool ShowStyleEditor = false;
 }
 
-public partial class VolteUiLayer : UiLayer<VolteUiState>
+public partial class VolteUiLayer : UiLayer
 {
+    private readonly VolteUiState _state;
+    
     public VolteUiLayer(IServiceProvider provider)
     {
-        State = new VolteUiState(provider);
+        _state = new VolteUiState(provider);
         
         MainMenuBar = MenuBar;
         
-        Panel("UI Settings", UiSettings);
         Panel("Command Stats", CommandStats);
         Panel("Bot Management", BotManagement);
         Panel("Guild Manager", GuildManager);
         Panel(_ =>
         {
-            if (State.ShowStyleEditor)
+            if (_state.ShowStyleEditor)
             {
                 ImGui.Begin("Style Editor");
                 ImGui.ShowStyleEditor(ImGui.GetStyle());
@@ -54,7 +54,7 @@ public partial class VolteUiLayer : UiLayer<VolteUiState>
         if (ImGui.BeginMenu("File"))
         {
             if (ImGui.Button("Shutdown"))
-                State.Cts.Cancel();
+                _state.Cts.Cancel();
             
             ImGui.EndMenu();
         }
@@ -70,23 +70,22 @@ public partial class VolteUiLayer : UiLayer<VolteUiState>
             
             ImGui.EndMenu();
         }
-    }
 
-    public override ImGuiFontConfig? GetFontConfig(int size)
-    {
-        var ttf = FilePath.Data / "UiFont.ttf";
-        if (!ttf.ExistsAsFile)
+        if (ImGui.BeginMenu("Theming"))
         {
-            using var embeddedFont = Assembly.GetExecutingAssembly().GetManifestResourceStream("UIFont");
-            if (embeddedFont != null)
+            if (ImGui.MenuItem(_state.SelectedTheme ? "Swap to Light" : "Swap to Dark"))
             {
-                using var fs = ttf.OpenCreate();
-                embeddedFont.Seek(0, SeekOrigin.Begin);
-                embeddedFont.CopyTo(fs);
+                _state.SelectedTheme = !_state.SelectedTheme;
+                if (_state.SelectedTheme) 
+                    SetColors(ref Spectrum.Dark, true);
+                else SetColors(ref Spectrum.Light, false);
             }
+
+            if (ImGui.RadioButton("Show Style Editor", _state.ShowStyleEditor))
+                _state.ShowStyleEditor = !_state.ShowStyleEditor;
+            
+            ImGui.EndMenu();
         }
-        
-        return new ImGuiFontConfig(ttf.ToString(), size);
     }
 
     private static void ColoredText(string fmt, Color color) =>

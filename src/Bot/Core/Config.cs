@@ -9,6 +9,8 @@ public static class Config
     public static readonly JsonSerializerOptions JsonOptions = CreateSerializerOptions(true);
     public static readonly JsonSerializerOptions MinifiedJsonOptions = CreateSerializerOptions(false);
 
+    public static readonly FilePath Path = FilePath.Data / "volte.json";
+
     private static JsonSerializerOptions CreateSerializerOptions(bool writeIndented)
         => new()
         {
@@ -21,7 +23,7 @@ public static class Config
     
 
     private static bool IsValidConfig() 
-        => FilePath.ConfigFile.ExistsAsFile && !FilePath.ConfigFile.ReadAllText().IsNullOrEmpty();
+        => Path.ExistsAsFile && !Path.ReadAllText().IsNullOrEmpty();
 
     public static bool StartupChecks()
     {
@@ -36,7 +38,7 @@ public static class Config
 
         if (CreateIfAbsent()) return true;
         Error(LogSource.Volte,
-            $"Please fill in the configuration located at \"{FilePath.ConfigFile}\"; restart me when you've done so.");
+            $"Please fill in the configuration located at \"{Path}\"; restart me when you've done so.");
         return false;
 
     }
@@ -62,7 +64,7 @@ public static class Config
         
         try
         {
-            FilePath.ConfigFile.WriteAllText(JsonSerializer.Serialize(_configuration, JsonOptions));
+            Path.WriteAllText(JsonSerializer.Serialize(_configuration, JsonOptions));
         }
         catch (Exception e)
         {
@@ -76,14 +78,14 @@ public static class Config
     {
         _ = CreateIfAbsent();
         if (IsValidConfig())
-            _configuration = JsonSerializer.Deserialize<BotConfig>(FilePath.ConfigFile.ReadAllText(), JsonOptions);                    
+            _configuration = JsonSerializer.Deserialize<BotConfig>(Path.ReadAllText(), JsonOptions);                    
     }
 
     public static bool Reload()
     {
         try
         {
-            _configuration = JsonSerializer.Deserialize<BotConfig>(FilePath.ConfigFile.ReadAllText(), JsonOptions);
+            _configuration = JsonSerializer.Deserialize<BotConfig>(Path.ReadAllText(), JsonOptions);
             return true;
         }
         catch (JsonException e)

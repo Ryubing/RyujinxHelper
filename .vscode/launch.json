@@ -10,11 +10,11 @@
             "request": "launch",
             "preLaunchTask": "build",
             // If you have changed target frameworks, make sure to update the program path.
-            "program": "${workspaceFolder}/src/bin/Debug/netcoreapp3.1/Volte.dll",
-            "args": [],
-            "cwd": "${workspaceFolder}/src",
+            "program": "${workspaceFolder}/src/Bot/bin/Debug/net8.0/Volte.dll",
+            "args": ["--ui"],
+            "cwd": "${workspaceFolder}/src/Bot/bin/Debug/net8.0",
             // For more information about the 'console' field, see https://aka.ms/VSCode-CS-LaunchJson-Console
-            "console": "internalConsole",
+            "console": "integratedTerminal",
             "stopAtEntry": false
         },
         {

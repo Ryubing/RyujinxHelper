@@ -1,7 +1,12 @@
+using System.IO;
 using Silk.NET.Maths;
+using Silk.NET.OpenGL.Extensions.ImGui;
 using Silk.NET.Windowing;
+using SixLabors.ImageSharp;
+using SixLabors.ImageSharp.PixelFormats;
 using Volte.Commands.Text.Modules;
 using Volte.UI;
+using Image = SixLabors.ImageSharp.Image;
 
 namespace Volte;
 
@@ -38,11 +43,9 @@ public class VolteBot
         IsRunning = true;
 
         if (Program.CommandLineArguments.TryGetValue("ui", out var sizeStr)
-            && !UiManager.TryCreateUi(ServiceProvider,
-                DefaultWindowOptions,
-                sizeStr.TryParse<int>(out var fsz) ? fsz : 17,
+            && !UiManager.TryCreateUi(GetUiParams(sizeStr.TryParse<int>(out var fsz) ? fsz : 17),
                 out var uiStartError)
-           ) Error(LogSource.UI, $"Could not create UI: {uiStartError}");
+           ) Error(LogSource.UI, $"Could not create UI: {uiStartError!.Message}");
 
 
         _client = ServiceProvider.Get<DiscordSocketClient>();
@@ -116,4 +119,41 @@ public class VolteBot
         shouldSwapAutomatically: true,
         videoMode: VideoMode.Default
     );
+
+    public static UiManager.CreateParams GetUiParams(int fontSize)
+    {
+        return new UiManager.CreateParams
+        {
+            Font = getFont(),
+            WindowIcon = getIcon(),
+            WOptions = DefaultWindowOptions,
+            Layers = [new VolteUiLayer(ServiceProvider)],
+            ThreadName = "Volte UI Thread"
+        };
+
+        ImGuiFontConfig getFont()
+        {
+            var ttf = FilePath.Data / "UiFont.ttf";
+            if (!ttf.ExistsAsFile)
+            {
+                using var embeddedFont = Assembly.GetExecutingAssembly().GetManifestResourceStream("UIFont");
+                if (embeddedFont != null)
+                {
+                    using var fs = ttf.OpenCreate();
+                    embeddedFont.Seek(0, SeekOrigin.Begin);
+                    embeddedFont.CopyTo(fs);
+                }
+            }
+        
+            return new ImGuiFontConfig(ttf.ToString(), fontSize);
+        }
+
+        Image<Rgba32> getIcon()
+        {
+            Stream iconStream;
+            return (iconStream = Assembly.GetExecutingAssembly().GetManifestResourceStream("VolteIcon")) == null 
+                ? null 
+                : Image.Load<Rgba32>(iconStream);
+        }
+    }
 }

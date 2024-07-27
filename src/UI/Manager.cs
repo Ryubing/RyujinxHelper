@@ -1,41 +1,41 @@
-﻿using System.IO;
-using System.Runtime.CompilerServices;
-using System.Runtime.InteropServices;
+﻿using System;
+using System.Collections.Concurrent;
+using System.Numerics;
+using System.Threading;
+using System.Threading.Tasks;
+using Gommon;
 using ImGuiNET;
-using Silk.NET.Core;
-using Silk.NET.Input;
-using Silk.NET.OpenGL;
 using Silk.NET.OpenGL.Extensions.ImGui;
 using Silk.NET.Windowing;
-using SixLabors.ImageSharp.Advanced;
+using SixLabors.ImageSharp;
 using SixLabors.ImageSharp.PixelFormats;
-using Image = SixLabors.ImageSharp.Image;
 
 #nullable enable
 
 namespace Volte.UI;
 
 // adapted from https://github.com/dotnet/Silk.NET/blob/main/examples/CSharp/OpenGL%20Demos/ImGui/Program.cs
-public sealed class UiManager<TState> : IDisposable where TState : UiLayerState
+public sealed partial class UiManager
 {
-    private bool _isActive;
+    public readonly ConcurrentQueue<Func<Task>> TaskQueue = new();
 
-    private readonly IWindow _window;
-    private readonly ImGuiFontConfig? _fontConfig;
+    public UiLayer[] Layers { get; }
 
-    private ImGuiController? _controller;
-    private GL? _gl;
-    private IInputContext? _inputContext;
+    private int CurrentLayerIdx { get; set; }
 
-    public UiLayer<TState> Layer { get; }
-
-    public UiManager(UiLayer<TState> igLayer, WindowOptions? windowOptions, int fontSize = 14)
+    private void SetLayer(int layerIndex) =>
+        CurrentLayerIdx = layerIndex.CoerceAtLeast(0).CoerceAtMost(Layers.Length - 1);
+    
+    public UiLayer CurrentLayer => Layers[CurrentLayerIdx];
+    
+    private UiManager(CreateParams @params)
     {
-        Layer = igLayer;
+        Layers = @params.Layers;
 
-        _window = Window.Create(windowOptions ?? WindowOptions.Default);
+        _window = Window.Create(@params.WOptions);
 
-        _fontConfig = Layer.GetFontConfig(fontSize);
+        _fontConfig = @params.Font;
+        _windowIcon = @params.WindowIcon;
 
         _window.Load += OnWindowLoad;
         _window.Render += OnWindowRender;
@@ -53,38 +53,15 @@ public sealed class UiManager<TState> : IDisposable where TState : UiLayerState
     public void Run()
     {
         _isActive = true;
-        ExecuteBackgroundAsync(async () =>
+        Executor.ExecuteBackgroundAsync(async () =>
         {
             while (_isActive)
-                if (Layer.TaskQueue.TryDequeue(out var task))
-                    await task!();
+                if (TaskQueue.TryDequeue(out var task))
+                    await task();
+            
+            TaskQueue.Clear();
         });
         _window.Run();
-    }
-
-    private void OnWindowLoad()
-    {
-        _gl = GL.GetApi(_window);
-        _inputContext = _window.CreateInput();
-        _controller = new ImGuiController(_gl, _window, _inputContext, _fontConfig, () =>
-            {
-                var io = ImGui.GetIO();
-                io.ConfigFlags |= ImGuiConfigFlags.DockingEnable;
-                io.ConfigDockingWithShift = false;
-
-                Layer.SetColors(ref Spectrum.Dark);
-
-                var fonts = FilePath.Data.Resolve("fonts", true);
-                if (fonts.ExistsAsDirectory)
-                    fonts.GetFiles()
-                        .Where(x => x.Extension is "ttf")
-                        .ForEach(fp => io.Fonts.AddFontFromFileTTF(fp.Path, 17));
-            }
-        );
-
-        SetWindowIcon();
-
-        Info(LogSource.UI, $"Window 0x{_window.Handle:X} loaded");
     }
 
     private void OnWindowRender(double delta)
@@ -92,58 +69,67 @@ public sealed class UiManager<TState> : IDisposable where TState : UiLayerState
         if (_window.WindowState == WindowState.Minimized) return;
 
         _controller?.Update((float)delta);
+        
+        // shoutout https://gist.github.com/moebiussurfing/8dbc7fef5964adcd29428943b78e45d2
+        // for showing me how to properly setup dock space
+        
+        const ImGuiWindowFlags windowFlags = 
+            ImGuiWindowFlags.MenuBar | ImGuiWindowFlags.NoDocking | ImGuiWindowFlags.NoTitleBar | 
+            ImGuiWindowFlags.NoCollapse | ImGuiWindowFlags.NoResize | ImGuiWindowFlags.NoMove | 
+            ImGuiWindowFlags.NoBringToFrontOnFocus | ImGuiWindowFlags.NoNavFocus;
 
-        Layer.RenderInternal(delta);
+        var viewport = ImGui.GetMainViewport();
+        
+        ImGui.SetNextWindowPos(viewport.WorkPos);
+        ImGui.SetNextWindowSize(viewport.WorkSize);
+        ImGui.SetNextWindowViewport(viewport.ID);
+        
+        using (var _ = new ScopedStyleVar(ImGuiStyleVar.WindowRounding, 0f))
+        using (var __ = new ScopedStyleVar(ImGuiStyleVar.WindowBorderSize, 0f))
+            ImGui.Begin("Dock Space", windowFlags);
+        
+        ImGui.DockSpace(ImGui.GetID("DockSpace"), Vector2.Zero);
+
+        var currentLayer = CurrentLayer;
+        
+        if (currentLayer.MainMenuBar is { } menuBar)
+            if (ImGui.BeginMenuBar())
+            {
+                menuBar(delta);
+                ImGui.EndMenuBar();
+            }
+        
+        currentLayer.RenderInternal(delta);
+        
+        ImGui.End();
 
         _controller?.Render();
     }
-
-    private void SetWindowIcon()
-    {
-        // shoutout https://github.com/dotnet/Silk.NET/blob/b079b28cd51ce447183cfedde0a85412b9b226ee/src/Lab/Experiments/BlankWindow/Program.cs#L82-L95
-        Stream? iconStream;
-        if ((iconStream = Assembly.GetExecutingAssembly().GetManifestResourceStream("VolteIcon")) == null) return;
-
-        var img = Image.Load<Rgba32>(iconStream);
-        var memoryGroup = img.GetPixelMemoryGroup();
-
-        Memory<byte> array = new byte[memoryGroup.TotalLength * Unsafe.SizeOf<Rgba32>()];
-        var block = MemoryMarshal.Cast<byte, Rgba32>(array.Span);
-
-        foreach (var memory in memoryGroup)
-        {
-            memory.Span.CopyTo(block);
-            block = block[memory.Length..];
-        }
-
-        var rawIcon = new RawImage(img.Width, img.Height, array);
-
-        img.Dispose();
-
-        _window.SetWindowIcon(ref rawIcon);
-    }
-
+    
     public void Dispose() => _window.Dispose();
-}
+    
+    public static UiManager? Instance { get; private set; }
 
-public static class UiManager
-{
-    public static UiManager<VolteUiState>? Instance { get; private set; }
-
-    public static bool TryCreateUi(
-        IServiceProvider provider, WindowOptions? windowOptions,
-        int fontSize, out string error
-    )
+    public readonly struct CreateParams
+    {
+        public readonly WindowOptions WOptions { get; init; }
+        public readonly UiLayer[] Layers { get; init; }
+        public readonly ImGuiFontConfig Font { get; init; }
+        public readonly Image<Rgba32>? WindowIcon { get; init; }
+        public readonly string ThreadName { get; init; }
+    }
+    
+    public static bool TryCreateUi(CreateParams createParams, out Exception? error)
     {
         if (Instance is not null)
         {
-            error = "UI is already open.";
+            error = new InvalidOperationException("UI is already open.");
             return false;
         }
 
         try
         {
-            Instance = Create(new VolteUiLayer(provider), windowOptions ?? VolteBot.DefaultWindowOptions, fontSize);
+            Instance = new UiManager(createParams);
             
             // declared as illegal code by the Silk God (Main thread isn't the controller of the Window)
             new Thread(() =>
@@ -151,12 +137,11 @@ public static class UiManager
                 Instance.Run(); //returns when UI is closed
                 Instance.Dispose();
                 Instance = null;
-            }) { Name = "Volte UI Thread" }.Start();
+            }) { Name = createParams.ThreadName }.Start();
         }
         catch (Exception e)
         {
-            Error(LogSource.UI, "Could not create UI thread", e);
-            error = $"Error opening UI: {e.Message}";
+            error = e;
             return false;
         }
 
@@ -164,8 +149,4 @@ public static class UiManager
 
         return true;
     }
-
-    public static UiManager<TState> Create<TState>(UiLayer<TState> layer, WindowOptions? windowOptions = null,
-        int fontSize = 14) where TState : UiLayerState
-        => new(layer, windowOptions, fontSize);
 }

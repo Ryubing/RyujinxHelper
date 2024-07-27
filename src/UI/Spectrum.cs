@@ -1,36 +1,10 @@
-﻿namespace Volte.UI;
+﻿using Silk.NET.SDL;
 
-internal static class Spectrum
+namespace Volte.UI;
+
+// https://github.com/adobe/imgui/blob/master/imgui_spectrum.h
+public static class Spectrum
 {
-    internal static class Static
-    {
-        internal static Color None = Color(0x000000);
-        internal static Color Gray200 = Color(0xF4F4F4);
-        internal static Color Gray300 = Color(0xEAEAEA);
-        internal static Color Gray400 = Color(0xD3D3D3);
-        internal static Color Gray500 = Color(0xBCBCBC);
-        internal static Color Gray600 = Color(0x959595);
-        internal static Color Gray700 = Color(0x767676);
-        internal static Color Gray800 = Color(0x505050);
-        internal static Color Gray900 = Color(0x323232);
-        internal static Color Blue400 = Color(0x378EF0);
-        internal static Color Blue500 = Color(0x2680EB);
-        internal static Color Blue600 = Color(0x1473E6);
-        internal static Color Blue700 = Color(0x0D66D0);
-        internal static Color Red400 = Color(0xEC5B62);
-        internal static Color Red500 = Color(0xE34850);
-        internal static Color Red600 = Color(0xD7373F);
-        internal static Color Red700 = Color(0xC9252D);
-        internal static Color Orange400 = Color(0xF29423);
-        internal static Color Orange500 = Color(0xE68619);
-        internal static Color Orange600 = Color(0xDA7B11);
-        internal static Color Orange700 = Color(0xCB6F10);
-        internal static Color Green400 = Color(0x33AB84);
-        internal static Color Green500 = Color(0x2D9D78);
-        internal static Color Green600 = Color(0x268E6C);
-        internal static Color Green700 = Color(0x12805C);
-    }
-
     public static ThemedColors Dark = new DarkThemedColors();
     public static ThemedColors Light = new LightThemeColors();
 
@@ -161,12 +135,41 @@ internal static class Spectrum
     }
 
 
+    public static class Static
+    {
+        internal static Color None = Color(0x000000);
+        internal static Color Gray200 = Color(0xF4F4F4);
+        internal static Color Gray300 = Color(0xEAEAEA);
+        internal static Color Gray400 = Color(0xD3D3D3);
+        internal static Color Gray500 = Color(0xBCBCBC);
+        internal static Color Gray600 = Color(0x959595);
+        internal static Color Gray700 = Color(0x767676);
+        internal static Color Gray800 = Color(0x505050);
+        internal static Color Gray900 = Color(0x323232);
+        internal static Color Blue400 = Color(0x378EF0);
+        internal static Color Blue500 = Color(0x2680EB);
+        internal static Color Blue600 = Color(0x1473E6);
+        internal static Color Blue700 = Color(0x0D66D0);
+        internal static Color Red400 = Color(0xEC5B62);
+        internal static Color Red500 = Color(0xE34850);
+        internal static Color Red600 = Color(0xD7373F);
+        internal static Color Red700 = Color(0xC9252D);
+        internal static Color Orange400 = Color(0xF29423);
+        internal static Color Orange500 = Color(0xE68619);
+        internal static Color Orange600 = Color(0xDA7B11);
+        internal static Color Orange700 = Color(0xCB6F10);
+        internal static Color Green400 = Color(0x33AB84);
+        internal static Color Green500 = Color(0x2D9D78);
+        internal static Color Green600 = Color(0x268E6C);
+        internal static Color Green700 = Color(0x12805C);
+    }
+
     private static Color Color(uint raw)
     {
         var r = (raw >> 16) & 0xFF;
         var g = (raw >> 8) & 0xFF;
         var b = (raw >> 0) & 0xFF;
-        return new Color((int)r, (int)g, (int)b);
+        return new Color((byte)r, (byte)g, (byte)b);
     }
 }
 

@@ -1,0 +1,18 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <TargetFramework>net8.0</TargetFramework>
+        <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+        <Version>1.0.0</Version>
+        <InformationalVersion>Dev</InformationalVersion>
+        <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    </PropertyGroup>
+    <ItemGroup>
+        <PackageReference Include="Gommon" Version="2.6.2" />
+        <PackageReference Include="Silk.NET.Input" Version="2.21.0" />
+        <PackageReference Include="Silk.NET.OpenGL" Version="2.21.0" />
+        <PackageReference Include="Silk.NET.OpenGL.Extensions.ImGui" Version="2.21.0" />
+        <PackageReference Include="Silk.NET.Windowing" Version="2.21.0" />
+        <PackageReference Include="SixLabors.ImageSharp" Version="3.1.4" />
+    </ItemGroup>
+</Project>

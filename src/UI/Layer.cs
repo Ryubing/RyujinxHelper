@@ -1,45 +1,29 @@
-﻿using System.Collections.Concurrent;
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Numerics;
+using System.Threading.Tasks;
 using ImGuiNET;
 using Silk.NET.Input;
-using Silk.NET.OpenGL.Extensions.ImGui;
+using Silk.NET.SDL;
 
 namespace Volte.UI;
 
-public abstract class UiLayer<TState> where TState : UiLayerState
+public abstract class UiLayer
 {
-    public readonly ConcurrentQueue<AsyncFunction> TaskQueue = new();
+    private readonly List<Action<double>> _panels = [];
+    
+    public Action<double> MainMenuBar { get; protected set; }
 
-    private readonly List<Action<double>> Panels = [];
+    protected static ImGuiIOPtr Io => ImGui.GetIO();
 
-    protected Func<double, bool> PreRenderCheck;
-
-    protected Action<double> MainMenuBar;
-
-    protected void Await(AsyncFunction task) => TaskQueue.Enqueue(task);
-    protected void Await(Task task) => Await(() => task);
-
-    protected void Panel(string label, Action<double> render) => Panels.Add(delta =>
-    {
-        if (ImGui.Begin(label))
-        {
-            render(delta);
-            ImGui.End();
-        }
-    });
-
-    protected void Panel(Action<double> render) => Panels.Add(render);
-    public TState State { get; protected set; }
-
-    protected ImGuiIOPtr Io => ImGui.GetIO();
-
-    public bool IsKeyPressed(Key key)
+    public static bool IsKeyPressed(Key key)
         => Io.KeysDown[(int)key];
 
-    public bool IsMouseButtonPressed(MouseButton mb)
+    public static bool IsMouseButtonPressed(MouseButton mb)
         => Io.MouseDown[(int)mb];
 
-    public bool AllKeysPressed(params Key[] keys)
+    public static bool AllKeysPressed(params Key[] keys)
     {
         if (keys.Length == 1)
             return IsKeyPressed(keys[0]);
@@ -49,7 +33,7 @@ public abstract class UiLayer<TState> where TState : UiLayerState
             .All(x => x);
     }
 
-    public bool AllMouseButtonsPressed(params MouseButton[] mouseButtons)
+    public static bool AllMouseButtonsPressed(params MouseButton[] mouseButtons)
     {
         if (mouseButtons.Length == 1)
             return Io.MouseDown[(int)mouseButtons[0]];
@@ -59,58 +43,21 @@ public abstract class UiLayer<TState> where TState : UiLayerState
             .All(x => x);
     }
 
-    protected virtual void Render(double _)
+    protected virtual bool Render(double _)
     {
+        return false;
     }
 
     internal void RenderInternal(double delta)
     {
-        if (!VolteBot.IsRunning) return;
+        if (Render(delta))
+            return;
         
-        // shoutout https://gist.github.com/moebiussurfing/8dbc7fef5964adcd29428943b78e45d2
-        // for showing me how to properly setup dock space
-        
-        const ImGuiWindowFlags windowFlags = 
-            ImGuiWindowFlags.MenuBar | ImGuiWindowFlags.NoDocking | ImGuiWindowFlags.NoTitleBar | 
-            ImGuiWindowFlags.NoCollapse | ImGuiWindowFlags.NoResize | ImGuiWindowFlags.NoMove | 
-            ImGuiWindowFlags.NoBringToFrontOnFocus | ImGuiWindowFlags.NoNavFocus;
-
-        var viewport = ImGui.GetMainViewport();
-        
-        ImGui.SetNextWindowPos(viewport.WorkPos);
-        ImGui.SetNextWindowSize(viewport.WorkSize);
-        ImGui.SetNextWindowViewport(viewport.ID);
-        
-        ImGui.PushStyleVar(ImGuiStyleVar.WindowRounding, 0f);
-        ImGui.PushStyleVar(ImGuiStyleVar.WindowBorderSize, 0f);
-        ImGui.PushStyleColor(ImGuiCol.WindowBg, State.Background.AsColor().AsVec4());
-
-        ImGui.Begin("Dock Space", windowFlags);
-        
-        ImGui.PopStyleVar(2);
-        ImGui.PopStyleColor(1);
-
-        var dockspaceId = ImGui.GetID("DockSpace");
-        ImGui.DockSpace(dockspaceId, Vector2.Zero);
-        
-        if (MainMenuBar is not null)
-        {
-            if (ImGui.BeginMenuBar())
-            {
-                MainMenuBar(delta);
-                ImGui.EndMenuBar();
-            }
-        }
-
-        Render(delta);
-        
-        foreach (var renderPanel in Panels)
+        foreach (var renderPanel in _panels)
             renderPanel(delta);
-        
-        ImGui.End();
     }
 
-    public void SetColors(ref ThemedColors theme)
+    public static void SetColors(ref ThemedColors theme, bool dark)
     {
         var style = ImGui.GetStyle();
         
@@ -161,9 +108,9 @@ public abstract class UiLayer<TState> where TState : UiLayerState
         set(ImGuiCol.PlotHistogram, theme.Blue400);
         set(ImGuiCol.PlotHistogramHovered, theme.Blue600);
 
-        setVec(ImGuiCol.TextSelectedBg, ImGui.ColorConvertU32ToFloat4((theme.Blue400 & 0x00FFFFFF) | 0x33000000));
+        setVec(ImGuiCol.TextSelectedBg, ImGui.ColorConvertU32ToFloat4((colorValue(theme.Blue400) & 0x00FFFFFF) | 0x33000000));
         setVec(ImGuiCol.DragDropTarget, new Vector4(1.00f, 1.00f, 0.00f, 0.90f));
-        setVec(ImGuiCol.NavHighlight, ImGui.ColorConvertU32ToFloat4((theme.Gray900 & 0x00FFFFFF) | 0x0A000000));
+        setVec(ImGuiCol.NavHighlight, ImGui.ColorConvertU32ToFloat4((colorValue(theme.Gray900) & 0x00FFFFFF) | 0x0A000000));
         setVec(ImGuiCol.NavWindowingHighlight, new Vector4(1.00f, 1.00f, 1.00f, 0.70f));
         setVec(ImGuiCol.NavWindowingDimBg, new Vector4(0.80f, 0.80f, 0.80f, 0.20f));
         setVec(ImGuiCol.ModalWindowDimBg, new Vector4(0.20f, 0.20f, 0.20f, 0.35f));
@@ -171,13 +118,29 @@ public abstract class UiLayer<TState> where TState : UiLayerState
         return;
 
         void set(ImGuiCol colorVar, Color color)
-            => style.Colors[(int)colorVar] = color.AsVec4();
+            => setVec(colorVar, new Vector4(color.R / 255f, color.G / 255f, color.B / 255f, 1f));
 
         void setVec(ImGuiCol colorVar, Vector4 colorVec)
             => style.Colors[(int)colorVar] = colorVec;
+        
+        uint colorValue(Color color) => ((uint)color.R << 16)
+                             | ((uint)color.G << 8)
+                             | color.B;
     }
+    
+    protected static void Await(Func<Task> task) => UiManager.Instance!.TaskQueue.Enqueue(task);
+    protected static void Await(Task task) => Await(() => task);
 
-    public virtual ImGuiFontConfig? GetFontConfig(int size) => null;
+    protected void Panel(string label, Action<double> render) => _panels.Add(delta =>
+    {
+        if (ImGui.Begin(label))
+        {
+            render(delta);
+            ImGui.End();
+        }
+    });
+
+    protected void Panel(Action<double> render) => _panels.Add(render);
     
     #region Scoped Styling
 
@@ -186,20 +149,11 @@ public abstract class UiLayer<TState> where TState : UiLayerState
     
     protected IDisposable PushStyle(ImGuiCol colorVar, Vector4 value) => new ScopedStyleColor(colorVar, value);
     protected IDisposable PushStyle(ImGuiCol colorVar, Vector3 value) => new ScopedStyleColor(colorVar, value);
-    protected IDisposable PushStyle(ImGuiCol colorVar, Color value) => new ScopedStyleColor(colorVar, value);
+    protected IDisposable PushStyle(ImGuiCol colorVar, Color value) => new ScopedStyleColor(colorVar, value.AsVec4());
     protected IDisposable PushStyle(ImGuiCol colorVar, System.Drawing.Color value) => new ScopedStyleColor(colorVar, value.AsVec4());
     protected IDisposable PushStyle(ImGuiCol colorVar, uint value) => new ScopedStyleColor(colorVar, value);
     
     #endregion Scoped Styling
-}
-
-public abstract class UiLayerState
-{
-    public static Vector3 DefaultBackground => new(.45f, .55f, .60f);
-
-    public Vector3 Background = DefaultBackground;
-
-    public bool SelectedTheme { get; set; } = true;
 }
 
 public struct ScopedStyleVar : IDisposable

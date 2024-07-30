@@ -8,6 +8,7 @@
         <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
         <Version>1.0.1</Version>
         <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+        <NoWarn>$(NoWarn);CS8500</NoWarn>
         <Description>The mini abstraction used for the UI of Volte. https://github.com/Polyhaze/Volte</Description>
         <PackageReleaseNotes>
             Themes are no longer passed by ref, and instead are passed by pointer.
@@ -17,11 +18,11 @@
         <PackageTags>Silk.NET;Silk;Silk.NET.Windowing;Silk.NET.OpenGL;Silk.NET.OpenGL.Extensions.ImGui;Silk.NET.Input;ImGui;UI;GUI</PackageTags>
     </PropertyGroup>
     <ItemGroup>
-        <PackageReference Include="Gommon" Version="2.6.2" />
+        <PackageReference Include="Gommon" Version="2.6.4" />
         <PackageReference Include="Silk.NET.Input" Version="2.21.0" />
         <PackageReference Include="Silk.NET.OpenGL" Version="2.21.0" />
         <PackageReference Include="Silk.NET.OpenGL.Extensions.ImGui" Version="2.21.0" />
         <PackageReference Include="Silk.NET.Windowing" Version="2.21.0" />
-        <PackageReference Include="SixLabors.ImageSharp" Version="3.1.4" />
+        <PackageReference Include="SixLabors.ImageSharp" Version="3.1.5" />
     </ItemGroup>
 </Project>

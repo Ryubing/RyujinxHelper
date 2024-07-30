@@ -58,13 +58,13 @@ public partial class VolteUiView
             if (ImGui.BeginMenu($"Bot status: {currentStatus}"))
             {
                 if (ImGui.MenuItem("Online", currentStatus != UserStatus.Online)) 
-                    Await(() => _state.Client.SetStatusAsync(UserStatus.Online));
+                    Await(_state.Client.SetStatusAsync(UserStatus.Online));
                 if (ImGui.MenuItem("Idle", currentStatus != UserStatus.Idle)) 
-                    Await(() => _state.Client.SetStatusAsync(UserStatus.Idle));
+                    Await(_state.Client.SetStatusAsync(UserStatus.Idle));
                 if (ImGui.MenuItem("Do Not Disturb", currentStatus != UserStatus.DoNotDisturb)) 
-                    Await(() => _state.Client.SetStatusAsync(UserStatus.DoNotDisturb));
+                    Await(_state.Client.SetStatusAsync(UserStatus.DoNotDisturb));
                 if (ImGui.MenuItem("Invisible", currentStatus != UserStatus.Invisible)) 
-                    Await(() => _state.Client.SetStatusAsync(UserStatus.Invisible));
+                    Await(_state.Client.SetStatusAsync(UserStatus.Invisible));
             
                 ImGui.EndMenu();
             }
@@ -110,7 +110,7 @@ public partial class VolteUiView
             {
                 if (ImGui.MenuItem("Leave Guild", destructiveMenuEnabled))
                 {
-                    Await(() => selectedGuild.LeaveAsync());
+                    Await(selectedGuild.LeaveAsync());
                     _state.SelectedGuildId = 0; //resets this pane back to just the "select a guild" button
                 }
 

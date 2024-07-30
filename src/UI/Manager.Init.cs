@@ -35,7 +35,7 @@ public sealed partial class UiManager : IDisposable
     {
         _gl = GL.GetApi(_window);
         _inputContext = _window.CreateInput();
-        _controller = new ImGuiController(_gl, _window, _inputContext, default, () =>
+        _controller = new ImGuiController(_gl, _window, _inputContext, onConfigureIO: () =>
             {
                 var io = ImGui.GetIO();
                 io.ConfigFlags |= ImGuiConfigFlags.DockingEnable;
@@ -43,16 +43,13 @@ public sealed partial class UiManager : IDisposable
 
                 unsafe
                 {
-                    if (Theme != null)
-                        SetColors(Theme);
+                    if (_theme != null)
+                        SetColors(_theme);
+                    else 
+                        ImGui.StyleColorsDark();
                 }
 
                 _onConfigureIO(io);
-
-                FilePath.Data.Resolve("fonts", true)
-                    .GetFiles()? 
-                    .Where(x => x.Extension is "ttf")?
-                    .ForEach(fp => io.Fonts.AddFontFromFileTTF(fp.Path, 17));
             }
         );
 

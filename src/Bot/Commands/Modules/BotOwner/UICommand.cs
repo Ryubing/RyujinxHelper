@@ -14,7 +14,7 @@ public sealed partial class BotOwnerModule
             return BadRequest($"Could not create UI thread: {err?.Message}");
         
         UiManager.AddView(new VolteUiView(Context.Services));
-        UiManager.StartThread(uiParams.ThreadName);
+        UiManager.StartThread("Volte UI Thread");
         return None(() => Context.Message.AddReactionAsync(Emojis.BallotBoxWithCheck));
 
     }

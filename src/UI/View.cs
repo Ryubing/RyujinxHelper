@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Numerics;
 using System.Threading.Tasks;
@@ -9,11 +10,12 @@ using Silk.NET.SDL;
 
 namespace Volte.UI;
 
+[SuppressMessage("ReSharper", "VirtualMemberNeverOverridden.Global")] //this is an API
 public abstract class UiView
 {
     private readonly List<Action<double>> _panels = [];
     
-    public Action<double> MainMenuBar { get; protected set; }
+    public Action<double> MainMenuBar { get; protected init; }
 
     protected static ImGuiIOPtr Io => ImGui.GetIO();
 
@@ -43,22 +45,23 @@ public abstract class UiView
             .All(x => x);
     }
 
-    protected virtual bool Render(double _)
-    {
-        return false;
-    }
+    /**
+     * Override this function for custom one-off rendering.
+     * The return value determines whether your <see cref="UiView"/>'s defined panels will be rendered.
+     * (false = no render, true = render)
+     */
+    protected virtual bool Render(double _) => true;
 
     internal void RenderInternal(double delta)
     {
-        if (Render(delta))
-            return;
+        if (!Render(delta)) return;
         
         foreach (var renderPanel in _panels)
             renderPanel(delta);
     }
     
-    protected static void Await(Func<Task> task) => UiManager.Instance!.TaskQueue.Enqueue(task);
-    protected static void Await(Task task) => Await(() => task);
+    protected static void Await(Func<Task> task) => Await(task());
+    protected static void Await(Task task) => UiManager.Instance!.TaskQueue.Enqueue(task);
 
     protected void Panel(string label, Action<double> render) => _panels.Add(delta =>
     {
@@ -70,42 +73,4 @@ public abstract class UiView
     });
 
     protected void Panel(Action<double> render) => _panels.Add(render);
-    
-    #region Scoped Styling
-
-    protected IDisposable PushStyle(ImGuiStyleVar styleVar, Vector2 value) => new ScopedStyleVar(styleVar, value);
-    protected IDisposable PushStyle(ImGuiStyleVar styleVar, float value) => new ScopedStyleVar(styleVar, value);
-    
-    protected IDisposable PushStyle(ImGuiCol colorVar, Vector4 value) => new ScopedStyleColor(colorVar, value);
-    protected IDisposable PushStyle(ImGuiCol colorVar, Vector3 value) => new ScopedStyleColor(colorVar, value);
-    protected IDisposable PushStyle(ImGuiCol colorVar, Color value) => new ScopedStyleColor(colorVar, value.AsVec4());
-    protected IDisposable PushStyle(ImGuiCol colorVar, System.Drawing.Color value) => new ScopedStyleColor(colorVar, value.AsVec4());
-    protected IDisposable PushStyle(ImGuiCol colorVar, uint value) => new ScopedStyleColor(colorVar, value);
-    
-    #endregion Scoped Styling
-}
-
-public struct ScopedStyleVar : IDisposable
-{
-    public ScopedStyleVar(ImGuiStyleVar styleVar, Vector2 value) 
-        => ImGui.PushStyleVar(styleVar, value);
-
-    public ScopedStyleVar(ImGuiStyleVar styleVar, float value) 
-        => ImGui.PushStyleVar(styleVar, value);
-
-    public void Dispose() => ImGui.PopStyleVar();
-}
-
-public struct ScopedStyleColor : IDisposable
-{
-    public ScopedStyleColor(ImGuiCol colorVar, Vector4 value) 
-        => ImGui.PushStyleColor(colorVar, value);
-
-    public ScopedStyleColor(ImGuiCol colorVar, Vector3 value) 
-        => ImGui.PushStyleColor(colorVar, new Vector4(value, 1f));
-
-    public ScopedStyleColor(ImGuiCol colorVar, uint value) => 
-        ImGui.PushStyleColor(colorVar, value);
-
-    public void Dispose() => ImGui.PopStyleColor();
 }

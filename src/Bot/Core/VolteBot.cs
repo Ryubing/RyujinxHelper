@@ -1,4 +1,5 @@
 using System.IO;
+using ImGuiNET;
 using Silk.NET.Maths;
 using Silk.NET.OpenGL.Extensions.ImGui;
 using Silk.NET.Windowing;
@@ -12,8 +13,6 @@ namespace Volte;
 
 public class VolteBot
 {
-    public static bool IsRunning { get; private set; }
-
     public static Task StartAsync()
     {
         Console.Title = DefaultWindowOptions.Title;
@@ -39,8 +38,6 @@ public class VolteBot
         LogFileRestartNotice();
 
         ServiceProvider = new ServiceCollection().AddAllServices().BuildServiceProvider();
-
-        IsRunning = true;
 
         if (Program.CommandLineArguments.TryGetValue("ui", out var sizeStr))
             CreateUi(sizeStr);
@@ -78,7 +75,6 @@ public class VolteBot
         }
         catch (Exception e)
         {
-            IsRunning = false;
             e.SentryCapture();
 
             await ShutdownAsync(_client, ServiceProvider);
@@ -124,36 +120,36 @@ public class VolteBot
         if (UiManager.TryCreateUi(uiParams,out var uiStartError))
         {
             UiManager.AddView(new VolteUiView(ServiceProvider));
-            UiManager.StartThread(uiParams.ThreadName);
+            UiManager.StartThread("Volte UI Thread");
         }
         else Error(LogSource.UI, $"Could not create UI: {uiStartError!.Message}");
     }
+
+    private static readonly string[] UiFontResourceKeys = [ 
+        "Regular", 
+        "Bold", 
+        "BoldItalic", 
+        "Italic" 
+    ];
+    
     public static UiManager.CreateParams GetUiParams(int fontSize)
     {
         unsafe //Spectrum.Dark/Light are pointers
         {
             return new UiManager.CreateParams
             {
-                OnConfigureIO = io =>
-                {
-                    var ttf = FilePath.Data / "UiFont.ttf";
-                    if (!ttf.ExistsAsFile)
-                    {
-                        using var embeddedFont = Assembly.GetExecutingAssembly().GetManifestResourceStream("UIFont");
-                        if (embeddedFont != null)
-                        {
-                            using var fs = ttf.OpenCreate();
-                            embeddedFont.Seek(0, SeekOrigin.Begin);
-                            embeddedFont.CopyTo(fs);
-                        }
-                    }
-
-                    io.Fonts.AddFontFromFileTTF(ttf.ToString(), fontSize);
-                },
                 WindowIcon = getIcon(),
                 WOptions = DefaultWindowOptions,
                 Theme = Spectrum.Dark,
-                ThreadName = "Volte UI Thread"
+                OnConfigureIo = _ =>
+                {
+                    UiFontResourceKeys.ForEach(key =>
+                    {
+                        using var embeddedFont = Assembly.GetExecutingAssembly().GetManifestResourceStream(key);
+                        if (embeddedFont != null)
+                            UiManager.LoadFontFromStream(embeddedFont, key, fontSize);
+                    });
+                }
             };
         }
 

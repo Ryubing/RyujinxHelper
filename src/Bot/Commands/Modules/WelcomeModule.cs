@@ -26,7 +26,7 @@ public class WelcomeModule : VolteModule
     public Task<ActionResult> WelcomeMessageAsync([Remainder] string message = null)
     {
         if (message is null)
-            return Ok($"The current welcome message for this guild is: {Format.Code(Context.GuildData.Configuration.Welcome.WelcomeMessage, string.Empty)}");
+            return Ok($"The current welcome message for this guild is: {Format.Code(Context.GuildData.Configuration.Welcome.WelcomeMessage ?? "None", string.Empty)}");
 
         Context.Modify(data => data.Configuration.Welcome.WelcomeMessage = message);
         var welcomeChannel = Context.Guild.GetTextChannel(Context.GuildData.Configuration.Welcome.WelcomeChannel);
@@ -59,7 +59,7 @@ public class WelcomeModule : VolteModule
         if (message is null)
             return Ok(new StringBuilder()
                 .AppendLine(
-                    $"The current leaving message for this guild is: {Format.Code(Context.GuildData.Configuration.Welcome.LeavingMessage, string.Empty)}"));
+                    $"The current leaving message for this guild is: {Format.Code(Context.GuildData.Configuration.Welcome.LeavingMessage ?? "None", string.Empty)}"));
 
         Context.GuildData.Configuration.Welcome.LeavingMessage = message;
         Db.Save(Context.GuildData);
@@ -86,7 +86,7 @@ public class WelcomeModule : VolteModule
     {
         if (message is null)
             return Ok(
-                $"Unset the WelcomeDmMessage that was previously set to: {Format.Code(Context.GuildData.Configuration.Welcome.WelcomeDmMessage)}");
+                $"Unset the WelcomeDmMessage that was previously set to: {Format.Code(Context.GuildData.Configuration.Welcome.WelcomeDmMessage ?? "None")}");
 
         Context.GuildData.Configuration.Welcome.WelcomeDmMessage = message;
         Db.Save(Context.GuildData);

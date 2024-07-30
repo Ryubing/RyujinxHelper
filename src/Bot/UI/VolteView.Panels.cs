@@ -6,7 +6,7 @@ using Color = System.Drawing.Color;
 
 namespace Volte.UI;
 
-public partial class VolteUiLayer
+public partial class VolteUiView
 {
     private void CommandStats(double _)
     {
@@ -28,21 +28,22 @@ public partial class VolteUiLayer
     {
         //using var __ = PushStyle(ImGuiStyleVar.WindowMinSize, new Vector2(385, 299));
         ImGui.Text("Discord Gateway:");
+        ImGui.SameLine();
         // ReSharper disable once SwitchStatementHandlesSomeKnownEnumValuesWithDefault
         // default is a meaningless case here i dont fucking care rider
         switch (_state.Client.ConnectionState)
         {
             case ConnectionState.Connected:
-                ColoredText("  Connected", Color.LawnGreen);
+                ColoredText("Connected", Color.LawnGreen);
                 break;
             case ConnectionState.Connecting:
-                ColoredText("  Connecting...", Color.Yellow);
+                ColoredText("Connecting...", Color.Yellow);
                 break;
             case ConnectionState.Disconnecting:
-                ColoredText("  Disconnecting...", Color.OrangeRed);
+                ColoredText("Disconnecting...", Color.OrangeRed);
                 break;
             case ConnectionState.Disconnected:
-                ColoredText("  Disconnected!", Color.Red);
+                ColoredText("Disconnected!", Color.Red);
                 break;
         }
 
@@ -92,9 +93,15 @@ public partial class VolteUiLayer
             ImGui.Text($"Owner: @{selectedGuild.Owner}");
             ImGui.Text($"Text Channels: {selectedGuild.TextChannels.Count}");
             ImGui.Text($"Voice Channels: {selectedGuild.VoiceChannels.Count}");
-            ImGui.Text($"{selectedGuildMembers.Length} members");
-            ColoredText($" + {selectedGuildMembers.Length - botMembers} users", Color.LawnGreen);
-            ColoredText($" - {botMembers} bots", Color.OrangeRed);
+            
+            ImGui.Text($"{selectedGuildMembers.Length} members |"); 
+            ImGui.SameLine();
+            ColoredText($"{selectedGuildMembers.Length - botMembers} users", Color.LawnGreen); 
+            ImGui.SameLine();
+            ImGui.Text("|"); 
+            ImGui.SameLine();
+            ColoredText($"{botMembers} bots", Color.OrangeRed);
+            
             ImGui.Separator();
 
             var destructiveMenuEnabled = AllKeysPressed(Key.ShiftLeft, Key.ControlLeft);

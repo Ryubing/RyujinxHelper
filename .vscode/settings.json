@@ -1,3 +1,4 @@
 {
-    "FSharp.suggestGitignore": false
+    "FSharp.suggestGitignore": false,
+    "editor.fontFamily": "JetBrains Mono, monospace"
 }

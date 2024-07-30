@@ -81,7 +81,7 @@ public class TagModule : VolteModule
         return Ok($"Successfully modified the content of tag **{tag.Name}**.");
     }
 
-    [Command("Delete", "Del", "Rem")]
+    [Command("Delete", "Remove", "Del", "Rem")]
     [Description("Deletes a tag if it exists.")]
     [RequireGuildModerator]
     public async Task<ActionResult> TagDeleteAsync([Remainder, Description("The tag to delete.")]

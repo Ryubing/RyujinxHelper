@@ -42,11 +42,8 @@ public class VolteBot
 
         IsRunning = true;
 
-        if (Program.CommandLineArguments.TryGetValue("ui", out var sizeStr)
-            && !UiManager.TryCreateUi(GetUiParams(sizeStr.TryParse<int>(out var fsz) ? fsz : 17),
-                out var uiStartError)
-           ) Error(LogSource.UI, $"Could not create UI: {uiStartError!.Message}");
-
+        if (Program.CommandLineArguments.TryGetValue("ui", out var sizeStr))
+            CreateUi(sizeStr);
 
         _client = ServiceProvider.Get<DiscordSocketClient>();
         _cts = ServiceProvider.Get<CancellationTokenSource>();
@@ -120,39 +117,51 @@ public class VolteBot
         videoMode: VideoMode.Default
     );
 
+    private static void CreateUi(string sizeStr)
+    {
+        var uiParams = GetUiParams(sizeStr.TryParse<int>(out var fsz) ? fsz : 17);
+
+        if (UiManager.TryCreateUi(uiParams,out var uiStartError))
+        {
+            UiManager.AddView(new VolteUiView(ServiceProvider));
+            UiManager.StartThread(uiParams.ThreadName);
+        }
+        else Error(LogSource.UI, $"Could not create UI: {uiStartError!.Message}");
+    }
     public static UiManager.CreateParams GetUiParams(int fontSize)
     {
-        return new UiManager.CreateParams
+        unsafe //Spectrum.Dark/Light are pointers
         {
-            Font = getFont(),
-            WindowIcon = getIcon(),
-            WOptions = DefaultWindowOptions,
-            Layers = [new VolteUiLayer(ServiceProvider)],
-            ThreadName = "Volte UI Thread"
-        };
-
-        ImGuiFontConfig getFont()
-        {
-            var ttf = FilePath.Data / "UiFont.ttf";
-            if (!ttf.ExistsAsFile)
+            return new UiManager.CreateParams
             {
-                using var embeddedFont = Assembly.GetExecutingAssembly().GetManifestResourceStream("UIFont");
-                if (embeddedFont != null)
+                OnConfigureIO = io =>
                 {
-                    using var fs = ttf.OpenCreate();
-                    embeddedFont.Seek(0, SeekOrigin.Begin);
-                    embeddedFont.CopyTo(fs);
-                }
-            }
-        
-            return new ImGuiFontConfig(ttf.ToString(), fontSize);
+                    var ttf = FilePath.Data / "UiFont.ttf";
+                    if (!ttf.ExistsAsFile)
+                    {
+                        using var embeddedFont = Assembly.GetExecutingAssembly().GetManifestResourceStream("UIFont");
+                        if (embeddedFont != null)
+                        {
+                            using var fs = ttf.OpenCreate();
+                            embeddedFont.Seek(0, SeekOrigin.Begin);
+                            embeddedFont.CopyTo(fs);
+                        }
+                    }
+
+                    io.Fonts.AddFontFromFileTTF(ttf.ToString(), fontSize);
+                },
+                WindowIcon = getIcon(),
+                WOptions = DefaultWindowOptions,
+                Theme = Spectrum.Dark,
+                ThreadName = "Volte UI Thread"
+            };
         }
 
         Image<Rgba32> getIcon()
         {
             Stream iconStream;
-            return (iconStream = Assembly.GetExecutingAssembly().GetManifestResourceStream("VolteIcon")) == null 
-                ? null 
+            return (iconStream = Assembly.GetExecutingAssembly().GetManifestResourceStream("VolteIcon")) == null
+                ? null
                 : Image.Load<Rgba32>(iconStream);
         }
     }

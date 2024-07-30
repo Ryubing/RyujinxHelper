@@ -1,7 +1,7 @@
 .idea/
 .vs/
-src/Bot/bin
-src/Bot/obj
+src/Bot/bin/
+src/Bot/obj/
 src/Bot/Properties/
 src/UI/bin/
 src/UI/obj/

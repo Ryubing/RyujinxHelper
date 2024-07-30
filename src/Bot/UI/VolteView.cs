@@ -25,11 +25,11 @@ public sealed class VolteUiState
     public ulong SelectedGuildId = 0;
 }
 
-public partial class VolteUiLayer : UiLayer
+public partial class VolteUiView : UiView
 {
     private readonly VolteUiState _state;
     
-    public VolteUiLayer(IServiceProvider provider)
+    public VolteUiView(IServiceProvider provider)
     {
         _state = new VolteUiState(provider);
         
@@ -64,9 +64,7 @@ public partial class VolteUiLayer : UiLayer
             ImGui.MenuItem($"{Io.Framerate:###} FPS ({1000f / Io.Framerate:0.##} ms/frame)", false);
             
             if (Config.DebugEnabled || Version.IsDevelopment)
-            {
                 ImGui.MenuItem($"Delta: {delta:0.00000}", false);
-            }
             
             ImGui.EndMenu();
         }
@@ -76,9 +74,11 @@ public partial class VolteUiLayer : UiLayer
             if (ImGui.MenuItem(_state.SelectedTheme ? "Swap to Light" : "Swap to Dark"))
             {
                 _state.SelectedTheme = !_state.SelectedTheme;
-                if (_state.SelectedTheme) 
-                    SetColors(ref Spectrum.Dark, true);
-                else SetColors(ref Spectrum.Light, false);
+                unsafe
+                {
+                    UiManager.SetColors(_state.SelectedTheme ? Spectrum.Dark : Spectrum.Light);
+                }
+
             }
 
             if (ImGui.RadioButton("Show Style Editor", _state.ShowStyleEditor))

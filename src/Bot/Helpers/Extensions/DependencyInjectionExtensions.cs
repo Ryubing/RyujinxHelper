@@ -26,7 +26,7 @@ public static partial class Extensions
                 LogLevel = Config.DebugEnabled || Version.IsDevelopment 
                     ? LogSeverity.Debug 
                     : LogSeverity.Verbose,
-                GatewayIntents = _intents,
+                GatewayIntents = Intents,
                 AlwaysDownloadUsers = true,
                 ConnectionTimeout = 10000,
                 MessageCacheSize = 50
@@ -48,7 +48,7 @@ public static partial class Extensions
                 Info(LogSource.Volte, $"Injected {l.Count()} services into the provider.");
             });
 
-    private const GatewayIntents _intents
+    private const GatewayIntents Intents
         = GatewayIntents.Guilds | GatewayIntents.GuildMessageReactions | GatewayIntents.GuildMembers |
            GatewayIntents.GuildMessages | GatewayIntents.GuildPresences | GatewayIntents.MessageContent;
 

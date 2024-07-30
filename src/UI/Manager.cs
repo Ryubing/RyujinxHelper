@@ -1,11 +1,11 @@
 ﻿using System;
 using System.Collections.Concurrent;
+using System.Collections.Generic;
 using System.Numerics;
 using System.Threading;
 using System.Threading.Tasks;
 using Gommon;
 using ImGuiNET;
-using Silk.NET.OpenGL.Extensions.ImGui;
 using Silk.NET.Windowing;
 using SixLabors.ImageSharp;
 using SixLabors.ImageSharp.PixelFormats;
@@ -19,22 +19,27 @@ public sealed partial class UiManager
 {
     public readonly ConcurrentQueue<Func<Task>> TaskQueue = new();
 
-    public UiLayer[] Layers { get; }
+    public readonly List<UiView> Views = [];
 
-    private int CurrentLayerIdx { get; set; }
+    public unsafe ThemedColors* Theme { get; }
 
-    private void SetLayer(int layerIndex) =>
-        CurrentLayerIdx = layerIndex.CoerceAtLeast(0).CoerceAtMost(Layers.Length - 1);
+    private int CurrentViewIdx { get; set; }
+
+    private void SetView(int viewIndex) =>
+        CurrentViewIdx = viewIndex.CoerceAtLeast(0).CoerceAtMost(Views.Count - 1);
     
-    public UiLayer CurrentLayer => Layers[CurrentLayerIdx];
+    public UiView CurrentView => Views[CurrentViewIdx];
     
     private UiManager(CreateParams @params)
     {
-        Layers = @params.Layers;
+        unsafe
+        {
+            Theme = @params.Theme;
+        }
 
         _window = Window.Create(@params.WOptions);
 
-        _fontConfig = @params.Font;
+        _onConfigureIO = @params.OnConfigureIO;
         _windowIcon = @params.WindowIcon;
 
         _window.Load += OnWindowLoad;
@@ -73,33 +78,35 @@ public sealed partial class UiManager
         // shoutout https://gist.github.com/moebiussurfing/8dbc7fef5964adcd29428943b78e45d2
         // for showing me how to properly setup dock space
         
-        const ImGuiWindowFlags windowFlags = 
-            ImGuiWindowFlags.MenuBar | ImGuiWindowFlags.NoDocking | ImGuiWindowFlags.NoTitleBar | 
+        var windowFlags = 
+            ImGuiWindowFlags.NoDocking | ImGuiWindowFlags.NoTitleBar | 
             ImGuiWindowFlags.NoCollapse | ImGuiWindowFlags.NoResize | ImGuiWindowFlags.NoMove | 
             ImGuiWindowFlags.NoBringToFrontOnFocus | ImGuiWindowFlags.NoNavFocus;
 
+        var currView = CurrentView;
+        if (currView.MainMenuBar != null)
+            windowFlags |= ImGuiWindowFlags.MenuBar;
+        
         var viewport = ImGui.GetMainViewport();
         
         ImGui.SetNextWindowPos(viewport.WorkPos);
         ImGui.SetNextWindowSize(viewport.WorkSize);
         ImGui.SetNextWindowViewport(viewport.ID);
         
-        using (var _ = new ScopedStyleVar(ImGuiStyleVar.WindowRounding, 0f))
-        using (var __ = new ScopedStyleVar(ImGuiStyleVar.WindowBorderSize, 0f))
+        using (new ScopedStyleVar(ImGuiStyleVar.WindowRounding, 0f))
+        using (new ScopedStyleVar(ImGuiStyleVar.WindowBorderSize, 0f))
             ImGui.Begin("Dock Space", windowFlags);
         
         ImGui.DockSpace(ImGui.GetID("DockSpace"), Vector2.Zero);
-
-        var currentLayer = CurrentLayer;
         
-        if (currentLayer.MainMenuBar is { } menuBar)
+        if (currView.MainMenuBar is { } menuBar)
             if (ImGui.BeginMenuBar())
             {
                 menuBar(delta);
                 ImGui.EndMenuBar();
             }
         
-        currentLayer.RenderInternal(delta);
+        currView.RenderInternal(delta);
         
         ImGui.End();
 
@@ -112,11 +119,13 @@ public sealed partial class UiManager
 
     public readonly struct CreateParams
     {
-        public readonly WindowOptions WOptions { get; init; }
-        public readonly UiLayer[] Layers { get; init; }
-        public readonly ImGuiFontConfig Font { get; init; }
-        public readonly Image<Rgba32>? WindowIcon { get; init; }
-        public readonly string ThreadName { get; init; }
+        public WindowOptions WOptions { get; init; }
+        public Action<ImGuiIOPtr> OnConfigureIO { get; init; }
+        public Image<Rgba32>? WindowIcon { get; init; }
+        
+        public unsafe ThemedColors* Theme { get; init; }
+        
+        public string ThreadName { get; init; }
     }
     
     public static bool TryCreateUi(CreateParams createParams, out Exception? error)
@@ -130,14 +139,6 @@ public sealed partial class UiManager
         try
         {
             Instance = new UiManager(createParams);
-            
-            // declared as illegal code by the Silk God (Main thread isn't the controller of the Window)
-            new Thread(() =>
-            {
-                Instance.Run(); //returns when UI is closed
-                Instance.Dispose();
-                Instance = null;
-            }) { Name = createParams.ThreadName }.Start();
         }
         catch (Exception e)
         {
@@ -149,4 +150,17 @@ public sealed partial class UiManager
 
         return true;
     }
+
+    public static void StartThread(string threadName)
+    {
+        // declared as illegal code by the Silk God (Main thread isn't the controller of the Window)
+        new Thread(() =>
+        {
+            Instance?.Run(); //returns when UI is closed
+            Instance?.Dispose();
+            Instance = null;
+        }) { Name = threadName }.Start();
+    }
+    
+    public static void AddView(UiView view) => Instance!.Views.Add(view);
 }

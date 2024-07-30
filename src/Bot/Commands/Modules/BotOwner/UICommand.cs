@@ -9,8 +9,13 @@ public sealed partial class BotOwnerModule
     public Task<ActionResult> UiAsync(
         [Description("Desired font size of the UI.")] int fontSize = 17)
     {
-        return UiManager.TryCreateUi(VolteBot.GetUiParams(fontSize), out var err)
-            ? None(() => Context.Message.AddReactionAsync(Emojis.BallotBoxWithCheck)) 
-            : BadRequest($"Could not create UI thread: {err?.Message}");
+        var uiParams = VolteBot.GetUiParams(fontSize);
+        if (!UiManager.TryCreateUi(uiParams, out var err))
+            return BadRequest($"Could not create UI thread: {err?.Message}");
+        
+        UiManager.AddView(new VolteUiView(Context.Services));
+        UiManager.StartThread(uiParams.ThreadName);
+        return None(() => Context.Message.AddReactionAsync(Emojis.BallotBoxWithCheck));
+
     }
 }

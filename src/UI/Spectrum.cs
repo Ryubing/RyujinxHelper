@@ -5,11 +5,27 @@ namespace Volte.UI;
 // https://github.com/adobe/imgui/blob/master/imgui_spectrum.h
 public static class Spectrum
 {
-    public static ThemedColors Dark = new DarkThemedColors();
-    public static ThemedColors Light = new LightThemeColors();
+    public static unsafe ThemedColors* Dark
+    {
+        get
+        {
+            fixed (DarkThemedColors* ptr = &DarkThemedColors.Instance)
+                return (ThemedColors*)ptr;
+        }
+    }
+
+    public static unsafe ThemedColors* Light
+    {
+        get
+        {
+            fixed (LightThemedColors* ptr = &LightThemedColors.Instance)
+                return (ThemedColors*)ptr;
+        }
+    }
 
     public class DarkThemedColors : ThemedColors
     {
+        internal static DarkThemedColors Instance = new();
         internal override Color Gray50 => Color(0x252525);
         internal override Color Gray75 => Color(0x2F2F2F);
         internal override Color Gray100 => Color(0x323232);
@@ -71,8 +87,9 @@ public static class Spectrum
         internal override Color Purple700 => Color(0xB483F0);
     }
 
-    public class LightThemeColors : ThemedColors
+    public class LightThemedColors : ThemedColors
     {
+        internal static LightThemedColors Instance = new();
         internal override Color Gray50 => Color(0xFFFFFF);
         internal override Color Gray75 => Color(0xFAFAFA);
         internal override Color Gray100 => Color(0xF5F5F5);

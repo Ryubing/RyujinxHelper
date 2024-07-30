@@ -1,11 +1,20 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
-
     <PropertyGroup>
+        <Authors>GreemDev</Authors>
+        <Company>Polyhaze</Company>
+        <RepositoryUrl>https://github.com/Polyhaze/Volte</RepositoryUrl>
+        <RepositoryType>git</RepositoryType>
         <TargetFramework>net8.0</TargetFramework>
         <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
-        <Version>1.0.0</Version>
-        <InformationalVersion>Dev</InformationalVersion>
+        <Version>1.0.1</Version>
         <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+        <Description>The mini abstraction used for the UI of Volte. https://github.com/Polyhaze/Volte</Description>
+        <PackageReleaseNotes>
+            Themes are no longer passed by ref, and instead are passed by pointer.
+            Layers are now added AFTER UiManager is initialized and the instance is set.
+            TryCreateUi no longer automatically starts the UI thread, for you to add layers &amp; do any custom ImGui setup before starting the thread.
+        </PackageReleaseNotes>
+        <PackageTags>Silk.NET;Silk;Silk.NET.Windowing;Silk.NET.OpenGL;Silk.NET.OpenGL.Extensions.ImGui;Silk.NET.Input;ImGui;UI;GUI</PackageTags>
     </PropertyGroup>
     <ItemGroup>
         <PackageReference Include="Gommon" Version="2.6.2" />

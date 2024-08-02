@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Numerics;
+using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using Gommon;
@@ -38,7 +39,7 @@ public sealed partial class UiManager
 
         _window = Window.Create(@params.WOptions);
 
-        _onConfigureIO = @params.OnConfigureIo;
+        _onConfigureIo = @params.OnConfigureIo;
         _windowIcon = @params.WindowIcon;
 
         _window.Load += OnWindowLoad;
@@ -61,13 +62,15 @@ public sealed partial class UiManager
         Lambda
             .Repeat(async () =>
             {
+                await Task.Delay(
+                    125); // tasks dont get added too often; so there's no need to run the polling below it as fast as possible.
                 if (TaskQueue.TryDequeue(out var task))
                     await task.ConfigureAwait(false);
             })
             .While(() => _isActive)
             .Finally(() => TaskQueue.Clear())
             .Async();
-        
+
         _window.Run();
     }
 
@@ -165,30 +168,20 @@ public sealed partial class UiManager
 
     public static void AddView(UiView view) => Instance!._views.Add(view);
 
-    public static void LoadFontFromStream(Stream stream, string fontName, float fontSize)
+    public static unsafe void LoadFontFromStream(Stream stream, string fontName, float fontSize)
     {
-        stream.Seek(0, SeekOrigin.Begin);
+        var fontData = stream.ToSpan();
 
-        var fontData = new byte[stream.Length];
-        
-        // no using is a deliberate choice here; the user is responsible for disposing the stream
-        var read = new BinaryReader(stream).Read(fontData, 0, fontData.Length);
-        if (read != fontData.Length)
-            throw new InvalidDataException("Could not read all bytes from the stream.");
-
-
-        unsafe
+        fixed (byte* fontDataPtr = fontData)
         {
             var fontConfig = ImGuiNative.ImFontConfig_ImFontConfig();
-            fontName
-                .Select(c => (byte)c)
-                .Take(40)
-                .ToArray()
-                .CopyTo(new Span<byte>(fontConfig->Name, 40));
+            fontConfig->FontData = fontDataPtr;
+            fontConfig->FontDataSize = fontData.Length;
+            fontConfig->SizePixels = fontSize;
+            
+            Buffers.CopyBytesFromString(fontConfig->Name, 40, fontName); //40 is the size of the name buffer in ImFontConfig
 
-            fixed (byte* fontDataPtr = fontData)
-                ImGui.GetIO().Fonts.AddFontFromMemoryTTF((nint)fontDataPtr, fontData.Length, fontSize,
-                    new ImFontConfigPtr(fontConfig));
+            ImGuiNative.ImFontAtlas_AddFont(ImGui.GetIO().Fonts, fontConfig);
         }
     }
 }

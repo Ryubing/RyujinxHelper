@@ -117,31 +117,26 @@ public class VolteBot
     {
         var uiParams = GetUiParams(sizeStr.TryParse<int>(out var fsz) ? fsz : 17);
 
-        if (UiManager.TryCreateUi(uiParams,out var uiStartError))
+        if (UiManager.TryCreateUi(uiParams, out var uiStartError))
         {
-            UiManager.AddView(new VolteUiView(ServiceProvider));
+            UiManager.AddView(new VolteUiView());
             UiManager.StartThread("Volte UI Thread");
         }
         else Error(LogSource.UI, $"Could not create UI: {uiStartError!.Message}");
     }
 
-    private static readonly string[] UiFontResourceKeys = [ 
-        "Regular", 
-        "Bold", 
-        "BoldItalic", 
-        "Italic" 
-    ];
+    private static readonly string[] UiFontResourceKeys = [ "Regular", "Bold", "BoldItalic", "Italic" ];
     
     public static UiManager.CreateParams GetUiParams(int fontSize)
     {
-        unsafe //Spectrum.Dark/Light are pointers
+        unsafe
         {
             return new UiManager.CreateParams
             {
-                WindowIcon = getIcon(),
+                WindowIcon = loadIcon(),
                 WOptions = DefaultWindowOptions,
                 Theme = Spectrum.Dark,
-                OnConfigureIo = _ =>
+                OnConfigureIo = _ => 
                 {
                     UiFontResourceKeys.ForEach(key =>
                     {
@@ -153,11 +148,11 @@ public class VolteBot
             };
         }
 
-        Image<Rgba32> getIcon()
+        Image<Rgba32> loadIcon()
         {
-            Stream iconStream;
-            return (iconStream = Assembly.GetExecutingAssembly().GetManifestResourceStream("VolteIcon")) == null
-                ? null
+            using var iconStream = Assembly.GetExecutingAssembly().GetManifestResourceStream("VolteIcon");
+            return iconStream == null 
+                ? null 
                 : Image.Load<Rgba32>(iconStream);
         }
     }

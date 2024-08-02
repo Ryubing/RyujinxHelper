@@ -11,6 +11,30 @@ namespace Volte.UI;
  */
 public static class Gui
 {
+    public static void SameLineText(ReadOnlySpan<char> text)
+    {
+        ImGui.Text(text);
+        ImGui.SameLine();
+    }
+    
+    public static void SameLineText(ReadOnlySpan<char> text, Color color)
+    {
+        ImGui.TextColored(color.AsVec4(), text);
+        ImGui.SameLine();
+    }
+    
+    public static void SameLineText(ReadOnlySpan<char> text, System.Drawing.Color color)
+    {
+        ImGui.TextColored(color.AsVec4(), text);
+        ImGui.SameLine();
+    }
+    
+    public static void Text(ReadOnlySpan<char> text, Color color) 
+        => ImGui.TextColored(color.AsVec4(), text);
+
+    public static void Text(ReadOnlySpan<char> text, System.Drawing.Color color) 
+        => ImGui.TextColored(color.AsVec4(), text);
+
     public static IDisposable PushValue(this ImGuiStyleVar styleVar, Vector2 value) => new ScopedStyleVar(styleVar, value);
     public static IDisposable PushValue(this ImGuiStyleVar styleVar, float value) => new ScopedStyleVar(styleVar, value);
 

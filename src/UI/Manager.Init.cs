@@ -24,7 +24,7 @@ public sealed partial class UiManager : IDisposable
     private bool _isActive;
 
     private readonly IWindow _window;
-    private readonly Action<ImGuiIOPtr> _onConfigureIO;
+    private readonly Action<ImGuiIOPtr> _onConfigureIo;
     private Image<Rgba32>? _windowIcon;
 
     private ImGuiController? _controller;
@@ -49,7 +49,7 @@ public sealed partial class UiManager : IDisposable
                         ImGui.StyleColorsDark();
                 }
 
-                _onConfigureIO(io);
+                _onConfigureIo(io);
             }
         );
 
@@ -62,8 +62,8 @@ public sealed partial class UiManager : IDisposable
 
         if (_windowIcon == null) return;
         
-        Memory<byte> array = new byte[_windowIcon.GetPixelMemoryGroup().TotalLength * Unsafe.SizeOf<Rgba32>()];
-        var block = MemoryMarshal.Cast<byte, Rgba32>(array.Span);
+        Span<byte> span = new byte[_windowIcon.GetPixelMemoryGroup().TotalLength * Unsafe.SizeOf<Rgba32>()];
+        var block = MemoryMarshal.Cast<byte, Rgba32>(span);
 
         foreach (var memory in _windowIcon.GetPixelMemoryGroup())
         {
@@ -71,7 +71,7 @@ public sealed partial class UiManager : IDisposable
             block = block[memory.Length..];
         }
 
-        var rawIcon = new RawImage(_windowIcon.Width, _windowIcon.Height, array);
+        var rawIcon = new RawImage(_windowIcon.Width, _windowIcon.Height, span.ToArray());
 
         _windowIcon.Dispose();
         _windowIcon = null;

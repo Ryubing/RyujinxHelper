@@ -12,23 +12,28 @@ public partial class VolteUiView
     {
         //using var __ = PushStyle(ImGuiStyleVar.WindowMinSize, new Vector2(201, 188));
         
-        ImGui.Text($"Total executions: {_state.Messages.AllTimeCommandCalls}");
-        ColoredText($"  - Successful: {_state.Messages.AllTimeSuccessfulCommandCalls}", Color.LawnGreen);
-        ColoredText($"  - Failed: {_state.Messages.AllTimeFailedCommandCalls}", Color.OrangeRed);
+        ImGui.SeparatorText("Total executions");
+        Gui.SameLineText($"Successful: {_state.Messages.AllTimeSuccessfulCommandCalls}", Color.LawnGreen);
+        Gui.SameLineText("+");
+        Gui.SameLineText($"Failed: {_state.Messages.AllTimeFailedCommandCalls}", Color.OrangeRed);
+        Gui.SameLineText("=");
+        ImGui.Text($"Total: {_state.Messages.AllTimeCommandCalls}");
+        
         ImGui.SeparatorText("This Session");
-        ImGui.Text($"Executions: {
+        Gui.SameLineText($"Successful: {CalledCommandsInfo.ThisSessionSuccess + _state.Messages.UnsavedSuccessfulCommandCalls}", Color.LawnGreen);
+        Gui.SameLineText("+");
+        Gui.SameLineText($"Failed: {CalledCommandsInfo.ThisSessionFailed + _state.Messages.UnsavedFailedCommandCalls}", Color.OrangeRed);
+        Gui.SameLineText("=");
+        ImGui.Text($"Total: {
             CalledCommandsInfo.ThisSessionSuccess + CalledCommandsInfo.ThisSessionFailed + 
             _state.Messages.UnsavedFailedCommandCalls + _state.Messages.UnsavedSuccessfulCommandCalls
         }");
-        ColoredText($"  - Successful: {CalledCommandsInfo.ThisSessionSuccess + _state.Messages.UnsavedSuccessfulCommandCalls}", Color.LawnGreen);
-        ColoredText($"  - Failed: {CalledCommandsInfo.ThisSessionFailed + _state.Messages.UnsavedFailedCommandCalls}", Color.OrangeRed);
     }
 
     private void BotManagement(double _)
     {
         //using var __ = PushStyle(ImGuiStyleVar.WindowMinSize, new Vector2(385, 299));
-        ImGui.Text("Discord Gateway:");
-        ImGui.SameLine();
+        Gui.SameLineText("Discord Gateway:");
         // ReSharper disable once SwitchStatementHandlesSomeKnownEnumValuesWithDefault
         // default is a meaningless case here i dont fucking care rider
         switch (_state.Client.ConnectionState)
@@ -94,12 +99,9 @@ public partial class VolteUiView
             ImGui.Text($"Text Channels: {selectedGuild.TextChannels.Count}");
             ImGui.Text($"Voice Channels: {selectedGuild.VoiceChannels.Count}");
             
-            ImGui.Text($"{selectedGuildMembers.Length} members |"); 
-            ImGui.SameLine();
-            ColoredText($"{selectedGuildMembers.Length - botMembers} users", Color.LawnGreen); 
-            ImGui.SameLine();
-            ImGui.Text("|"); 
-            ImGui.SameLine();
+            Gui.SameLineText($"{selectedGuildMembers.Length} members |");
+            Gui.SameLineText($"{selectedGuildMembers.Length - botMembers} users", Color.LawnGreen); 
+            Gui.SameLineText("|");
             ColoredText($"{botMembers} bots", Color.OrangeRed);
             
             ImGui.Separator();

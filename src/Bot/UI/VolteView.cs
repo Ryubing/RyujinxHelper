@@ -29,9 +29,9 @@ public partial class VolteUiView : UiView
 {
     private readonly VolteUiState _state;
     
-    public VolteUiView(IServiceProvider provider)
+    public VolteUiView()
     {
-        _state = new VolteUiState(provider);
+        _state = new VolteUiState(VolteBot.ServiceProvider);
         
         MainMenuBar = MenuBar;
         
@@ -58,16 +58,6 @@ public partial class VolteUiView : UiView
             
             ImGui.EndMenu();
         }
-        
-        if (ImGui.BeginMenu("Debug Stats"))
-        {
-            ImGui.MenuItem($"{Io.Framerate:###} FPS ({1000f / Io.Framerate:0.##} ms/frame)", false);
-            
-            if (Config.DebugEnabled || Version.IsDevelopment)
-                ImGui.MenuItem($"Delta: {delta:0.00000}", false);
-            
-            ImGui.EndMenu();
-        }
 
         if (ImGui.BeginMenu("Theming"))
         {
@@ -86,6 +76,8 @@ public partial class VolteUiView : UiView
             
             ImGui.EndMenu();
         }
+        
+        ImGui.BeginMenu($"{Io.Framerate:###} FPS", false);
     }
 
     private static void ColoredText(string fmt, Color color) =>

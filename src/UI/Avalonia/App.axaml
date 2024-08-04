@@ -1,0 +1,26 @@
+﻿<Application xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:sty="using:FluentAvalonia.Styling"
+             x:Class="Volte.UI.App">
+    <Application.Resources>
+        <ResourceDictionary>
+            <ResourceDictionary.ThemeDictionaries>
+                <ResourceDictionary x:Key="Light">
+                    <SolidColorBrush x:Key="SystemChromeHighColor">#FFACACAC</SolidColorBrush>
+                    <SolidColorBrush x:Key="SystemChromeLowColor">Transparent</SolidColorBrush>
+                    <SolidColorBrush x:Key="SystemChromeMediumColor">#FFF2F2F2</SolidColorBrush>
+                    <SolidColorBrush x:Key="SystemChromeMediumLowColor">#FFE6E6E6</SolidColorBrush>
+                </ResourceDictionary>
+                <ResourceDictionary x:Key="Dark">
+                    <SolidColorBrush x:Key="SystemChromeHighColor">#FF737373</SolidColorBrush>
+                    <SolidColorBrush x:Key="SystemChromeLowColor">Transparent</SolidColorBrush>
+                    <SolidColorBrush x:Key="SystemChromeMediumColor">#FF2B2B2B</SolidColorBrush>
+                    <SolidColorBrush x:Key="SystemChromeMediumLowColor">#FF1F1F1F</SolidColorBrush>
+                </ResourceDictionary>
+            </ResourceDictionary.ThemeDictionaries>
+        </ResourceDictionary>
+    </Application.Resources>
+    <Application.Styles>       
+        <sty:FluentAvaloniaTheme PreferUserAccentColor="True" />
+    </Application.Styles>
+</Application>

@@ -12,7 +12,12 @@ public static class Program
             if (output.Error is not InvalidOperationException)
                 Error(output.Error);
 
-        CommandLineArguments = new ReadOnlyDictionary<string, string>(output.Parsed ?? new Dictionary<string, string>());
+        await Main(output.Parsed);
+    }
+    
+    private static async Task Main(Dictionary<string, string> args)
+    {
+        CommandLineArguments = new ReadOnlyDictionary<string, string>(args ?? new Dictionary<string, string>());
         await VolteBot.StartAsync();
     }
 }

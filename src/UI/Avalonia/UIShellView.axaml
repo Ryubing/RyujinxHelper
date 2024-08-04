@@ -1,0 +1,71 @@
+﻿<faw:AppWindow xmlns="https://github.com/avaloniaui"
+               xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+               xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+               xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+               xmlns:fac="using:FluentAvalonia.UI.Controls"
+               xmlns:faw="using:FluentAvalonia.UI.Windowing"
+               xmlns:v="using:Volte"
+               xmlns:local="using:Volte.UI"
+               xmlns:h="using:Volte.UI.Helpers"
+               mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
+               x:Class="Volte.UI.UIShellView"
+               Title="{Binding Title}">
+    <faw:AppWindow.DataContext>
+        <local:UIShellViewModel />
+    </faw:AppWindow.DataContext>
+    <Grid Background="Transparent" RowDefinitions="32,*,25">
+        <Grid ColumnDefinitions="Auto,*">
+            <Viewbox Width="26"
+                     Height="48"
+                     MaxWidth="48"
+                     MinWidth="48"
+                     Margin="3,4"
+                     HorizontalAlignment="Right"
+                     VerticalAlignment="Center"
+                     Stretch="Fill">
+                <Grid>
+                    <Viewbox Width="12"
+                             Height="12"
+                             HorizontalAlignment="Left"
+                             VerticalAlignment="Center">
+                        <Border Padding="25">
+                            <Image Source="{Binding Icon}"></Image>
+                        </Border>
+                    </Viewbox>
+                </Grid>
+            </Viewbox>
+
+            <Menu Name="MainMenu" Grid.Column="1" />
+        </Grid>
+        <fac:NavigationView Name="MainNavigation"
+                           Grid.Row="1"
+                           FooterMenuItemsSource="{Binding FooterPages, Source={x:Static h:PageManager.Shared}}"
+                           IsSettingsVisible="False"
+                           MenuItemsSource="{Binding Pages, Source={x:Static h:PageManager.Shared}}"
+                           PaneDisplayMode="LeftCompact"
+                           PaneTitle="{Binding Title}"
+                           SelectedItem="{Binding Current, Mode=TwoWay, Source={x:Static h:PageManager.Shared}}">
+            <fac:NavigationView.MenuItemTemplate>
+                <DataTemplate x:DataType="h:PageData">
+                    <fac:NavigationViewItem Content="{Binding Title}"
+                                           IconSource="{Binding Icon}"
+                                           Tag="{Binding Content}"
+                                           ToolTip.Tip="{Binding Description}" />
+                </DataTemplate>
+            </fac:NavigationView.MenuItemTemplate>
+        </fac:NavigationView>
+        <Grid Grid.Row="2"
+              ColumnDefinitions="Auto,Auto,*,Auto,Auto"
+              IsHitTestVisible="False">
+            <Border Grid.ColumnSpan="5" Background="{DynamicResource SystemAccentColor}" />
+            <TextBlock Grid.Column="3"
+                       Margin="5,0"
+                       VerticalAlignment="Center"
+                       FontSize="12">
+                <Run Text="{Binding Title}" />
+                <Run Text=" |" />
+                <Run Text="{Binding Source={x:Static v:Version.InformationVersion}}" />
+            </TextBlock>
+        </Grid>
+    </Grid>
+</faw:AppWindow>

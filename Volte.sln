@@ -5,7 +5,7 @@ VisualStudioVersion = 16.0.28721.148
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Volte", "src\Bot\Volte.csproj", "{5D4A85B0-1326-4CA2-A26C-D646D9579342}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Volte.UI", "src\UI\Volte.UI.csproj", "{70624B23-1B94-4801-9536-DD4FE86E6671}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Volte.UI", "src\UI\Volte.UI.csproj", "{BCD42127-89FE-44F3-AD2F-D224ED94B03A}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -23,14 +23,14 @@ Global
 		{5D4A85B0-1326-4CA2-A26C-D646D9579342}.Release|Any CPU.Build.0 = Release|Any CPU
 		{5D4A85B0-1326-4CA2-A26C-D646D9579342}.Release|x64.ActiveCfg = Release|x64
 		{5D4A85B0-1326-4CA2-A26C-D646D9579342}.Release|x64.Build.0 = Release|x64
-		{70624B23-1B94-4801-9536-DD4FE86E6671}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{70624B23-1B94-4801-9536-DD4FE86E6671}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{70624B23-1B94-4801-9536-DD4FE86E6671}.Debug|x64.ActiveCfg = Debug|Any CPU
-		{70624B23-1B94-4801-9536-DD4FE86E6671}.Debug|x64.Build.0 = Debug|Any CPU
-		{70624B23-1B94-4801-9536-DD4FE86E6671}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{70624B23-1B94-4801-9536-DD4FE86E6671}.Release|Any CPU.Build.0 = Release|Any CPU
-		{70624B23-1B94-4801-9536-DD4FE86E6671}.Release|x64.ActiveCfg = Release|Any CPU
-		{70624B23-1B94-4801-9536-DD4FE86E6671}.Release|x64.Build.0 = Release|Any CPU
+		{BCD42127-89FE-44F3-AD2F-D224ED94B03A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{BCD42127-89FE-44F3-AD2F-D224ED94B03A}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{BCD42127-89FE-44F3-AD2F-D224ED94B03A}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{BCD42127-89FE-44F3-AD2F-D224ED94B03A}.Debug|x64.Build.0 = Debug|Any CPU
+		{BCD42127-89FE-44F3-AD2F-D224ED94B03A}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{BCD42127-89FE-44F3-AD2F-D224ED94B03A}.Release|Any CPU.Build.0 = Release|Any CPU
+		{BCD42127-89FE-44F3-AD2F-D224ED94B03A}.Release|x64.ActiveCfg = Release|Any CPU
+		{BCD42127-89FE-44F3-AD2F-D224ED94B03A}.Release|x64.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

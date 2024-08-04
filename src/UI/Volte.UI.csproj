@@ -1,28 +1,33 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
     <PropertyGroup>
-        <Authors>GreemDev</Authors>
-        <Company>Polyhaze</Company>
-        <RepositoryUrl>https://github.com/Polyhaze/Volte</RepositoryUrl>
-        <RepositoryType>git</RepositoryType>
+        <OutputType>Exe</OutputType>
         <TargetFramework>net8.0</TargetFramework>
-        <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
-        <Version>1.0.1</Version>
-        <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
-        <NoWarn>$(NoWarn);CS8500</NoWarn>
-        <Description>The mini abstraction used for the UI of Volte. https://github.com/Polyhaze/Volte</Description>
-        <PackageReleaseNotes>
-            Themes are no longer passed by ref, and instead are passed by pointer.
-            Layers are now added AFTER UiManager is initialized and the instance is set.
-            TryCreateUi no longer automatically starts the UI thread, for you to add layers &amp; do any custom ImGui setup before starting the thread.
-        </PackageReleaseNotes>
-        <PackageTags>Silk.NET;Silk;Silk.NET.Windowing;Silk.NET.OpenGL;Silk.NET.OpenGL.Extensions.ImGui;Silk.NET.Input;ImGui;UI;GUI</PackageTags>
+        <LangVersion>latest</LangVersion>
+        <Nullable>enable</Nullable>
+        <ImplicitUsings>enable</ImplicitUsings>
     </PropertyGroup>
     <ItemGroup>
-        <PackageReference Include="Gommon" Version="2.6.4" />
-        <PackageReference Include="Silk.NET.Input" Version="2.21.0" />
-        <PackageReference Include="Silk.NET.OpenGL" Version="2.21.0" />
-        <PackageReference Include="Silk.NET.OpenGL.Extensions.ImGui" Version="2.21.0" />
-        <PackageReference Include="Silk.NET.Windowing" Version="2.21.0" />
-        <PackageReference Include="SixLabors.ImageSharp" Version="3.1.5" />
+        <PackageReference Condition="'$(Configuration)' == 'Debug'" Include="Avalonia.Diagnostics" Version="11.1.0" />
+        <PackageReference Include="ConfigFactory.Avalonia" Version="0.4.2" />
+        <PackageReference Include="Avalonia" Version="11.1.0"/>
+        <PackageReference Include="Avalonia.Desktop" Version="11.1.0"/>
+        <PackageReference Include="Avalonia.Themes.Fluent" Version="11.1.0"/>
+        <PackageReference Include="Avalonia.Fonts.Inter" Version="11.1.0"/>
+        <PackageReference Include="FluentAvaloniaUI" Version="2.0.5" />
+        
+        <ProjectReference Include="../Bot/Volte.csproj"/>
+    </ItemGroup>
+    <ItemGroup>
+        <AvaloniaResource Include="..\Bot\Resources\Volte.ico" Link="Assets\icon.ico" />
+    </ItemGroup>
+    <ItemGroup>
+      <Compile Update="Avalonia\App.axaml.cs">
+        <DependentUpon>App.axaml</DependentUpon>
+        <SubType>Code</SubType>
+      </Compile>
+      <Compile Update="Avalonia\UIShellView.axaml.cs">
+        <DependentUpon>MainWindow.axaml</DependentUpon>
+        <SubType>Code</SubType>
+      </Compile>
     </ItemGroup>
 </Project>

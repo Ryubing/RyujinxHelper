@@ -1,13 +1,4 @@
-using System.IO;
-using ImGuiNET;
-using Silk.NET.Maths;
-using Silk.NET.OpenGL.Extensions.ImGui;
-using Silk.NET.Windowing;
-using SixLabors.ImageSharp;
-using SixLabors.ImageSharp.PixelFormats;
 using Volte.Commands.Text.Modules;
-using Volte.UI;
-using Image = SixLabors.ImageSharp.Image;
 
 namespace Volte;
 
@@ -15,7 +6,7 @@ public class VolteBot
 {
     public static Task StartAsync()
     {
-        Console.Title = DefaultWindowOptions.Title;
+        Console.Title = $"Volte {Version.InformationVersion}";
         Console.CursorVisible = false;
         return new VolteBot().LoginAsync();
     }
@@ -38,9 +29,6 @@ public class VolteBot
         LogFileRestartNotice();
 
         ServiceProvider = new ServiceCollection().AddAllServices().BuildServiceProvider();
-
-        if (Program.CommandLineArguments.TryGetValue("ui", out var sizeStr))
-            CreateUi(sizeStr);
 
         _client = ServiceProvider.Get<DiscordSocketClient>();
         _cts = ServiceProvider.Get<CancellationTokenSource>();
@@ -95,65 +83,5 @@ public class VolteBot
         await client.StopAsync();
 
         Environment.Exit(0);
-    }
-
-    // WindowOptions.Default with custom title and larger base window
-    public static readonly WindowOptions DefaultWindowOptions = new(
-        isVisible: true,
-        position: new Vector2D<int>(50, 50),
-        size: new Vector2D<int>(1600, 900),
-        framesPerSecond: 0,
-        updatesPerSecond: 0.0,
-        api: GraphicsAPI.Default,
-        title: $"Volte {Version.InformationVersion}",
-        windowState: WindowState.Normal,
-        windowBorder: WindowBorder.Resizable,
-        isVSync: true,
-        shouldSwapAutomatically: true,
-        videoMode: VideoMode.Default
-    );
-
-    private static void CreateUi(string sizeStr)
-    {
-        var uiParams = GetUiParams(sizeStr.TryParse<int>(out var fsz) ? fsz : 17);
-
-        if (UiManager.TryCreateUi(uiParams, out var uiStartError))
-        {
-            UiManager.AddView(new VolteUiView());
-            UiManager.StartThread("Volte UI Thread");
-        }
-        else Error(LogSource.UI, $"Could not create UI: {uiStartError!.Message}");
-    }
-
-    private static readonly string[] UiFontResourceKeys = [ "Regular", "Bold", "BoldItalic", "Italic" ];
-    
-    public static UiManager.CreateParams GetUiParams(int fontSize)
-    {
-        unsafe
-        {
-            return new UiManager.CreateParams
-            {
-                WindowIcon = loadIcon(),
-                WOptions = DefaultWindowOptions,
-                Theme = Spectrum.Dark,
-                OnConfigureIo = _ => 
-                {
-                    UiFontResourceKeys.ForEach(key =>
-                    {
-                        using var embeddedFont = Assembly.GetExecutingAssembly().GetManifestResourceStream(key);
-                        if (embeddedFont != null)
-                            UiManager.LoadFontFromStream(embeddedFont, key, fontSize);
-                    });
-                }
-            };
-        }
-
-        Image<Rgba32> loadIcon()
-        {
-            using var iconStream = Assembly.GetExecutingAssembly().GetManifestResourceStream("VolteIcon");
-            return iconStream == null 
-                ? null 
-                : Image.Load<Rgba32>(iconStream);
-        }
     }
 }

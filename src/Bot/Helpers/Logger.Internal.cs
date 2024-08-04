@@ -55,7 +55,7 @@ public static partial class Logger
     {
         if (_logFileNoticePrinted || !(Config.EnabledFeatures?.LogToFile ?? false)) return;
             
-        GetRelevantLogPath().AppendAllText($"{Side}RESTARTING{Side}\n");
+        GetLogFilePath(DateTime.Now).AppendAllText($"{Side}RESTARTING{Side}\n");
             
         _logFileNoticePrinted = true;
     }
@@ -113,10 +113,14 @@ public static partial class Logger
         if (e != null)
         {
             e.SentryCapture(scope => 
-                scope.AddBreadcrumb("This exception might not have been thrown, and may not be important; it is merely being logged."));
-            Append(Environment.NewLine + (e.Message.IsNullOrEmpty() ? "No message provided" : e.Message) + 
-                   Environment.NewLine + e.StackTrace, 
-                Color.IndianRed, ref content);
+                scope.AddBreadcrumb("This exception might not have been thrown, and may not be important; it is merely being logged.")
+            );
+            
+            Append(errorString(), Color.IndianRed, ref content);
+
+            string errorString()
+                => Environment.NewLine + (e.Message.IsNullOrEmpty() ? "No message provided" : e.Message) +
+                   Environment.NewLine + e.StackTrace;
         }
 
         if (Environment.NewLine != content[^1].ToString())
@@ -126,12 +130,22 @@ public static partial class Logger
         }
             
         if (Config.EnabledFeatures?.LogToFile ?? false)
-            GetRelevantLogPath().AppendAllText(content.ToString().TrimEnd('\n').Append("\n"));
+            GetLogFilePath(DateTime.Now).AppendAllText(content.ToString().TrimEnd('\n').Append("\n"));
+        
+        if (!_logEventHandler.HasSubscribers) return;
+        
+        _logEventHandler.Call(new VolteLogEventArgs
+        {
+            Severity = s,
+            Source = src,
+            Message = message,
+            PrintedLines = content.ToString().TrimEnd('\n').Split('\n', StringSplitOptions.RemoveEmptyEntries),
+            Error = e
+        });
     }
 
-    private static FilePath GetLogFilePath(DateTime date) => new FilePath("logs") / string.Intern($"{date.Month}-{date.Day}-{date.Year}.log");
-
-    private static FilePath GetRelevantLogPath() => GetLogFilePath(DateTime.Now);
+    private static FilePath GetLogFilePath(DateTime date) 
+        => new FilePath("logs") / string.Intern($"{date.Year}-{date.Month}-{date.Day}.log");
 
     private static void Append(string m, Color c)
     {

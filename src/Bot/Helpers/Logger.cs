@@ -1,12 +1,18 @@
 using System.IO;
 using System.Runtime.CompilerServices;
-using Color = System.Drawing.Color;
-using Optional = Gommon.Optional;
 
 namespace Volte.Helpers;
 
 public static partial class Logger
 {
+    public static event Action<VolteLogEventArgs> LogEvent
+    {
+        add => _logEventHandler.Add(value);
+        remove => _logEventHandler.Remove(value);
+    }
+    
+    private static readonly Event<Action<VolteLogEventArgs>> _logEventHandler = new();
+    
     public static bool IsDebugLoggingEnabled => Config.DebugEnabled || Version.IsDevelopment;
     
     public static void HandleLogEvent(LogEventArgs args) =>
@@ -71,8 +77,9 @@ public static partial class Logger
     ///     This method calls <see cref="SentrySdk"/>'s CaptureException, so it is logged to Sentry.
     /// </summary>
     /// <param name="e">Exception to print.</param>
-    public static void Error<TData>(Exception e, InvocationInfo<TData> caller)
-        => Execute(LogSeverity.Error, LogSource.Volte, string.Empty, e, caller);
+    /// <param name="src">Source to print the message from.</param>
+    public static void Error<TData>(Exception e, InvocationInfo<TData> caller, LogSource src = LogSource.Volte)
+        => Execute(LogSeverity.Error, src, string.Empty, e, caller);
 
     #endregion
 

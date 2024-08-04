@@ -1,5 +1,4 @@
 ﻿using Discord.Interactions;
-using Silk.NET.Input;
 using Volte.Interactions;
 using RunMode = Qmmands.RunMode;
 

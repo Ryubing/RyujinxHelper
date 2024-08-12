@@ -64,6 +64,7 @@ public static partial class EvalHelper
         var msg = await embed.WithTitle("Evaluating")
             .WithDescription(Format.Code(code, "cs"))
             .SendToAsync(ctx.Channel);
+        
         try
         {
             var env = CreateEvalEnvironment(ctx);
@@ -72,7 +73,7 @@ public static partial class EvalHelper
             sw.Stop();
             
             var shouldReply = true;
-            if (state != null)
+            if (state.ReturnValue != null)
             {
                 switch (state.ReturnValue)
                 {

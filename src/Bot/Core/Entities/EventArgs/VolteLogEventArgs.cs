@@ -2,11 +2,13 @@
 
 #nullable enable
 
-public class VolteLogEventArgs
+public struct VolteLogEventArgs
 {
-    public required LogSeverity Severity;
-    public required LogSource Source;
-    public required string Message;
-    public required string[] PrintedLines;
-    public required Exception? Error;
+    public VolteLogEventArgs() { }
+
+    public required LogSeverity Severity { get; init; }
+    public required LogSource Source { get; init; }
+    public required string? Message { get; init; }
+    public required Exception? Error { get; init; }
+    public InvocationInfo Invocation { get; init; } = default;
 }

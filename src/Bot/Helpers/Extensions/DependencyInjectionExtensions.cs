@@ -45,7 +45,7 @@ public static partial class Extensions
                 var l = Assembly.GetExecutingAssembly().GetTypes()
                     .Where(IsEligibleService)
                     .Apply(ls => ls.ForEach(coll.TryAddSingleton));
-                Info(LogSource.Volte, $"Injected {l.Count()} services into the provider.");
+                Info(LogSource.Volte, $"Injected services [{l.Select(x => x.Name.ReplaceIgnoreCase("Service", "")).JoinToString(", ")}] into the provider.");
             });
 
     private const GatewayIntents Intents

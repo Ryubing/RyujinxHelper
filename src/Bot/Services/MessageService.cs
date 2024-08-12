@@ -5,25 +5,11 @@ public sealed class MessageService : VolteService
     private readonly CommandService _commandService;
     private readonly QuoteService _quoteService;
         
-    public MessageService(DiscordSocketClient client,
-        IServiceProvider provider,
-        CommandService commandService,
+    public MessageService(CommandService commandService,
         QuoteService quoteService)
     {
         _commandService = commandService;
         _quoteService = quoteService;
-        CalledCommandsInfo.StartPersistence(provider, saveEvery: 2.Minutes());
-        
-        client.MessageReceived += async socketMessage =>
-        {
-            if (socketMessage.ShouldHandle(out var msg))
-            {
-                if (msg.Channel is IDMChannel dm)
-                    await dm.SendMessageAsync("Currently, I do not support commands via DM.");
-                else
-                    await HandleMessageAsync(new MessageReceivedEventArgs(socketMessage, provider));
-            }
-        };
     }
     
     public ulong AllTimeCommandCalls => CalledCommandsInfo.Sum + 
@@ -190,7 +176,7 @@ public sealed class MessageService : VolteService
                 .Append(Format.Bold(result.Command.Name))
                 .AppendLine(":")
                 .Append(Format.Code(result.FailedChecks.Select(x => 
-                    $"{Format.Code(x.Check.GetType().AsPrettyString().Replace("Attribute", ""))}: {x.Result.FailureReason}"
+                    $"{x.Check.GetType().AsPrettyString().Replace("Attribute", "")}: {x.Result.FailureReason}"
                 ).JoinToString('\n'), "css"))
             );
 
@@ -201,7 +187,7 @@ public sealed class MessageService : VolteService
                 .Append(Format.Bold(result.Parameter.Name))
                 .AppendLine(":")
                 .Append(Format.Code(result.FailedChecks.Select(x => 
-                    $"{Format.Code(x.Check.GetType().AsPrettyString().Replace("Attribute", ""))}: {x.Result.FailureReason}"
+                    $"{x.Check.GetType().AsPrettyString().Replace("Attribute", "")}: {x.Result.FailureReason}"
                 ).JoinToString('\n'), "css"))
             );
         

@@ -42,10 +42,11 @@ public static partial class Logger
     
     internal static void PrintHeader()
     {
+        if (VolteBot.AvaloniaIsAttached) return;
+        
         Info(LogSource.Volte, MessageService.Separator.Trim());
         VolteAscii.ForEach(ln => Info(LogSource.Volte, ln));
         Info(LogSource.Volte, MessageService.Separator.Trim());
-        Info(LogSource.Volte, $"Currently running Volte V{Version.InformationVersion}.");
     }
 
     private const string Side = "----------------------------------------------------------";
@@ -60,34 +61,40 @@ public static partial class Logger
         _logFileNoticePrinted = true;
     }
     
-    private static void Log<TData>(LogSeverity s, LogSource from, string message, Exception e, InvocationInfo<TData> caller = default)
+    private static void Log(LogSeverity s, LogSource from, string message, Exception e, InvocationInfo caller = default)
     {
         if (s is LogSeverity.Debug && !Config.DebugEnabled)
             return;
         
-        LogSync.Lock(() => Execute(s, from, message, e, caller));
+        LogEventHandler.Call(new VolteLogEventArgs
+        {
+            Severity = s,
+            Source = from,
+            Message = message,
+            Error = e,
+            Invocation = caller
+        });
     }
     
-    private static void Execute<TData>(LogSeverity s, LogSource src, string message, Exception e, InvocationInfo<TData> caller)
+    private static void Execute(LogSeverity s, LogSource src, string message, Exception e, InvocationInfo caller)
     {
         var content = new StringBuilder();
 
         if (IsDebugLoggingEnabled && caller.IsInitialized)
         {
             var debugInfo = Optional.None<string>();
-            switch (caller)
+            switch (caller.Type)
             {
-                case InvocationInfo<FullDebugInfo> fdi:
+                case { Full: true }:
                     debugInfo =
-                        $"{fdi.GetSourceFileName()}:{fdi.Data.SourceFileLocation.LineInFile}->{fdi.Data.CallerName}";
+                        $"{caller.GetSourceFileName()}:{caller.LineInFile}->{caller.CallerName}";
+                    break;
+                case { CallerOnly: true }:
+                    debugInfo = caller.CallerName;
                     break;
                 
-                case InvocationInfo<SourceMemberName> smn:
-                    debugInfo = smn.Data.Value;
-                    break;
-                
-                case InvocationInfo<SourceFileLocation> fdi:
-                    debugInfo = $"{fdi.GetSourceFileName()}:{fdi.Data.LineInFile}";
+                case { FileLoc: true }:
+                    debugInfo = $"{caller.GetSourceFileName()}:{caller.LineInFile}";
                     break;
             }
 
@@ -130,21 +137,10 @@ public static partial class Logger
         }
             
         if (Config.EnabledFeatures?.LogToFile ?? false)
-            GetLogFilePath(DateTime.Now).AppendAllText(content.ToString().TrimEnd('\n').Append("\n"));
-        
-        if (!_logEventHandler.HasSubscribers) return;
-        
-        _logEventHandler.Call(new VolteLogEventArgs
-        {
-            Severity = s,
-            Source = src,
-            Message = message,
-            PrintedLines = content.ToString().TrimEnd('\n').Split('\n', StringSplitOptions.RemoveEmptyEntries),
-            Error = e
-        });
+            GetLogFilePath(DateTime.Now).AppendAllText(content.ToString());
     }
 
-    private static FilePath GetLogFilePath(DateTime date) 
+    public static FilePath GetLogFilePath(DateTime date) 
         => new FilePath("logs") / string.Intern($"{date.Year}-{date.Month}-{date.Day}.log");
 
     private static void Append(string m, Color c)
@@ -199,5 +195,5 @@ public static partial class Logger
             _ => throw new InvalidOperationException($"The specified LogSeverity ({severity}) is invalid.")
         };
 
-    private static string P(this string input) => string.Intern(input.PadRight(10));
+    public static string P(this string input, int padding = 10) => string.Intern(input.PadRight(padding));
 }

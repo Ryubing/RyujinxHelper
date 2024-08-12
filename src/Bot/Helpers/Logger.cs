@@ -7,26 +7,26 @@ public static partial class Logger
 {
     public static event Action<VolteLogEventArgs> LogEvent
     {
-        add => _logEventHandler.Add(value);
-        remove => _logEventHandler.Remove(value);
+        add => LogEventHandler.Add(value);
+        remove => LogEventHandler.Remove(value);
     }
-    
-    private static readonly Event<Action<VolteLogEventArgs>> _logEventHandler = new();
-    
+
+    private static readonly Event<Action<VolteLogEventArgs>> LogEventHandler = new();
+
     public static bool IsDebugLoggingEnabled => Config.DebugEnabled || Version.IsDevelopment;
-    
-    public static void HandleLogEvent(LogEventArgs args) =>
-        Log<object>(args.LogMessage.Severity, args.LogMessage.Source,
+
+    public static void HandleLogEvent(DiscordLogEventArgs args) =>
+        Log(args.LogMessage.Severity, args.LogMessage.Source,
             args.LogMessage.Message, args.LogMessage.Exception);
 
     #region Logger methods with invocation info
 
-        /// <summary>
+    /// <summary>
     ///     Prints a <see cref="LogSeverity.Debug"/> message to the console from the specified <paramref name="src"/> source, with the given <paramref name="message"/> message.
     /// </summary>
     /// <param name="src">Source to print the message from.</param>
     /// <param name="message">Message to print.</param>
-    public static void Debug<TData>(LogSource src, string message, InvocationInfo<TData> caller)
+    public static void Debug(LogSource src, string message, InvocationInfo caller)
         => Log(LogSeverity.Debug, src, message, null, caller);
 
     /// <summary>
@@ -34,7 +34,7 @@ public static partial class Logger
     /// </summary>
     /// <param name="src">Source to print the message from.</param>
     /// <param name="message">Message to print.</param>
-    public static void Info<TData>(LogSource src, string message, InvocationInfo<TData> caller)
+    public static void Info(LogSource src, string message, InvocationInfo caller)
         => Log(LogSeverity.Info, src, message, null, caller);
 
     /// <summary>
@@ -43,7 +43,7 @@ public static partial class Logger
     /// <param name="src">Source to print the message from.</param>
     /// <param name="message">Message to print.</param>
     /// <param name="e">Optional Exception to print.</param>
-    public static void Error<TData>(LogSource src, string message, Exception e = null, InvocationInfo<TData> caller = default)
+    public static void Error(LogSource src, string message, InvocationInfo caller, Exception e = null)
         => Log(LogSeverity.Error, src, message, e, caller);
 
     /// <summary>
@@ -52,7 +52,7 @@ public static partial class Logger
     /// <param name="src">Source to print the message from.</param>
     /// <param name="message">Message to print.</param>
     /// <param name="e">Optional Exception to print.</param>
-    public static void Critical<TData>(LogSource src, string message, Exception e = null, InvocationInfo<TData> caller = default)
+    public static void Critical(LogSource src, string message, InvocationInfo caller, Exception e = null)
         => Log(LogSeverity.Critical, src, message, e, caller);
 
     /// <summary>
@@ -61,7 +61,7 @@ public static partial class Logger
     /// <param name="src">Source to print the message from.</param>
     /// <param name="message">Message to print.</param>
     /// <param name="e">Optional Exception to print.</param>
-    public static void Warn<TData>(LogSource src, string message, Exception e = null, InvocationInfo<TData> caller = default)
+    public static void Warn(LogSource src, string message, InvocationInfo caller, Exception e = null)
         => Log(LogSeverity.Warning, src, message, e, caller);
 
     /// <summary>
@@ -69,7 +69,7 @@ public static partial class Logger
     /// </summary>
     /// <param name="src">Source to print the message from.</param>
     /// <param name="message">Message to print.</param>
-    public static void Verbose<TData>(LogSource src, string message, InvocationInfo<TData> caller)
+    public static void Verbose(LogSource src, string message, InvocationInfo caller)
         => Log(LogSeverity.Verbose, src, message, null, caller);
 
     /// <summary>
@@ -78,20 +78,20 @@ public static partial class Logger
     /// </summary>
     /// <param name="e">Exception to print.</param>
     /// <param name="src">Source to print the message from.</param>
-    public static void Error<TData>(Exception e, InvocationInfo<TData> caller, LogSource src = LogSource.Volte)
+    public static void Error(Exception e, InvocationInfo caller, LogSource src = LogSource.Volte)
         => Execute(LogSeverity.Error, src, string.Empty, e, caller);
 
     #endregion
 
     #region Normal logger methods
-    
+
     /// <summary>
     ///     Prints a <see cref="LogSeverity.Debug"/> message to the console from the specified <paramref name="src"/> source, with the given <paramref name="message"/> message.
     /// </summary>
     /// <param name="src">Source to print the message from.</param>
     /// <param name="message">Message to print.</param>
     public static void Debug(LogSource src, string message)
-        => Log<object>(LogSeverity.Debug, src, message, null);
+        => Log(LogSeverity.Debug, src, message, null);
 
     /// <summary>
     ///     Prints a <see cref="LogSeverity.Info"/> message to the console from the specified <paramref name="src"/> source, with the given <paramref name="message"/> message.
@@ -99,7 +99,7 @@ public static partial class Logger
     /// <param name="src">Source to print the message from.</param>
     /// <param name="message">Message to print.</param>
     public static void Info(LogSource src, string message)
-        => Log<object>(LogSeverity.Info, src, message, null);
+        => Log(LogSeverity.Info, src, message, null);
 
     /// <summary>
     ///     Prints a <see cref="LogSeverity.Error"/> message to the console from the specified <paramref name="src"/> source, with the given <paramref name="message"/> message, with the specified <paramref name="e"/> exception if provided.
@@ -108,7 +108,7 @@ public static partial class Logger
     /// <param name="message">Message to print.</param>
     /// <param name="e">Optional Exception to print.</param>
     public static void Error(LogSource src, string message, Exception e = null)
-        => Log<object>(LogSeverity.Error, src, message, e);
+        => Log(LogSeverity.Error, src, message, e);
 
     /// <summary>
     ///     Prints a <see cref="LogSeverity.Critical"/> message to the console from the specified <paramref name="src"/> source, with the given <paramref name="message"/> message, with the specified <paramref name="e"/> exception if provided.
@@ -117,7 +117,7 @@ public static partial class Logger
     /// <param name="message">Message to print.</param>
     /// <param name="e">Optional Exception to print.</param>
     public static void Critical(LogSource src, string message, Exception e = null)
-        => Log<object>(LogSeverity.Critical, src, message, e);
+        => Log(LogSeverity.Critical, src, message, e);
 
     /// <summary>
     ///     Prints a <see cref="LogSeverity.Critical"/> message to the console from the specified <paramref name="src"/> source, with the given <paramref name="message"/> message, with the specified <paramref name="e"/> exception if provided.
@@ -126,7 +126,7 @@ public static partial class Logger
     /// <param name="message">Message to print.</param>
     /// <param name="e">Optional Exception to print.</param>
     public static void Warn(LogSource src, string message, Exception e = null)
-        => Log<object>(LogSeverity.Warning, src, message, e);
+        => Log(LogSeverity.Warning, src, message, e);
 
     /// <summary>
     ///     Prints a <see cref="LogSeverity.Verbose"/> message to the console from the specified <paramref name="src"/> source, with the given <paramref name="message"/> message.
@@ -134,7 +134,7 @@ public static partial class Logger
     /// <param name="src">Source to print the message from.</param>
     /// <param name="message">Message to print.</param>
     public static void Verbose(LogSource src, string message)
-        => Log<object>(LogSeverity.Verbose, src, message, null);
+        => Log(LogSeverity.Verbose, src, message, null);
 
     /// <summary>
     ///     Prints a <see cref="LogSeverity.Error"/> message to the console from the specified <paramref name="e"/> exception.
@@ -142,10 +142,10 @@ public static partial class Logger
     /// </summary>
     /// <param name="e">Exception to print.</param>
     public static void Error(Exception e)
-        => Execute<object>(LogSeverity.Error, LogSource.Volte, string.Empty, e, default);
-    
+        => Execute(LogSeverity.Error, LogSource.Volte, string.Empty, e, default);
+
     #endregion
-    
+
     private static readonly string[] _ignoredLogMessages =
     [
         "You're using the GuildPresences intent without listening to the PresenceUpdate event",
@@ -158,104 +158,102 @@ public static partial class Logger
         client.Log += m =>
         {
             if (!m.Message.ContainsAnyIgnoreCase(_ignoredLogMessages))
-                HandleLogEvent(new LogEventArgs(m));
+                HandleLogEvent(new DiscordLogEventArgs(m));
 
             return Task.CompletedTask;
         };
     }
-}
 
-public readonly struct FullDebugInfo
-{
-    public required SourceFileLocation SourceFileLocation { get; init; }
-    public required string CallerName { get; init; }
-}
-    
-public readonly struct SourceFileLocation
-{
-    public required string FilePath { get; init; }
-    public required int LineInFile { get; init; }
-}
-    
-public readonly struct SourceMemberName
-{
-    public required string Value { get; init; }
-}
-
-public readonly struct InvocationInfo<TData>
-{
-    // ReSharper disable once UnusedMember.Global
-    // this is used by the default keyword
-    public InvocationInfo()
+    public static void OutputLogToStandardOut()
     {
-        IsInitialized = false;
+        LogEventHandler.Clear();
+        LogEvent += logEvent => LogSync.Lock(() => Execute(logEvent.Severity, logEvent.Source, logEvent.Message, logEvent.Error, logEvent.Invocation));
     }
-    
-    public InvocationInfo(TData data)
-    {
-        IsInitialized = true;
-        Data = data;
-    }
-    
-    public TData Data { get; }
-    public bool IsInitialized { get; }
 }
 
-public static class InvocationInfo
+public readonly struct InvocationInfo
 {
-    public static string GetSourceFileName(this InvocationInfo<FullDebugInfo> fdiInvocation)
-        => fdiInvocation.Data.SourceFileLocation.FilePath[
-            (fdiInvocation.Data.SourceFileLocation.FilePath.LastIndexOf(Path.DirectorySeparatorChar) + 1)..
-        ];
-    
-    public static string GetSourceFileName(this InvocationInfo<SourceFileLocation> sflInvocation)
-        => sflInvocation.Data.FilePath[(sflInvocation.Data.FilePath.LastIndexOf(Path.DirectorySeparatorChar) + 1)..];
-    
     /// <summary>
     ///     Creates an <see cref="InvocationInfo"/> with information about the current source file, line, and member name.
     ///     Do not provide the arguments!
     /// </summary>
     /// <remarks>Mostly used in the logger.</remarks>
     /// <returns>An <see cref="InvocationInfo"/> referencing the specific line in the specific member, in the source file in which it is created.</returns>
-    public static InvocationInfo<FullDebugInfo> Here(
+    public static InvocationInfo Here(
         [CallerFilePath] string sourceLocation = default!,
         [CallerLineNumber] int lineNumber = default,
-        [CallerMemberName] string callerName = default!) 
-        => new(new FullDebugInfo
-        {
-            SourceFileLocation = new SourceFileLocation
-            {
-                FilePath = sourceLocation,
-                LineInFile = lineNumber
-            },
-            CallerName = callerName
-        });
-    
+        [CallerMemberName] string callerName = default!
+    ) => new(sourceLocation, lineNumber, callerName);
+
     /// <summary>
     ///     Creates a partial <see cref="InvocationInfo"/> with information about the current source file and line.
     ///     Do not provide the arguments!
     /// </summary>
     /// <remarks>Mostly used in the logger.</remarks>
     /// <returns>An <see cref="InvocationInfo"/> referencing the specific line in the source file in which it is created.</returns>
-    public static InvocationInfo<SourceFileLocation> CurrentFileLocation(
+    public static InvocationInfo CurrentFileLocation(
         [CallerFilePath] string sourceLocation = default!,
-        [CallerLineNumber] int lineNumber = default) 
-        => new(new SourceFileLocation
-        {
-            FilePath = sourceLocation,
-            LineInFile = lineNumber
-        });
-    
+        [CallerLineNumber] int lineNumber = default
+    ) => new(sourceLocation, lineNumber);
+
     /// <summary>
     ///     Creates a partial <see cref="InvocationInfo"/> with only information about the current member name.
     ///     Do not provide the arguments!
     /// </summary>
     /// <remarks>Mostly used in the logger.</remarks>
     /// <returns>An <see cref="InvocationInfo"/> referencing the specific C# source member it was created in.</returns>
-    public static InvocationInfo<SourceMemberName> CurrentMember(
-        [CallerMemberName] string callerName = default!) 
-        => new(new SourceMemberName
-        {
-            Value = callerName
-        });
+    public static InvocationInfo CurrentMember([CallerMemberName] string callerName = default!) => new(callerName);
+    
+    public bool IsInitialized { get; }
+
+    public string FilePath { get; }
+    public int LineInFile { get; }
+    public string CallerName { get; }
+
+    public (bool Full, bool FileLoc, bool CallerOnly) Type { get; }
+
+    // ReSharper disable once UnusedMember.Global
+    // this is used by the default keyword
+    public InvocationInfo()
+    {
+        IsInitialized = false;
+        Type = (false, false, false);
+    }
+
+    public InvocationInfo(string filePath, int line, string caller)
+    {
+        IsInitialized = true;
+        Type = (true, false, false);
+
+        FilePath = filePath;
+        LineInFile = line;
+        CallerName = caller;
+    }
+
+    public InvocationInfo(string filePath, int line)
+    {
+        IsInitialized = true;
+        Type = (false, true, false);
+
+        FilePath = filePath;
+        LineInFile = line;
+    }
+
+    public InvocationInfo(string caller)
+    {
+        IsInitialized = true;
+        Type = (false, false, true);
+
+        CallerName = caller;
+    }
+}
+
+public static class InvocationInfoExt
+{
+    public static string GetSourceFileName(this InvocationInfo invocation)
+        => invocation.FilePath[
+            (invocation.FilePath.LastIndexOf(Path.DirectorySeparatorChar) + 1)..
+        ];
+
+
 }

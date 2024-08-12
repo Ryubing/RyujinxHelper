@@ -39,6 +39,12 @@ internal class Event<T>
         lock (_subLock)
             _subscriptions = _subscriptions.Remove(subscriber);
     }
+
+    public void Clear()
+    {
+        lock (_subLock)
+            _subscriptions = [];
+    }
 }
 
 internal static class EventExtensions

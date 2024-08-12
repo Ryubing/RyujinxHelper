@@ -5,6 +5,7 @@ using Avalonia.Media.Imaging;
 using Avalonia.Platform;
 using FluentAvalonia.UI.Windowing;
 using Gommon;
+using Volte.UI.Helpers;
 
 namespace Volte.UI;
 
@@ -24,14 +25,15 @@ public partial class UIShellView : AppWindow
             OpenDevTools = new KeyGesture(Key.F4, KeyModifiers.Control),
             Icon = Icon
         };
+        
+        PageManager.Shared.PropertyChanged += (pm, e) =>
+        {
+            if (e.PropertyName == nameof(PageManager.Current) && pm is PageManager pageManager)
+                SideNav.Content = pageManager.Current?.Content;
+        };
 
 #if DEBUG
         this.AttachDevTools(DataContext.Cast<UIShellViewModel>().OpenDevTools);
 #endif
-    }
-
-    private void InitializeComponent()
-    {
-        AvaloniaXamlLoader.Load(this);
     }
 }

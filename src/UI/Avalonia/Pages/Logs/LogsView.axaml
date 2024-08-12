@@ -1,0 +1,75 @@
+﻿<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:faw="using:FluentAvalonia.UI.Windowing"
+             xmlns:local="using:Volte.UI.Avalonia.Pages"
+             xmlns:pi="using:Projektanker.Icons.Avalonia"
+             xmlns:converters="using:Volte.UI.Converters"
+             mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
+             x:Class="Volte.UI.Avalonia.Pages.LogsView"
+             x:DataType="local:LogsViewModel">
+    <!--<UserControl.DataContext>
+        <local:LogsViewModel/>
+    </UserControl.DataContext>-->
+    <ScrollViewer Name="Viewer">
+        <ListBox Margin="5"
+                 Padding="10"
+                 AutoScrollToSelectedItem="True"
+                 Background="Transparent"
+                 ItemsSource="{Binding Logs}"
+                 SelectedItem="{Binding Selected}"
+                 SelectionMode="Single">
+            <ListBox.Styles>
+                <Style Selector="ListBoxItem">
+                    <Setter Property="Padding" Value="0" />
+                    <Setter Property="Margin" Value="0" />
+                    <Setter Property="MinHeight" Value="0" />
+                </Style>
+            </ListBox.Styles>
+            <ListBox.ContextFlyout>
+                <Flyout ShowMode="TransientWithDismissOnPointerMoveAway">
+                    <StackPanel Orientation="Horizontal" Spacing="5">
+                        <Button Width="26"
+                                Height="26"
+                                Padding="0"
+                                Command="{Binding CopyCommand}"
+                                ToolTip.Tip="Copy">
+                            <pi:Icon Value="fa-regular fa-copy" />
+                        </Button>
+                        <Button Width="26"
+                                Height="26"
+                                Padding="0"
+                                Command="{Binding CopyMarkdownCommand}"
+                                ToolTip.Tip="Copy Markdown">
+                            <pi:Icon Value="fa-solid fa-brush" />
+                        </Button>
+                    </StackPanel>
+                </Flyout>
+            </ListBox.ContextFlyout>
+            <ListBox.ItemTemplate>
+                <DataTemplate DataType="{x:Type local:VolteLog}">
+                    <Grid>
+                        <Border Margin="1"
+                                HorizontalAlignment="Stretch"
+                                VerticalAlignment="Stretch"
+                                Background="{Binding Severity, Converter={x:Static converters:LogSeverityToBrush.Shared}}"
+                                CornerRadius="3"
+                                Opacity="0.3" />
+                        
+                        <Grid ColumnDefinitions="*,Auto" Margin="5">
+                            <TextBlock VerticalAlignment="Center"
+                                       Text="{Binding String}"
+                                       TextWrapping="WrapWithOverflow" />
+                            <TextBlock Grid.Column="1"
+                                       HorizontalAlignment="Right"
+                                       VerticalAlignment="Center"
+                                       FontSize="9"
+                                       Text="{Binding Date}" />
+                        </Grid>
+                    </Grid>
+                </DataTemplate>
+            </ListBox.ItemTemplate>
+        </ListBox>
+    </ScrollViewer>
+</UserControl>

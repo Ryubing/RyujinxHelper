@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Text.RegularExpressions;
+using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Scripting;
 using Microsoft.CodeAnalysis.Scripting;
 
@@ -69,8 +70,9 @@ public static partial class EvalHelper
             var sw = Stopwatch.StartNew();
             var state = await CSharpScript.RunAsync(code, Options, env);
             sw.Stop();
+            
             var shouldReply = true;
-            if (state.ReturnValue != null)
+            if (state != null)
             {
                 switch (state.ReturnValue)
                 {

@@ -1,5 +1,10 @@
 ﻿using Avalonia;
+using Avalonia.Logging;
+using Gommon;
+using Projektanker.Icons.Avalonia;
+using Projektanker.Icons.Avalonia.FontAwesome;
 using Volte.Helpers;
+using Logger = Volte.Helpers.Logger;
 
 namespace Volte.UI;
 
@@ -13,6 +18,10 @@ public class Program
     {
         if (!UnixHelper.TryParseNamedArguments(args, out var output) && output.Error is not InvalidOperationException)
             Logger.Error(output.Error);
+
+        new Thread(() => VolteBot.StartAsync().GetAwaiter().GetResult()).Start();
+
+        VolteBot.AvaloniaIsAttached = true;
         
         return BuildAvaloniaApp()
             .StartWithClassicDesktopLifetime(args);
@@ -23,5 +32,5 @@ public class Program
         => AppBuilder.Configure<App>()
             .UsePlatformDetect()
             .WithInterFont()
-            .LogToTrace(Avalonia.Logging.LogEventLevel.Debug, "TabView");
+            .Apply(_ => IconProvider.Current.Register<FontAwesomeIconProvider>());
 }

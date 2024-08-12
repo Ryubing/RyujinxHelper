@@ -8,14 +8,17 @@ public static class Program
     
     private static async Task Main(string[] args)
     {
+        //this is the entrypoint for command-line volte, so log to the console. the UI will have its own log.
+        OutputLogToStandardOut(); 
+        
         if (!UnixHelper.TryParseNamedArguments(args, out var output))
             if (output.Error is not InvalidOperationException)
                 Error(output.Error);
 
-        await Main(output.Parsed);
+        await StartBotAsync(output.Parsed);
     }
     
-    private static async Task Main(Dictionary<string, string> args)
+    public static async Task StartBotAsync(Dictionary<string, string> args = null)
     {
         CommandLineArguments = new ReadOnlyDictionary<string, string>(args ?? new Dictionary<string, string>());
         await VolteBot.StartAsync();

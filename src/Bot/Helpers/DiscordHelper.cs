@@ -110,9 +110,24 @@ public static class DiscordHelper
     public static SocketGuild GetPrimaryGuild(this BaseSocketClient client)
         => client.GetGuild(405806471578648588); // TODO: config option
     
-    public static void RegisterVolteEventHandlers(this DiscordSocketClient client, ServiceProvider provider)
+    public static async Task RegisterVolteEventHandlers(this DiscordSocketClient client, ServiceProvider provider)
     {
         Listen(client);
+        
+        CalledCommandsInfo.StartPersistence(provider, saveEvery: 2.Minutes());
+        
+        client.MessageReceived += async socketMessage =>
+        {
+            Info(LogSource.Volte, socketMessage.Content);
+            
+            if (socketMessage.ShouldHandle(out var msg))
+            {
+                if (msg.Channel is IDMChannel dm)
+                    await dm.SendMessageAsync("Currently, I do not support commands via DM.");
+                else
+                    await provider.Get<MessageService>().HandleMessageAsync(new MessageReceivedEventArgs(socketMessage, provider));
+            }
+        };
 
         client.Ready += async () =>
         {
@@ -121,6 +136,7 @@ public static class DiscordHelper
             var channels = client.Guilds.SelectMany(x => x.Channels).DistinctBy(x => x.Id).Count();
 
             PrintHeader();
+            Info(LogSource.Volte, $"Currently running Volte V{Version.InformationVersion}.");
             Info(LogSource.Volte, "Use this URL to invite me to your guilds:");
             Info(LogSource.Volte, $"{client.GetInviteUrl()}");
             Info(LogSource.Volte, $"Logged in as {client.CurrentUser.Username}#{client.CurrentUser.Discriminator}");

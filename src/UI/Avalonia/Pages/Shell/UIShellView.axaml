@@ -25,8 +25,8 @@
                      Stretch="Fill">
                 <Grid>
                     <Viewbox Width="12"
-                             Height="12"
-                             HorizontalAlignment="Left"
+                             Height="11"
+                             HorizontalAlignment="Center"
                              VerticalAlignment="Center">
                         <Border Padding="25">
                             <Image Source="{Binding Icon}"></Image>
@@ -37,7 +37,7 @@
 
             <Menu Name="MainMenu" Grid.Column="1" />
         </Grid>
-        <fac:NavigationView Name="MainNavigation"
+        <fac:NavigationView Name="SideNav"
                            Grid.Row="1"
                            FooterMenuItemsSource="{Binding FooterPages, Source={x:Static h:PageManager.Shared}}"
                            IsSettingsVisible="False"

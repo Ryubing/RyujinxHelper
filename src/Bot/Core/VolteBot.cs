@@ -11,6 +11,8 @@ public class VolteBot
         return new VolteBot().LoginAsync();
     }
 
+    public static bool AvaloniaIsAttached { get; set; }
+    
     public static ServiceProvider ServiceProvider { get; private set; }
     private DiscordSocketClient _client;
     private CancellationTokenSource _cts;

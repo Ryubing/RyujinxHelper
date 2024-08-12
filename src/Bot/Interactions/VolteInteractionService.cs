@@ -44,7 +44,7 @@ public class VolteInteractionService : VolteService
 
         _backing.Log += logMessage =>
         {
-            HandleLogEvent(new LogEventArgs(logMessage));
+            HandleLogEvent(new DiscordLogEventArgs(logMessage));
             return Task.CompletedTask;
         };
 

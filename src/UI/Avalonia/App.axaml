@@ -4,6 +4,11 @@
              x:Class="Volte.UI.App">
     <Application.Resources>
         <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <ResourceDictionary>
+                    <FontFamily x:Key="JetBrainsMono">avares://Volte.UI/Assets/Fonts/#JetBrains Mono</FontFamily>
+                </ResourceDictionary>
+            </ResourceDictionary.MergedDictionaries>
             <ResourceDictionary.ThemeDictionaries>
                 <ResourceDictionary x:Key="Light">
                     <SolidColorBrush x:Key="SystemChromeHighColor">#FFACACAC</SolidColorBrush>

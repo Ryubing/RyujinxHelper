@@ -40,22 +40,21 @@ public class LogSeverityToBrush : IValueConverter
 
     public object ConvertBack(object? value, Type targetType, object? parameter, CultureInfo culture)
     {
-        if (value == _verbose) {
+        if (value == _verbose)
             return LogSeverity.Verbose;
-        }
-        if (value == _debug) {
+        
+        if (value == _debug)
             return LogSeverity.Debug;
-        }
-        if (value == _warning) {
+        
+        if (value == _warning)
             return LogSeverity.Warning;
-        }
-        if (value == _error) {
+        
+        if (value == _error)
             return LogSeverity.Error;
-        }
+        
         // ReSharper disable once ConvertIfStatementToReturnStatement
-        if (value == _critical) {
+        if (value == _critical)
             return LogSeverity.Critical;
-        }
 
         return LogSeverity.Info;
     }

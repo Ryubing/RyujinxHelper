@@ -59,11 +59,14 @@
                         
                         <Grid ColumnDefinitions="*,Auto" Margin="5">
                             <TextBlock VerticalAlignment="Center"
+                                       FontFamily="{StaticResource JetBrainsMono}"
                                        Text="{Binding String}"
                                        TextWrapping="WrapWithOverflow" />
                             <TextBlock Grid.Column="1"
                                        HorizontalAlignment="Right"
                                        VerticalAlignment="Center"
+                                       FontFamily="{StaticResource JetBrainsMono}"
+                                       FontStyle="Oblique"
                                        FontSize="9"
                                        Text="{Binding Date}" />
                         </Grid>

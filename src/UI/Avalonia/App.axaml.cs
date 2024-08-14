@@ -1,7 +1,9 @@
-﻿using Avalonia;
+﻿using System.Reflection;
+using Avalonia;
 using Avalonia.Controls.ApplicationLifetimes;
 using Avalonia.Markup.Xaml;
 using FluentAvalonia.UI.Controls;
+using Gommon;
 using Volte.UI.Avalonia.Pages;
 using Volte.UI.Helpers;
 
@@ -21,10 +23,12 @@ public class App : Application
             var shellView = new UIShellView();
             desktop.MainWindow = shellView;
             
-            PageManager.Shared.Register(Page.Logs, "Logs", new LogsView(), Symbol.AllApps, "Bot Logs", isDefault: false, isFooter: true);
+            PageManager.Shared.Init();
         }
         
 
         base.OnFrameworkInitializationCompleted();
     }
+
+
 }

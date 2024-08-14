@@ -46,7 +46,7 @@
                            PaneTitle="{Binding Title}"
                            SelectedItem="{Binding Current, Mode=TwoWay, Source={x:Static h:PageManager.Shared}}">
             <fac:NavigationView.MenuItemTemplate>
-                <DataTemplate x:DataType="h:PageData">
+                <DataTemplate x:DataType="h:Page">
                     <fac:NavigationViewItem Content="{Binding Title}"
                                            IconSource="{Binding Icon}"
                                            Tag="{Binding Content}"
@@ -62,6 +62,8 @@
                        Margin="5,0"
                        VerticalAlignment="Center"
                        FontSize="12">
+                <Run Text="{Binding Connection}" />
+                <Run Text=" |" />
                 <Run Text="{Binding Title}" />
                 <Run Text=" |" />
                 <Run Text="{Binding Source={x:Static v:Version.InformationVersion}}" />

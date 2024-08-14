@@ -7,8 +7,7 @@ namespace Gommon;
 public static partial class Extensions
 {
     public static IServiceCollection AddAllServices(this IServiceCollection coll) =>
-        coll.AddSingleton<CancellationTokenSource>()
-            .AddSingleton(new HttpClient
+        coll.AddSingleton(new HttpClient
             {
                 Timeout = 10.Seconds()
             })

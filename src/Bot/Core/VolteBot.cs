@@ -4,23 +4,24 @@ namespace Volte;
 
 public class VolteBot
 {
-    public static Task StartAsync()
+    public static Task StartAsync(Gommon.Optional<CancellationTokenSource> cts = default)
     {
         Console.Title = $"Volte {Version.InformationVersion}";
         Console.CursorVisible = false;
-        return new VolteBot().LoginAsync();
+        return new VolteBot().LoginAsync(cts);
     }
 
     public static bool AvaloniaIsAttached { get; set; }
     
-    public static ServiceProvider ServiceProvider { get; private set; }
-    private DiscordSocketClient _client;
-    private CancellationTokenSource _cts;
+    public static ServiceProvider Services { get; private set; }
+    
+    public static DiscordSocketClient Client { get; private set; }
+    public static CancellationTokenSource Cts { get; private set; }
 
-    private VolteBot()
-        => Console.CancelKeyPress += (_, _) => _cts?.Cancel();
+    public VolteBot()
+        => Console.CancelKeyPress += (_, _) => Cts?.Cancel();
 
-    private async Task LoginAsync()
+    public async Task LoginAsync(Gommon.Optional<CancellationTokenSource> cts = default)
     {
         if (!Config.StartupChecks()) return;
 
@@ -30,18 +31,20 @@ public class VolteBot
 
         LogFileRestartNotice();
 
-        ServiceProvider = new ServiceCollection().AddAllServices().BuildServiceProvider();
+        Services = new ServiceCollection().AddAllServices()
+            .AddSingleton(cts.OrElse(new CancellationTokenSource()))
+            .BuildServiceProvider();
 
-        _client = ServiceProvider.Get<DiscordSocketClient>();
-        _cts = ServiceProvider.Get<CancellationTokenSource>();
+        Client = Services.Get<DiscordSocketClient>();
+        Cts = Services.Get<CancellationTokenSource>();
 
-        AdminUtilityModule.AllowedPasteSites = await HttpHelper.GetAllowedPasteSitesAsync(ServiceProvider);
+        AdminUtilityModule.AllowedPasteSites = await HttpHelper.GetAllowedPasteSitesAsync(Services);
 
-        await _client.LoginAsync(TokenType.Bot, Config.Token);
-        await _client.StartAsync();
+        await Client.LoginAsync(TokenType.Bot, Config.Token);
+        await Client.StartAsync();
 
         {
-            var commandService = ServiceProvider.Get<CommandService>();
+            var commandService = Services.Get<CommandService>();
 
             var addedParsers = commandService.AddTypeParsers();
             Info(LogSource.Volte,
@@ -54,20 +57,20 @@ public class VolteBot
                 $"Loaded {addedModules.Count} modules and {addedModules.Sum(m => m.Commands.Count)} commands.");
         }
 
-        _client.RegisterVolteEventHandlers(ServiceProvider);
+        Client.RegisterVolteEventHandlers(Services);
 
-        ExecuteBackgroundAsync(async () => await ServiceProvider.Get<AddonService>().InitAsync());
-        ServiceProvider.Get<ReminderService>().Initialize();
+        ExecuteBackgroundAsync(async () => await Services.Get<AddonService>().InitAsync());
+        Services.Get<ReminderService>().Initialize();
 
         try
         {
-            await Task.Delay(-1, _cts.Token);
+            await Task.Delay(-1, Cts.Token);
         }
         catch (Exception e)
         {
             e.SentryCapture();
 
-            await ShutdownAsync(_client, ServiceProvider);
+            await ShutdownAsync(Client, Services);
         }
     }
 

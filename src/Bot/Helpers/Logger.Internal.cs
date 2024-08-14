@@ -1,4 +1,5 @@
 ﻿using Colorful;
+using JetBrains.Annotations;
 using Sentry.Extensibility;
 
 using Color = System.Drawing.Color;
@@ -13,23 +14,13 @@ public static partial class Logger
         public bool IsEnabled(SentryLevel logLevel) 
             => Version.IsDevelopment || logLevel is not SentryLevel.Debug;
             
-        public void Log(SentryLevel logLevel, string message, Exception exception = null, params object[] args)
-            => LogSync.Lock(() =>
+        public void Log(SentryLevel logLevel, [CanBeNull] string message, Exception exception = null, params object[] args)
+            => LogEventHandler.Call(new VolteLogEventArgs
             {
-                var (color, value) = VerifySentryLevel(logLevel);
-                Append($"{value}:".P(), color);
-                Append("[SENTRY]".P(), Color.Chartreuse);
-
-                if (!message.IsNullOrWhitespace())
-                    Append(message.Format(args), Color.White);
-
-                if (exception != null)
-                {
-                    var toWrite = $"{Environment.NewLine}{exception.Message}{Environment.NewLine}{exception.StackTrace}";
-                    Append(toWrite, Color.IndianRed);
-                }
-                    
-                Console.Write(Environment.NewLine);
+                Source = LogSource.Sentry,
+                Severity = logLevel.ToSeverity(),
+                Message = message?.Format(args),
+                Error = exception
             });
     }
 
@@ -82,21 +73,13 @@ public static partial class Logger
 
         if (IsDebugLoggingEnabled && caller.IsInitialized)
         {
-            var debugInfo = Optional.None<string>();
-            switch (caller.Type)
+            Gommon.Optional<string> debugInfo = caller.Type switch
             {
-                case { Full: true }:
-                    debugInfo =
-                        $"{caller.GetSourceFileName()}:{caller.LineInFile}->{caller.CallerName}";
-                    break;
-                case { CallerOnly: true }:
-                    debugInfo = caller.CallerName;
-                    break;
-                
-                case { FileLoc: true }:
-                    debugInfo = $"{caller.GetSourceFileName()}:{caller.LineInFile}";
-                    break;
-            }
+                { Full: true } => $"{caller.GetSourceFileName()}:{caller.LineInFile}->{caller.CallerName}",
+                { CallerOnly: true } => caller.CallerName,
+                { FileLoc: true } => $"{caller.GetSourceFileName()}:{caller.LineInFile}",
+                _ => default
+            };
 
             debugInfo.IfPresent(debugInfoContent =>
             {
@@ -167,19 +150,7 @@ public static partial class Logger
             LogSource.Rest => (Color.Red, "REST"),
             LogSource.Unknown => (Color.Fuchsia, "UNKNOWN"),
             LogSource.Sentry => (Color.Chartreuse, "SENTRY"),
-            LogSource.UI => (Color.Teal, "UI"),
             _ => throw new InvalidOperationException($"The specified LogSource {source} is invalid.")
-        };
-        
-    private static (Color Color, string Level) VerifySentryLevel(SentryLevel level) =>
-        level switch
-        {
-            SentryLevel.Debug => (Color.RoyalBlue, "DEBUG"),
-            SentryLevel.Info => (Color.RoyalBlue, "INFO"),
-            SentryLevel.Warning => (Color.LawnGreen, "WARN"),
-            SentryLevel.Error => (Color.Gold, "ERROR"),
-            SentryLevel.Fatal => (Color.LimeGreen, "FATAL"),
-            _ => throw new ArgumentOutOfRangeException(nameof(level), level, null)
         };
 
 
@@ -196,4 +167,27 @@ public static partial class Logger
         };
 
     public static string P(this string input, int padding = 10) => string.Intern(input.PadRight(padding));
+
+    public static LogSeverity ToSeverity(this SentryLevel sentryLevel) =>
+        sentryLevel switch
+        {
+            SentryLevel.Debug => LogSeverity.Debug,
+            SentryLevel.Info => LogSeverity.Info,
+            SentryLevel.Warning => LogSeverity.Warning,
+            SentryLevel.Error => LogSeverity.Error,
+            SentryLevel.Fatal => LogSeverity.Critical,
+            _ => throw new ArgumentOutOfRangeException(nameof(sentryLevel), sentryLevel, null)
+        };
+
+    public static SentryLevel ToSentryLevel(this LogSeverity severity) =>
+        severity switch
+        {
+            LogSeverity.Critical => SentryLevel.Fatal,
+            LogSeverity.Error => SentryLevel.Error,
+            LogSeverity.Warning => SentryLevel.Warning,
+            LogSeverity.Info => SentryLevel.Info,
+            LogSeverity.Verbose => SentryLevel.Info,
+            LogSeverity.Debug => SentryLevel.Debug,
+            _ => throw new ArgumentOutOfRangeException(nameof(severity), severity, null)
+        };
 }

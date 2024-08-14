@@ -8,10 +8,10 @@ public class VolteInteractionModule<T> : InteractionModuleBase<SocketInteraction
     public bool IsInGuild() => Context.Guild != null;
 
     public GuildData GetData() 
-        => VolteBot.ServiceProvider.Get<DatabaseService>().GetData(Context.Guild);
+        => VolteBot.Services.Get<DatabaseService>().GetData(Context.Guild);
     
     public void ModifyData(DataEditor modifier)
-        => VolteBot.ServiceProvider.Get<DatabaseService>().Modify(Context.Guild.Id, modifier);
+        => VolteBot.Services.Get<DatabaseService>().Modify(Context.Guild.Id, modifier);
 
     protected InteractionBadRequestResult BadRequest(string reason) => new(reason);
 

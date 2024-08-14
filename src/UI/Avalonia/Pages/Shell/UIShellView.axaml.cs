@@ -1,4 +1,5 @@
-﻿using Avalonia;
+﻿using System.Diagnostics.CodeAnalysis;
+using Avalonia;
 using Avalonia.Input;
 using Avalonia.Markup.Xaml;
 using Avalonia.Media.Imaging;
@@ -9,6 +10,7 @@ using Volte.UI.Helpers;
 
 namespace Volte.UI;
 
+[SuppressMessage("ReSharper", "InconsistentNaming")]
 public partial class UIShellView : AppWindow
 {
     public UIShellView()

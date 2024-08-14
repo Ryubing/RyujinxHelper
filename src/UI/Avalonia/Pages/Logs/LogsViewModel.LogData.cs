@@ -25,15 +25,15 @@ public partial class VolteLog : ObservableObject
     public Exception? Error { get; init; }
     
     [ObservableProperty] 
-    private DateTime _date = DateTime.UtcNow;
+    private DateTime _date = DateTime.Now;
 
     public string String 
     {
         get
         {
             var sb = new StringBuilder();
-            sb.Append($"{Enum.GetName(Severity)!.ToUpper()}:".P(15));
-            sb.Append($"[{Enum.GetName(Source)!.ToUpper()}]".P(15));
+            sb.Append($"{Enum.GetName(Severity)!.ToUpper()}:".P(12));
+            sb.Append($"[{Enum.GetName(Source)!.ToUpper()}]".P(12));
             sb.Append(Message ?? "null");
 
             return sb.ToString();

@@ -19,7 +19,7 @@ public class Program
         if (!UnixHelper.TryParseNamedArguments(args, out var output) && output.Error is not InvalidOperationException)
             Logger.Error(output.Error);
 
-        new Thread(() => VolteBot.StartAsync().GetAwaiter().GetResult()).Start();
+        VolteManager.Start();
 
         VolteBot.AvaloniaIsAttached = true;
         

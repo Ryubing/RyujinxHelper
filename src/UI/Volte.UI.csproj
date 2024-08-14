@@ -20,7 +20,8 @@
         <ProjectReference Include="../Bot/Volte.csproj"/>
     </ItemGroup>
     <ItemGroup>
-        <AvaloniaResource Include="..\Bot\Resources\Volte.ico" Link="Assets\icon.ico" />
+        <AvaloniaResource Include="../Bot/Resources/Volte.ico" Link="Assets\icon.ico" />
+        <AvaloniaResource Include="Assets/**" />
     </ItemGroup>
     <ItemGroup>
       <Compile Update="Avalonia\App.axaml.cs">

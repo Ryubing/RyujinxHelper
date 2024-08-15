@@ -9,9 +9,9 @@
              mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
              x:Class="Volte.UI.Avalonia.Pages.LogsView"
              x:DataType="local:LogsViewModel">
-    <!--<UserControl.DataContext>
-        <local:LogsViewModel/>
-    </UserControl.DataContext>-->
+    <UserControl.DataContext>
+        <local:LogsViewModel />
+    </UserControl.DataContext>
     <ScrollViewer Name="Viewer">
         <ListBox Margin="5"
                  Padding="10"
@@ -19,7 +19,7 @@
                  Background="Transparent"
                  ItemsSource="{Binding Logs}"
                  SelectedItem="{Binding Selected}"
-                 SelectionMode="Single">
+                 SelectionMode="Toggle">
             <ListBox.Styles>
                 <Style Selector="ListBoxItem">
                     <Setter Property="Padding" Value="0" />
@@ -53,20 +53,22 @@
                         <Border Margin="1"
                                 HorizontalAlignment="Stretch"
                                 VerticalAlignment="Stretch"
-                                Background="{Binding Severity, Converter={x:Static converters:LogSeverityToBrush.Shared}}"
                                 CornerRadius="3"
+                                Background="{Binding Severity, Converter={x:Static converters:LogSeverityToBrush.Shared}}"
                                 Opacity="0.3" />
-                        
                         <Grid ColumnDefinitions="*,Auto" Margin="5">
-                            <TextBlock VerticalAlignment="Center"
+                            <TextBlock Grid.Column="0"
+                                       VerticalAlignment="Center"
+                                       HorizontalAlignment="Left"
                                        FontFamily="{StaticResource JetBrainsMono}"
                                        Text="{Binding String}"
                                        TextWrapping="WrapWithOverflow" />
                             <TextBlock Grid.Column="1"
-                                       HorizontalAlignment="Right"
                                        VerticalAlignment="Center"
+                                       HorizontalAlignment="Right"
                                        FontFamily="{StaticResource JetBrainsMono}"
                                        FontStyle="Oblique"
+                                       TextDecorations="Underline"
                                        FontSize="9"
                                        Text="{Binding Date}" />
                         </Grid>

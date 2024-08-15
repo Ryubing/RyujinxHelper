@@ -2,6 +2,7 @@
 using Avalonia.Threading;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using Discord;
 using Gommon;
 using Volte.Entities;
 using Volte.Helpers;
@@ -13,7 +14,7 @@ public partial class LogsViewModel : ObservableObject
 {
     private const byte MaxLogsInMemory = 100;
     
-    private readonly LogsView _view;
+    public required LogsView? View { get; init; }
 
     [ObservableProperty] 
     private ObservableCollection<VolteLog> _logs = [];
@@ -21,26 +22,22 @@ public partial class LogsViewModel : ObservableObject
     [ObservableProperty] 
     private VolteLog? _selected;
     
-    public LogsViewModel(LogsView view)
-    {
-        _view = view;
-        Logger.LogEvent += Receive;
-    }
-    
+    public LogsViewModel() => Logger.LogEvent += Receive;
+
     ~LogsViewModel() => Logger.LogEvent -= Receive;
     
     [RelayCommand]
     private void Copy()
     {
         if (Selected is not null)
-            Executor.ExecuteBackgroundAsync(() => OS.CopyToClipboard(Selected.String));
+            Executor.ExecuteBackgroundAsync(() => OS.CopyToClipboardAsync(Selected.String));
     }
 
     [RelayCommand]
     private void CopyMarkdown()
     {
         if (Selected is not null)
-            Executor.ExecuteBackgroundAsync(() => OS.CopyToClipboard(Selected.Markdown));
+            Executor.ExecuteBackgroundAsync(() => OS.CopyToClipboardAsync(Selected.Markdown));
     }
     
 
@@ -54,7 +51,8 @@ public partial class LogsViewModel : ObservableObject
                     .IfPresent(toRemove => Logs.Remove(toRemove));
         
             Logs.Add(new VolteLog(eventArgs));
-            Lambda.Try(() => Dispatcher.UIThread.Invoke(_view.Viewer.ScrollToEnd));
+            if (View?.Viewer is not null)
+                Lambda.Try(() => Dispatcher.UIThread.Invoke(View.Viewer.ScrollToEnd));
         }
         
         eventArgs.Error?.SentryCapture(scope => 

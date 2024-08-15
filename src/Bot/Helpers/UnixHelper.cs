@@ -49,16 +49,18 @@ public static class UnixHelper
     /// <exception cref="ArgumentException">Content contains an unexpected quotation mark.</exception>
     public static Dictionary<string, string> ParseNamedArguments(string input)
     {
-        var state = ParsingState.Neutral;
-        var inQuote = false;
         var result = new Dictionary<string, string>();
+        
+        var state = ParsingState.Neutral;
+        
+        var inQuote = false;
         var argName = string.Empty;
         var argVal = string.Empty;
         var lastChar = new char();
 
         foreach (var (token, index) in input.WithIndex())
         {
-                        switch (token)
+            switch (token)
             {
                 case '-' when state is ParsingState.ArgumentName && lastChar is ' ':
                     state = ParsingState.Neutral;

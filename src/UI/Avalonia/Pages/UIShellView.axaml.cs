@@ -8,7 +8,7 @@ using FluentAvalonia.UI.Windowing;
 using Gommon;
 using Volte.UI.Helpers;
 
-namespace Volte.UI;
+namespace Volte.UI.Avalonia.Pages;
 
 [SuppressMessage("ReSharper", "InconsistentNaming")]
 public partial class UIShellView : AppWindow
@@ -18,14 +18,14 @@ public partial class UIShellView : AppWindow
         InitializeComponent();
         TitleBar.ExtendsContentIntoTitleBar = true;
         TitleBar.TitleBarHitTestType = TitleBarHitTestType.Complex;
-        
-        using var bitmap = new Bitmap(AssetLoader.Open(new Uri("avares://Volte.UI/Assets/icon.ico")));
+
+        using var bitmap = new Bitmap(AssetLoader.Open(AvaloniaHelper.GetResourceUri("icon.ico")));
         Icon = bitmap.CreateScaledBitmap(new PixelSize(48, 48));
         
         DataContext = new UIShellViewModel
         {
-            OpenDevTools = new KeyGesture(Key.F4, KeyModifiers.Control),
-            Icon = Icon
+            ShellView = this,
+            OpenDevTools = new KeyGesture(Key.F4, KeyModifiers.Control)
         };
         
         PageManager.Shared.PropertyChanged += (pm, e) =>

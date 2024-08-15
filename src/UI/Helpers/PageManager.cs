@@ -68,7 +68,7 @@ public partial class PageManager : ObservableObject
     public void Init(Assembly? assembly = null)
     {
         GetPageTypes(assembly)
-            .OrderByDescending(x => x.Attribute.Index)
+            .OrderByDescending(x => x.Attribute.PageType)
             .ForEach(page =>
             {
                 var instance = Activator.CreateInstance(page.Type);
@@ -95,9 +95,9 @@ public partial class PageManager : ObservableObject
     #endregion
 }
 
-public enum PageType
+public enum PageType : byte
 {
-    Logs
+    Logs = 0
 }
 
 public class Page
@@ -111,10 +111,9 @@ public class Page
 [AttributeUsage(AttributeTargets.Class)]
 public class UiPageAttribute : Attribute
 {
-    public UiPageAttribute(PageType pageType, byte index, string description, Symbol icon, string? title = null,
+    public UiPageAttribute(PageType pageType, string description, Symbol icon, string? title = null,
         bool isDefault = false, bool isFooter = false)
     {
-        Index = index;
         PageType = pageType;
         Title = title ?? Enum.GetName(pageType)!;
         Description = description;
@@ -123,7 +122,6 @@ public class UiPageAttribute : Attribute
         IsFooter = isFooter;
     }
 
-    public byte Index { get; init; }
     public string Title { get; init; }
     public string Description { get; init; }
     public PageType PageType { get; init; }

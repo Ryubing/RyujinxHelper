@@ -5,10 +5,10 @@
                xmlns:fac="using:FluentAvalonia.UI.Controls"
                xmlns:faw="using:FluentAvalonia.UI.Windowing"
                xmlns:v="using:Volte"
-               xmlns:local="using:Volte.UI"
+               xmlns:local="using:Volte.UI.Avalonia.Pages"
                xmlns:h="using:Volte.UI.Helpers"
                mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
-               x:Class="Volte.UI.UIShellView"
+               x:Class="Volte.UI.Avalonia.Pages.UIShellView"
                Title="{Binding Title}">
     <faw:AppWindow.DataContext>
         <local:UIShellViewModel />

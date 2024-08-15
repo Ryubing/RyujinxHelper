@@ -2,19 +2,20 @@
 using Avalonia.Media;
 using CommunityToolkit.Mvvm.ComponentModel;
 using Discord;
-using Discord.WebSocket;
 
-namespace Volte.UI;
+namespace Volte.UI.Avalonia.Pages;
 
 // ReSharper disable once InconsistentNaming
 public partial class UIShellViewModel : ObservableObject
 {
-    public KeyGesture OpenDevTools { get; init; }
+    public required UIShellView? ShellView { get; init; } 
     
-    public IImage Icon { get; init; }
+    public required KeyGesture OpenDevTools { get; init; }
+
+    public IImage? Icon => ShellView?.Icon;
 
     [ObservableProperty]
-    public ConnectionState _connection = VolteBot.Client.ConnectionState;
+    private ConnectionState _connection = VolteBot.Client.ConnectionState;
 
     [ObservableProperty]
     private string _title = "Volte";

@@ -1,13 +1,10 @@
-﻿using System.Reflection;
-using Avalonia;
+﻿using Avalonia;
 using Avalonia.Controls.ApplicationLifetimes;
 using Avalonia.Markup.Xaml;
-using FluentAvalonia.UI.Controls;
-using Gommon;
 using Volte.UI.Avalonia.Pages;
 using Volte.UI.Helpers;
 
-namespace Volte.UI;
+namespace Volte.UI.Avalonia;
 
 public class App : Application
 {
@@ -26,9 +23,8 @@ public class App : Application
             PageManager.Shared.Init();
         }
         
+        VolteManager.Start();
 
         base.OnFrameworkInitializationCompleted();
     }
-
-
 }

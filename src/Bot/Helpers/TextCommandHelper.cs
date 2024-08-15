@@ -173,7 +173,7 @@ public static class TextCommandHelper
                 parser.BaseType!.GenericTypeArguments,
                 BindingFlags.Public,
                 args: [
-                    parser.GetConstructor(Type.EmptyTypes)?.Invoke([]), 
+                    parser.GetConstructor(Type.EmptyTypes)?.Invoke([]) ?? throw new InvalidOperationException($"Couldn't find no-args constructor for {parser.AsFullNamePrettyString()}"), 
                     parser.GetCustomAttribute<InjectTypeParserAttribute>()!.OverridePrimitive 
                 ]
             );

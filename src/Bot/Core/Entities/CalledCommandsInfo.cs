@@ -15,7 +15,8 @@ public class CalledCommandsInfo
     public static readonly FilePath CalledCommandsFile = FilePath.Data / "commandstats.bin";
 
     private static bool _isInitialized;
-    private static CalledCommandsInfo _instance = new();
+    // ReSharper disable once InconsistentNaming
+    private static readonly CalledCommandsInfo _instance = new();
 
     public static CalledCommandsInfo Instance
     {

@@ -31,6 +31,7 @@ global using Gommon;
 global using static Gommon.Lambda;
 global using static Gommon.Executor;
 global using static Volte.Helpers.Logger;
+global using static Volte.Entities.AppStatusEventArgs;
 
 global using Console = Colorful.Console;
 global using DiscordLogMessage = Discord.LogMessage;

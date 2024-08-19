@@ -43,6 +43,10 @@ public enum LogSource
     /// </summary>
     Sentry = 7,
     /// <summary>
+    ///     Indicates that this log message is from the Avalonia UI.
+    /// </summary>
+    UI = 7,
+    /// <summary>
     ///     Indicates that this log message came from an unknown source.
     /// </summary>
     Unknown = int.MaxValue

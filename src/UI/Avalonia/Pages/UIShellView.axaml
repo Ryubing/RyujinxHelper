@@ -7,6 +7,7 @@
                xmlns:v="using:Volte"
                xmlns:local="using:Volte.UI.Avalonia.Pages"
                xmlns:h="using:Volte.UI.Helpers"
+               xmlns:pi="using:Projektanker.Icons.Avalonia"
                mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
                x:Class="Volte.UI.Avalonia.Pages.UIShellView"
                Title="{Binding Title}">
@@ -58,6 +59,12 @@
               ColumnDefinitions="Auto,Auto,*,Auto,Auto"
               IsHitTestVisible="False">
             <Border Grid.ColumnSpan="5" Background="{DynamicResource SystemAccentColor}" />
+            <pi:Icon Grid.Column="0" Margin="5,0" Value="{Binding Icon, Source={x:Static h:AppStatus.Shared}}" />
+            <TextBlock Grid.Column="1"
+                       Margin="5,0"
+                       VerticalAlignment="Center"
+                       FontFamily="{StaticResource JetBrainsMono}"
+                       Text="{Binding Status, Source={x:Static h:AppStatus.Shared}}" />
             <TextBlock Grid.Column="3"
                        Margin="5,0"
                        VerticalAlignment="Center"

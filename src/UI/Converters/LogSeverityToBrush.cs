@@ -12,14 +12,17 @@ namespace Volte.UI.Converters;
 public class LogSeverityToBrush : IValueConverter
 {
     private static readonly BrushConverter _brushConverter = new();
+    
     private static readonly object? _default = Brushes.Transparent;
     private static readonly object? _verbose = _brushConverter.ConvertFromInvariantString(Hex(Color.SpringGreen));
     private static readonly object? _debug = _brushConverter.ConvertFromInvariantString(Hex(Color.SandyBrown));
     private static readonly object? _warning = _brushConverter.ConvertFromInvariantString(Hex(Color.Yellow));
     private static readonly object? _error = _brushConverter.ConvertFromInvariantString(Hex(Color.DarkRed));
     private static readonly object? _critical = _brushConverter.ConvertFromInvariantString(Hex(Color.Maroon));
+    
+    private static string Hex(Color color) => $"#{color.R:X2}{color.G:X2}{color.B:X2}";
 
-    private static readonly Lazy<LogSeverityToBrush> _shared = new(() => new LogSeverityToBrush());
+    private static readonly Lazy<LogSeverityToBrush> _shared = new(() => new());
     public static LogSeverityToBrush Shared => _shared.Value;
 
     public object? Convert(object? value, Type targetType, object? parameter, CultureInfo culture)
@@ -58,6 +61,4 @@ public class LogSeverityToBrush : IValueConverter
 
         return LogSeverity.Info;
     }
-
-    private static string Hex(Color color) => $"#{color.R:X2}{color.G:X2}{color.B:X2}";
 }

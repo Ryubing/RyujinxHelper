@@ -13,6 +13,8 @@ namespace Volte.UI.Avalonia.Pages;
 public partial class LogsViewModel : ObservableObject
 {
     private const byte MaxLogsInMemory = 100;
+
+    private readonly object _logSync = new();
     
     public required LogsView? View { get; init; }
 
@@ -25,38 +27,32 @@ public partial class LogsViewModel : ObservableObject
     public LogsViewModel() => Logger.LogEvent += Receive;
 
     ~LogsViewModel() => Logger.LogEvent -= Receive;
-    
-    [RelayCommand]
-    private void Copy()
-    {
-        if (Selected is not null)
-            Executor.ExecuteBackgroundAsync(() => OS.CopyToClipboardAsync(Selected.String));
-    }
-
-    [RelayCommand]
-    private void CopyMarkdown()
-    {
-        if (Selected is not null)
-            Executor.ExecuteBackgroundAsync(() => OS.CopyToClipboardAsync(Selected.Markdown));
-    }
-    
 
     private void Receive(VolteLogEventArgs eventArgs)
     {
-        if (!(eventArgs.Message.IsNullOrEmpty() || eventArgs.Message.IsNullOrWhitespace()))
+        if (eventArgs is { Source: LogSource.Sentry, Severity: LogSeverity.Debug }) 
+            return; //sentry debug messages are huge and break the log view entirely.
+
+        lock (_logSync)
         {
-            if (Logs.Count >= MaxLogsInMemory)
-                Logs.OrderByDescending(x => x.Date)
-                    .FindFirst()
-                    .IfPresent(toRemove => Logs.Remove(toRemove));
+            if (!(eventArgs.Message.IsNullOrEmpty() || eventArgs.Message.IsNullOrWhitespace()))
+            {
+                if (Logs.Count >= MaxLogsInMemory)
+                    Logs.OrderByDescending(x => x.Date)
+                        .FindLast()
+                        .IfPresent(toRemove => Logs.Remove(toRemove));
         
-            Logs.Add(new VolteLog(eventArgs));
-            if (View?.Viewer is not null)
-                Lambda.Try(() => Dispatcher.UIThread.Invoke(View.Viewer.ScrollToEnd));
+                Logs.Add(new VolteLog(eventArgs));
+                if (View?.Viewer is not null)
+                    Lambda.Try(() => Dispatcher.UIThread.Invoke(View.Viewer.ScrollToEnd));
+            }
+
+            if (eventArgs.Error is not { } err) return;
+        
+            VolteApp.NotifyError(err);
+            err.SentryCapture(scope => 
+                scope.AddBreadcrumb("This exception might not have been thrown, and may not be important; it is merely being logged.")
+            );
         }
-        
-        eventArgs.Error?.SentryCapture(scope => 
-            scope.AddBreadcrumb("This exception might not have been thrown, and may not be important; it is merely being logged.")
-        );
     }
 }

@@ -79,7 +79,7 @@ public static partial class Logger
     /// <param name="e">Exception to print.</param>
     /// <param name="src">Source to print the message from.</param>
     public static void Error(Exception e, InvocationInfo caller, LogSource src = LogSource.Volte)
-        => Execute(LogSeverity.Error, src, string.Empty, e, caller);
+        => Error(src, string.Empty, caller, e);
 
     #endregion
 
@@ -142,7 +142,7 @@ public static partial class Logger
     /// </summary>
     /// <param name="e">Exception to print.</param>
     public static void Error(Exception e)
-        => Execute(LogSeverity.Error, LogSource.Volte, string.Empty, e, default);
+        => Error(LogSource.Volte, string.Empty, e);
 
     #endregion
 

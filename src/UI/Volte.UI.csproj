@@ -24,7 +24,7 @@
         <AvaloniaResource Include="Assets/**" />
     </ItemGroup>
     <ItemGroup>
-      <Compile Update="Avalonia\App.axaml.cs">
+      <Compile Update="Avalonia\VolteApp.axaml.cs">
         <DependentUpon>App.axaml</DependentUpon>
         <SubType>Code</SubType>
       </Compile>

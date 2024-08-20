@@ -30,17 +30,17 @@
             <ListBox.ContextFlyout>
                 <Flyout ShowMode="TransientWithDismissOnPointerMoveAway">
                     <StackPanel Orientation="Horizontal" Spacing="5">
-                        <Button Width="26"
-                                Height="26"
+                        <Button Name="CopySimple"
+                                Height="25"
+                                Width="25"
                                 Padding="0"
-                                Command="{Binding CopyCommand}"
                                 ToolTip.Tip="Copy">
                             <pi:Icon Value="fa-regular fa-copy" />
                         </Button>
-                        <Button Width="26"
-                                Height="26"
+                        <Button Name="CopyMarkdown"
+                                Height="25"
+                                Width="25"
                                 Padding="0"
-                                Command="{Binding CopyMarkdownCommand}"
                                 ToolTip.Tip="Copy Markdown">
                             <pi:Icon Value="fa-solid fa-brush" />
                         </Button>

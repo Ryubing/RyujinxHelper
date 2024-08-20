@@ -65,32 +65,22 @@ public partial class PageManager : ObservableObject
 
     #region Attributes
 
-    public void Init(Assembly? assembly = null)
+    public static void Init(Assembly? assembly = null)
     {
-        GetPageTypes(assembly)
-            .OrderByDescending(x => x.Attribute.PageType)
-            .ForEach(page =>
-            {
-                var instance = Activator.CreateInstance(page.Type);
-                if (instance != null)
-                    Register(
-                        pageType: page.Attribute.PageType,
-                        title: page.Attribute.Title,
-                        content: instance,
-                        icon: page.Attribute.Icon,
-                        description: page.Attribute.Description,
-                        isDefault: page.Attribute.IsDefault,
-                        isFooter: page.Attribute.IsFooter
-                    );
-            });
+        (assembly ?? Assembly.GetExecutingAssembly()).GetTypes()
+            .Where(x => x.HasAttribute<UiPageAttribute>() && !x.HasAttribute<DontAutoRegisterAttribute>())
+            .Select(x => (type: x, attribute: x.GetCustomAttribute<UiPageAttribute>()!))
+            .OrderByDescending(x => x.attribute.PageType)
+            .ForEach(page => Shared.Register(
+                pageType: page.attribute.PageType,
+                title: page.attribute.Title,
+                content: Activator.CreateInstance(page.type)!,
+                icon: page.attribute.Icon,
+                description: page.attribute.Description,
+                isDefault: page.attribute.IsDefault,
+                isFooter: page.attribute.IsFooter
+            ));
     }
-
-    private static IEnumerable<(Type Type, UiPageAttribute Attribute)> GetPageTypes(Assembly? assembly = null)
-        => (assembly ?? Assembly.GetExecutingAssembly()).GetTypes()
-            .Where(x => !x.HasAttribute<DontAutoRegisterAttribute>()) 
-            // this is a Discord.Interactions attribute but its just a marker and thats what i wanted to add here
-            .Where(x => x.HasAttribute<UiPageAttribute>())
-            .Select(x => (x, x.GetCustomAttribute<UiPageAttribute>()!));
 
     #endregion
 }

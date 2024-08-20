@@ -4,6 +4,7 @@ using Gommon;
 using Humanizer;
 using Volte.Entities;
 using Volte.Helpers;
+// ReSharper disable MemberCanBePrivate.Global
 
 namespace Volte.UI.Helpers;
 

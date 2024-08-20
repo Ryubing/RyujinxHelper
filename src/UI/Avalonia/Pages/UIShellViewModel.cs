@@ -8,11 +8,9 @@ namespace Volte.UI.Avalonia.Pages;
 // ReSharper disable once InconsistentNaming
 public partial class UIShellViewModel : ObservableObject
 {
-    public required UIShellView? ShellView { get; init; } 
+    public required UIShellView? View { get; init; } 
     
     public required KeyGesture OpenDevTools { get; init; }
-
-    public IImage? Icon => ShellView?.Icon;
 
     [ObservableProperty]
     private ConnectionState _connection = VolteBot.Client.ConnectionState;

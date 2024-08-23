@@ -45,7 +45,7 @@ public static partial class Logger
 
     internal static void LogFileRestartNotice()
     {
-        if (_logFileNoticePrinted || !(Config.EnabledFeatures?.LogToFile ?? false)) return;
+        if (_logFileNoticePrinted || Config.EnabledFeatures?.LogToFile is not true) return;
             
         GetLogFilePath(DateTime.Now).AppendAllText($"{Side}RESTARTING{Side}\n");
             

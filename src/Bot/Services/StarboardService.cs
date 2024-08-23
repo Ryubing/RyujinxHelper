@@ -154,7 +154,7 @@ public sealed class StarboardService : VolteService
         var messageChannel = await cachedChannel.GetOrDownloadAsync();
 
         // Ignore reactions cleared in DMs
-        if (!(messageChannel is IGuildChannel channel)) return;
+        if (messageChannel is not IGuildChannel channel) return;
 
         var guildId = channel.Guild.Id;
         var messageId = cachedMessage.Id;
@@ -211,7 +211,7 @@ public sealed class StarboardService : VolteService
     private async Task UpdateOrPostToStarboardAsync(StarboardOptions starboard, IMessage message, StarboardEntry entry)
     {
         var starboardChannel = _client.GetChannel(starboard.StarboardChannel);
-        if (!(starboardChannel is SocketTextChannel starboardTextChannel))
+        if (starboardChannel is not SocketTextChannel starboardTextChannel)
             return;
 
         if (entry.StarboardMessageId == 0)
@@ -236,7 +236,7 @@ public sealed class StarboardService : VolteService
                 return;
             }
 
-            if (!(starboardMessage is IUserMessage starboardUserMessage)) return;
+            if (starboardMessage is not IUserMessage starboardUserMessage) return;
 
             if (entry.StarCount >= starboard.StarsRequiredToPost)
             {
@@ -280,7 +280,7 @@ public sealed class StarboardService : VolteService
         var data = await _db.GetDataAsync(message.Channel.Cast<IGuildChannel>().GuildId);
             
         var starboardChannel = _client.GetChannel(data.Configuration.Starboard.StarboardChannel);
-        if (!(starboardChannel is SocketTextChannel starboardTextChannel))
+        if (starboardChannel is not ITextChannel starboardTextChannel)
             return null;
 
         // Discord API limitation: Fetch a full message. The message in OnReactionXXX does not contain an Author

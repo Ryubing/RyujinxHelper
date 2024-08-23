@@ -5,7 +5,7 @@ namespace Volte.Helpers;
 
 public static partial class Logger
 {
-    public static event Action<VolteLogEventArgs> LogEvent
+    public static event Action<VolteLogEventArgs> Event
     {
         add => LogEventHandler.Add(value);
         remove => LogEventHandler.Remove(value);
@@ -13,11 +13,9 @@ public static partial class Logger
 
     private static readonly Event<Action<VolteLogEventArgs>> LogEventHandler = new();
 
-    public static bool IsDebugLoggingEnabled => Config.DebugEnabled || Version.IsDevelopment;
+    public static void Log(VolteLogEventArgs eventArgs) => LogEventHandler.Call(eventArgs);
 
-    public static void HandleLogEvent(DiscordLogEventArgs args) =>
-        Log(args.LogMessage.Severity, args.LogMessage.Source,
-            args.LogMessage.Message, args.LogMessage.Exception);
+    public static bool IsDebugLoggingEnabled => Config.DebugEnabled || Version.IsDevelopment;
 
     #region Logger methods with invocation info
 
@@ -153,21 +151,19 @@ public static partial class Logger
         "unknown dispatch"
     ];
 
-    public static void Listen(DiscordSocketClient client)
-    {
+    public static void Listen(DiscordSocketClient client) =>
         client.Log += m =>
         {
             if (!m.Message.ContainsAnyIgnoreCase(_ignoredLogMessages))
-                HandleLogEvent(new DiscordLogEventArgs(m));
+                Log(new VolteLogEventArgs(m));
 
             return Task.CompletedTask;
         };
-    }
 
     public static void OutputLogToStandardOut()
     {
         LogEventHandler.Clear();
-        LogEvent += logEvent => LogSync.Lock(() => Execute(logEvent.Severity, logEvent.Source, logEvent.Message, logEvent.Error, logEvent.Invocation));
+        Event += logEvent => LogSync.Lock(() => Execute(logEvent.Severity, logEvent.Source, logEvent.Message, logEvent.Error, logEvent.Invocation));
     }
 }
 

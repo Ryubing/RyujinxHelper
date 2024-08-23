@@ -1,26 +1,25 @@
 ﻿using System.Text;
-using Avalonia.Threading;
-using CommunityToolkit.Mvvm.ComponentModel;
 using Discord;
 using Gommon;
 using Volte.Entities;
 using Volte.Helpers;
-using Console = Colorful.Console;
+using Volte.Services;
+// ReSharper disable MemberCanBePrivate.Global
 
 namespace Volte.UI.Avalonia.Pages;
 
-public partial class VolteLog : ObservableObject
+public readonly record struct VolteLog
 {
     private static readonly int LongestSeverity = Enum.GetValues<LogSeverity>()
-        .Select(sev => Enum.GetName(sev)!.Length)
-        .Max();
-    
+        .Max(sev => Enum.GetName(sev)!.Length);
+
     private static readonly int LongestSource = Enum.GetValues<LogSource>()
-        .Select(sev => Enum.GetName(sev)!.Length)
-        .Max();
+        .Max(src => Enum.GetName(src)!.Length);
     
-    private static readonly string PaddingLengthBlankSpace = new(' ', (int)(LongestSeverity * 1.33) + (int)(LongestSource * 1.85));
-    
+    private static readonly int SeverityPadding = (int)(LongestSeverity * 1.33);
+    private static readonly int SourcePadding = (int)(LongestSource * 1.85);
+    private static readonly string PaddingLengthBlankSpace = new(' ', SeverityPadding + SourcePadding);
+
     public VolteLog(VolteLogEventArgs eventData)
     {
         Severity = eventData.Severity;
@@ -28,49 +27,50 @@ public partial class VolteLog : ObservableObject
         Message = eventData.Message;
         Error = eventData.Error;
     }
-    
-    public LogSeverity Severity { get; init; }
-    public LogSource Source { get; init; }
-    public string? Message { get; init; }
-    public Exception? Error { get; init; }
-    
-    [ObservableProperty] 
-    private DateTime _date = DateTime.Now;
 
+    public DateTime Date { get; } = DateTime.Now;
+
+    public LogSeverity Severity { get; }
+    public LogSource Source { get; }
+    public string? Message { get; }
+    public Exception? Error { get; }
+
+    public string? AlignedMessage => Message?.Replace(MessageService.Whitespace, PaddingLengthBlankSpace);
     public string SeverityName => Enum.GetName(Severity)!.ToUpper();
     public string SourceName => Enum.GetName(Source)!.ToUpper();
 
-    public string String 
+    public string String
     {
         get
         {
             var sb = new StringBuilder();
-            sb.Append($"{SeverityName}:".P((int)(LongestSeverity * 1.33)));
-            sb.Append($"[{SourceName}]".P((int)(LongestSource * 1.85)));
-            
+            sb.Append($"{SeverityName}:".P(SeverityPadding));
+            sb.Append($"[{SourceName}]".P(SourcePadding));
+
             if (Message is not null)
-                sb.Append(Message);
+                sb.Append(AlignedMessage);
 
             if (Error is not null)
-                sb.AppendAllLines(errorString().ReplaceLineEndings(Environment.NewLine + PaddingLengthBlankSpace).Split(Environment.NewLine));
+                sb.AppendAllLines(new StringBuilder()
+                    .AppendLine()
+                    .Append($"{Error!.GetType().AsFullNamePrettyString()}: ")
+                    .AppendLine(Error.Message.IsNullOrEmpty() ? "No message provided" : Error.Message)
+                    .Append(Error.StackTrace)
+                    .ToString()
+                    .ReplaceLineEndings(PaddingLengthBlankSpace.Prepend(Environment.NewLine))
+                    .Split(Environment.NewLine)
+                );
 
             return sb.ToString();
-
-            string errorString() =>
-                Environment.NewLine + $"{Error!.GetType().AsFullNamePrettyString()}: " 
-                                    + (Error.Message.IsNullOrEmpty() ? "No message provided" : Error.Message) +
-                Environment.NewLine + Error.StackTrace;
         }
     }
 
 
     public string Markdown =>
         $"""
-         `[{SeverityName}]` `[{SourceName}]` 
+         `[{SourceName}]` `[{SeverityName}]` 
          `[{Date}]`
 
-         ```
-         {Message}
-         ```
+         {Format.Code(Message, string.Empty)}
          """;
 }

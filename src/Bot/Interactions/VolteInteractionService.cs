@@ -7,14 +7,14 @@ namespace Volte.Interactions;
 public class VolteInteractionService : VolteService
 {
     private static bool _commandsRegistered;
-
-
+    
     private readonly IServiceProvider _provider;
     private readonly InteractionService _backing;
 
     public VolteInteractionService(IServiceProvider provider, DiscordSocketClient client)
     {
-        _backing = new InteractionService(client.Rest, new InteractionServiceConfig
+        _provider = provider;
+        _backing = new(client.Rest, new()
         {
             LogLevel = Config.DebugEnabled || Version.IsDevelopment
                 ? LogSeverity.Debug
@@ -44,7 +44,7 @@ public class VolteInteractionService : VolteService
 
         _backing.Log += logMessage =>
         {
-            HandleLogEvent(new DiscordLogEventArgs(logMessage));
+            Log(new VolteLogEventArgs(logMessage));
             return Task.CompletedTask;
         };
 

@@ -8,7 +8,7 @@ public sealed partial class BotOwnerModule
     public async Task<ActionResult> ReloadAsync()
     {
         AdminUtilityModule.AllowedPasteSites = await HttpHelper.GetAllowedPasteSitesAsync(Context.Services);
-        return Config.Reload()
+        return Config.Reload<HeadlessBotConfig>()
             ? Ok("Config and AllowedPasteSites reloaded!")
             : BadRequest("Something bad happened. Check console for more detailed information.");
     }

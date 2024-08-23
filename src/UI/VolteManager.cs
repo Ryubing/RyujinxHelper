@@ -1,6 +1,4 @@
-﻿using Gommon;
-
-namespace Volte.UI;
+﻿namespace Volte.UI;
 
 public class VolteManager
 {
@@ -10,27 +8,31 @@ public class VolteManager
         Console.CursorVisible = false;
     }
     
-    private static VolteBot? _bot;
     private static Task? _botTask;
 
-    public static CancellationTokenSource Cts = new();
+    public static CancellationTokenSource? Cts { get; private set; }
 
     public static void Start()
     {
-        if (_bot is not null) return;
-        
-        _bot = new VolteBot();
-        _botTask = Task.Run(async () => await _bot.LoginAsync(Cts));
-    }
+        if (VolteBot.Client is not null && Cts is not null) return;
 
+        Cts = new();
+        
+        _botTask = Task.Run(async () => await VolteBot.LoginAsync(Cts));
+    }
+    
     public static void Stop()
     {
-        if (_bot is null) return;
+        if (VolteBot.Client is null && Cts is null) return;
         
-        Cts.Cancel();
-        _bot = null;
+        Cts!.Cancel();
         _botTask = null;
-        
-        Cts.TryReset();
+
+        Cts = null;
     }
+    
+    public static string GetConnectionState()
+        => VolteBot.Client is null
+            ? "Disconnected"
+            : Enum.GetName(VolteBot.Client.ConnectionState) ?? "Disconnected";
 }

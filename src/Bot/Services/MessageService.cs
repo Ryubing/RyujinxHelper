@@ -5,7 +5,8 @@ public sealed class MessageService : VolteService
     private readonly CommandService _commandService;
     private readonly QuoteService _quoteService;
         
-    public MessageService(CommandService commandService,
+    public MessageService(
+        CommandService commandService,
         QuoteService quoteService)
     {
         _commandService = commandService;
@@ -224,10 +225,12 @@ public sealed class MessageService : VolteService
 
     private const int SpaceCount = 20;
     private const int HyphenCount = 49;
-
+    
+    public static readonly string Whitespace = string.Intern(new string(' ', SpaceCount));
+    
     public static readonly string Separator = string.Intern(
         String(sb => sb
-            .Append(string.Intern(new string(' ', SpaceCount)))
+            .Append(Whitespace)
             .Append(new string('-', HyphenCount))
         ));
 
@@ -235,30 +238,30 @@ public sealed class MessageService : VolteService
         $"|  -Command from user: {args.Context.User} ({args.Context.User.Id})";
 
     private static string CommandIssued(CommandEventArgs args) 
-        => new StringBuilder(string.Intern(new string(' ', SpaceCount)))
+        => new StringBuilder(Whitespace)
             .Append($"|     -Command Issued: {args.Context.Command.Name}").ToString();
 
     private static string FullMessage(CommandEventArgs args) 
-        => new StringBuilder(string.Intern(new string(' ', SpaceCount)))
+        => new StringBuilder(Whitespace)
             .Append($"|       -Full Message: {args.Context.Message.Content}").ToString();
 
     private static string InGuild(CommandEventArgs args) 
-        => new StringBuilder(string.Intern(new string(' ', SpaceCount)))
+        => new StringBuilder(Whitespace)
             .Append($"|           -In Guild: {args.Context.Guild.Name} ({args.Context.Guild.Id})").ToString();
 
     private static string InChannel(CommandEventArgs args) 
-        => new StringBuilder(string.Intern(new string(' ', SpaceCount)))
+        => new StringBuilder(Whitespace)
             .Append($"|         -In Channel: #{args.Context.Channel.Name} ({args.Context.Channel.Id})").ToString();
 
     private static string TimeIssued(CommandEventArgs args) 
-        => new StringBuilder(string.Intern(new string(' ', SpaceCount)))
+        => new StringBuilder(Whitespace)
             .Append($"|        -Time Issued: {args.Context.Now.FormatFullTime()}, {args.Context.Now.FormatDate()}").ToString();
 
     private static string After(CommandEventArgs args) 
-        => new StringBuilder(string.Intern(new string(' ', SpaceCount)))
+        => new StringBuilder(Whitespace)
             .Append($"|              -After: {args.Stopwatch.Elapsed.Humanize()}").ToString();
 
     private static string ResultMessage(ResultCompletionData data) 
-        => new StringBuilder(string.Intern(new string(' ', SpaceCount)))
+        => new StringBuilder(Whitespace)
             .Append($"|     -Result Message: {data.Message?.Id}").ToString();
 }

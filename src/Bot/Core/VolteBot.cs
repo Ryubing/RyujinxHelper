@@ -8,24 +8,24 @@ public class VolteBot
     {
         Console.Title = $"Volte {Version.InformationVersion}";
         Console.CursorVisible = false;
-        return new VolteBot().LoginAsync(cts);
+        return LoginAsync(cts);
     }
 
     public static bool AvaloniaIsAttached { get; set; }
-    
+
     public static ServiceProvider Services { get; private set; }
-    
+
     public static DiscordSocketClient Client { get; private set; }
     public static CancellationTokenSource Cts { get; private set; }
 
     public VolteBot()
         => Console.CancelKeyPress += (_, _) => Cts?.Cancel();
 
-    public async Task LoginAsync(Gommon.Optional<CancellationTokenSource> cts = default)
+    public static async Task LoginAsync(Gommon.Optional<CancellationTokenSource> cts = default)
     {
-        if (!Config.StartupChecks()) return;
+        if (!Config.StartupChecks<HeadlessBotConfig>()) return;
 
-        Config.Load();
+        Config.Load<HeadlessBotConfig>();
 
         if (!Config.IsValidToken()) return;
 
@@ -40,6 +40,8 @@ public class VolteBot
 
         AdminUtilityModule.AllowedPasteSites = await HttpHelper.GetAllowedPasteSitesAsync(Services);
 
+        SetAppStatus("Logging in", FontAwesome.RightToBracket);
+        var sw = Stopwatch.StartNew();
         await Client.LoginAsync(TokenType.Bot, Config.Token);
         await Client.StartAsync();
 
@@ -64,29 +66,36 @@ public class VolteBot
 
         try
         {
+            SetAppStatus($"Logged in, took {sw.Elapsed.Humanize(2)}.",
+                FontAwesome.Check,
+                isWorkingStatus: false,
+                statusExpiresAfter: 10.Seconds()
+            );
             await Task.Delay(-1, Cts.Token);
         }
         catch (Exception e)
         {
             e.SentryCapture();
 
-            await ShutdownAsync(Client, Services);
+            await ShutdownAsync();
         }
     }
 
     // ReSharper disable SuggestBaseTypeForParameter
-    public static async Task ShutdownAsync(DiscordSocketClient client, ServiceProvider provider)
+    public static async Task ShutdownAsync()
     {
         Critical(LogSource.Volte, "Bot shutdown requested; shutting down and cleaning up.");
 
-        CalledCommandsInfo.UpdateSaved(provider.Get<MessageService>());
+        CalledCommandsInfo.UpdateSaved(Services.Get<MessageService>());
 
-        await provider.DisposeAsync();
+        await Client.SetStatusAsync(UserStatus.Invisible);
+        await Client.LogoutAsync();
+        await Client.StopAsync();
 
-        await client.SetStatusAsync(UserStatus.Invisible);
-        await client.LogoutAsync();
-        await client.StopAsync();
+        await Services.DisposeAsync();
 
-        Environment.Exit(0);
+        Services = null;
+        Client = null;
+        Cts = null;
     }
 }

@@ -47,34 +47,49 @@ public partial class PageManager : ObservableObject
             Focus(pageType);
     }
 
-    public void Focus(PageType pageType)
+    public void Focus(PageType pageType) => Current = this[pageType];
+
+
+    public bool TryGetViewModel<T>(out T viewModel) where T : ObservableObject
     {
-        Current = this[pageType];
+        foreach (var page in Pages.Concat(FooterPages))
+            if (page.Content is UserControl { DataContext: T pageViewModel })
+            {
+                viewModel = pageViewModel;
+                return true;
+            }
+
+        viewModel = null!;
+        return false;
     }
 
+    public T GetViewModel<T>() where T : ObservableObject
+        => TryGetViewModel<T>(out var result)
+            ? result!
+            : throw new InvalidOperationException(
+                $"No registered page has the DataContext type of '{typeof(T).AsPrettyString()}'");
 
-    public T Get<T>(PageType pageType) where T : ObservableObject
-    {
-        var (index, isFooter) = _lookup[pageType];
-        if ((isFooter ? FooterPages : Pages)[index].Content is not UserControl { DataContext: T value })
-            throw new InvalidOperationException(
-                $"Invalid ViewModel type for '{pageType}'");
-
-        return value;
-    }
 
     #region Attributes
 
-    public static void Init(Assembly? assembly = null)
+    public static void Init(Optional<Assembly> assembly = default)
     {
-        (assembly ?? Assembly.GetExecutingAssembly()).GetTypes()
+        assembly.OrElse(Assembly.GetExecutingAssembly()).GetTypes()
             .Where(x => x.HasAttribute<UiPageAttribute>() && !x.HasAttribute<DontAutoRegisterAttribute>())
             .Select(x => (type: x, attribute: x.GetCustomAttribute<UiPageAttribute>()!))
-            .OrderByDescending(x => x.attribute.PageType)
+            .OrderBy(x => x.attribute.PageType)
             .ForEach(page => Shared.Register(
                 pageType: page.attribute.PageType,
                 title: page.attribute.Title,
-                content: Activator.CreateInstance(page.type)!,
+                content: page.type.GetConstructor(Type.EmptyTypes)?.Invoke([])
+                         ?? throw new TypeInitializationException(
+                             page.type.AsFullNamePrettyString(),
+                             new Exception($"""
+                                            The specified type does not have a parameterless constructor.
+                                            Create one or use {nameof(DontAutoRegisterAttribute)}
+                                            on the page type to prevent auto-registration.
+                                            """.ReplaceLineEndings())
+                         ),
                 icon: page.attribute.Icon,
                 description: page.attribute.Description,
                 isDefault: page.attribute.IsDefault,
@@ -112,10 +127,10 @@ public class UiPageAttribute : Attribute
         IsFooter = isFooter;
     }
 
-    public string Title { get; init; }
-    public string Description { get; init; }
-    public PageType PageType { get; init; }
-    public Symbol Icon { get; init; }
-    public bool IsDefault { get; init; }
-    public bool IsFooter { get; init; }
+    public string Title { get; }
+    public string Description { get; }
+    public PageType PageType { get; }
+    public Symbol Icon { get; }
+    public bool IsDefault { get; }
+    public bool IsFooter { get; }
 }

@@ -1,4 +1,5 @@
-﻿namespace Volte.Interactions;
+﻿// ReSharper disable MemberCanBePrivate.Global UnusedMember.Global
+namespace Volte.Interactions;
 
 public static class Buttons
     {
@@ -73,13 +74,28 @@ public static class Buttons
         ///     The character that separates the ID.
         /// </summary>
         public const char Separator = ':';
+        
+        /// <summary>
+        ///     The identifier (the first part) of the Custom ID.
+        /// </summary>
+        public string Identifier { get; } = null!;
 
-        private object? _identifier;
-        private object? _action;
-        private object? _value;
-        private object? _trailing;
+        /// <summary>
+        ///     The action (the second part) of the Custom ID.
+        /// </summary>
+        public string Action { get; } = null!;
 
-        private StringBuilder _rawId;
+        /// <summary>
+        ///     The value (the third part) of the Custom ID.
+        /// </summary>
+        public string? Value { get; }
+
+        /// <summary>
+        ///     The trailing content of the Custom ID (everything after the semicolon after the value content, if present).
+        /// </summary>
+        public string? TrailingContent { get; }
+
+        private StringBuilder? _rawId;
 
         /// <summary>
         ///     Create a new <see cref="MessageComponentId"/> with <paramref name="raw"/> as its content.
@@ -89,13 +105,13 @@ public static class Buttons
         {
             _rawId = new StringBuilder(raw);
             var split = raw.Split(Separator);
-            if (split.Length == 0) return;
+            if (split.Length < 3) return;
 
-            _identifier = split.FirstOrDefault();
-            _action = split.ElementAtOrDefault(1);
-            _value = split.ElementAtOrDefault(2);
+            Identifier = split[0];
+            Action = split[1];
+            Value = split.ElementAtOrDefault(2);
             
-            _trailing = raw.Length == raw.LastIndexOf(Separator) + 1
+            TrailingContent = raw.Length == raw.LastIndexOf(Separator) + 1
                 ? null
                 : raw[(raw.LastIndexOf(Separator) + 1)..];
         }
@@ -109,10 +125,13 @@ public static class Buttons
         /// <param name="trailing"></param>
         public MessageComponentId(object identifier, object action, object? value, object? trailing)
         {
-            _identifier = identifier;
-            _action = action;
-            _value = value;
-            _trailing = trailing;
+            Guard.Require(identifier, nameof(identifier));
+            Guard.Require(action, nameof(action));
+            
+            Identifier = identifier.ToString()!;
+            Action = action.ToString()!;
+            Value = value?.ToString();
+            TrailingContent = trailing?.ToString();
         }
 
         public static implicit operator MessageComponentId(string raw) => new(raw);
@@ -124,60 +143,21 @@ public static class Buttons
 
         public override string ToString()
         {
-            if (_rawId != null)
-                return _rawId.ToString();
-
-            _rawId = new StringBuilder();
-            if (_identifier != null)
-                AppendSegment(_identifier);
-            if (_action != null)
-                AppendSegment(_action);
-            if (_value != null)
-                AppendSegment(_value);
-            if (_trailing != null)
-                _rawId.Append(_trailing);
-
-            var result = _rawId.ToString();
-            _rawId = null;
-            return result;
+            // ReSharper disable once InvertIf
+            if (_rawId == null)
+            {
+                _rawId = new StringBuilder();
+                AppendSegment(Identifier);
+                AppendSegment(Action);
+                if (Value != null)
+                    AppendSegment(Value);
+                if (TrailingContent != null)
+                    _rawId.Append(TrailingContent);
+            }
+            
+            return _rawId.ToString();
         }
 
-        private void AppendSegment(object val) => _rawId.Append($"{val}{Separator}");
-        
-        #nullable disable
-        /// <summary>
-        ///     The identifier (the first part) of the Custom ID.
-        /// </summary>
-        public string Identifier
-        {
-            get => _identifier?.ToString();
-            set => _identifier = value;
-        }
-
-        /// <summary>
-        ///     The action (the second part) of the Custom ID.
-        /// </summary>
-        public string Action
-        {
-            get => _action?.ToString();
-            set => _action = value;
-        }
-        
-        /// <summary>
-        ///     The value (the third part) of the Custom ID.
-        /// </summary>
-        public string Value
-        {
-            get => _value?.ToString();
-            set => _value = value;
-        }
-
-        /// <summary>
-        ///     The trailing content of the Custom ID.
-        /// </summary>
-        public string TrailingContent
-        {
-            get => _trailing?.ToString();
-            set => _trailing = value;
-        }
+        private void AppendSegment(object val) 
+            => _rawId?.Append($"{val}{Separator}");
     }

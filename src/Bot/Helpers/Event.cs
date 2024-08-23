@@ -49,6 +49,13 @@ internal class Event<T>
 
 internal static class EventExtensions
 {
+    public static Task CallAsync(this Event<Func<Task>> eventHandler)
+        => eventHandler.Subscriptions.ForEachAsync(x => x());
+
+    public static Task CallAsync<T>(this Event<Func<T, Task>> eventHandler,
+        T arg
+    ) => eventHandler.Subscriptions.ForEachAsync(x => x(arg));
+
     public static void Call(this Event<Action> eventHandler)
         => eventHandler.Subscriptions.ForEach(x => x());
 

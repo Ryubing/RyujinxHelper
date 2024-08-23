@@ -6,9 +6,9 @@ public sealed class GuildConfiguration
 {
     internal GuildConfiguration()
     {
-        Moderation = new ModerationOptions();
-        Welcome = new WelcomeOptions();
-        Starboard = new StarboardOptions();
+        Moderation = new();
+        Welcome = new();
+        Starboard = new();
     }
 
     [JsonPropertyName("autorole")]

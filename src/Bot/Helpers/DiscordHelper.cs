@@ -15,7 +15,7 @@ public static class DiscordHelper
             Emojis.Six, Emojis.Seven, Emojis.Eight, Emojis.Nine
         ];
 
-    public static RequestOptions CreateRequestOptions(Action<RequestOptions> initializer) 
+    public static RequestOptions RequestOptions(Action<RequestOptions> initializer) 
         => new RequestOptions().Apply(initializer);
 
 
@@ -106,27 +106,21 @@ public static class DiscordHelper
 
     public static SocketUser GetOwner(this BaseSocketClient client)
         => client.GetUser(Config.Owner);
-
-    public static SocketGuild GetPrimaryGuild(this BaseSocketClient client)
-        => client.GetGuild(405806471578648588); // TODO: config option
     
-    public static async Task RegisterVolteEventHandlers(this DiscordSocketClient client, ServiceProvider provider)
+    public static void RegisterVolteEventHandlers(this DiscordSocketClient client, ServiceProvider provider)
     {
         Listen(client);
         
         CalledCommandsInfo.StartPersistence(provider, saveEvery: 2.Minutes());
         
-        client.MessageReceived += async socketMessage =>
+        client.MessageReceived += socketMessage =>
         {
-            Info(LogSource.Volte, socketMessage.Content);
+            if (!socketMessage.ShouldHandle(out var msg)) return Task.CompletedTask;
             
-            if (socketMessage.ShouldHandle(out var msg))
-            {
-                if (msg.Channel is IDMChannel dm)
-                    await dm.SendMessageAsync("Currently, I do not support commands via DM.");
-                else
-                    await provider.Get<MessageService>().HandleMessageAsync(new MessageReceivedEventArgs(socketMessage, provider));
-            }
+            if (msg.Channel is IDMChannel dm)
+                return dm.SendMessageAsync("Currently, I do not support commands via DM.");
+                
+            return provider.Get<MessageService>().HandleMessageAsync(new MessageReceivedEventArgs(socketMessage, provider));
         };
 
         client.Ready += async () =>
@@ -138,7 +132,7 @@ public static class DiscordHelper
             PrintHeader();
             Info(LogSource.Volte, $"Currently running Volte V{Version.InformationVersion}.");
             Info(LogSource.Volte, "Use this URL to invite me to your guilds:");
-            Info(LogSource.Volte, $"{client.GetInviteUrl()}");
+            Info(LogSource.Volte, client.GetInviteUrl());
             Info(LogSource.Volte, $"Logged in as {client.CurrentUser.Username}#{client.CurrentUser.Discriminator}");
             Info(LogSource.Volte, $"Default command prefix is: \"{Config.CommandPrefix}\"");
             Info(LogSource.Volte, "Connected to:");
@@ -190,10 +184,10 @@ public static class DiscordHelper
 
     // ReSharper disable twice UnusedMethodReturnValue.Global
     public static async Task<IUserMessage> SendToAsync(this EmbedBuilder e, IGuildUser u) =>
-        await (await u.CreateDMChannelAsync()).SendMessageAsync(embed: e.Build());
+        await e.SendToAsync(await u.CreateDMChannelAsync());
 
     public static async Task<IUserMessage> SendToAsync(this Embed e, IGuildUser u) =>
-        await (await u.CreateDMChannelAsync()).SendMessageAsync(embed: e);
+       await e.SendToAsync(await u.CreateDMChannelAsync());
 
     public static Emoji ToEmoji(this string str) => new(str);
 
@@ -224,7 +218,7 @@ public static class DiscordHelper
     }
 
     public static Task<bool> TryDeleteAsync(this IDeletable deletable, string reason)
-        => deletable.TryDeleteAsync(CreateRequestOptions(opts => opts.AuditLogReason = reason));
+        => deletable.TryDeleteAsync(RequestOptions(opts => opts.AuditLogReason = reason));
 
     public static string GetEffectiveUsername(this IGuildUser user) =>
         user.Nickname ?? user.Username;

@@ -57,7 +57,7 @@ public static partial class Logger
         if (s is LogSeverity.Debug && !Config.DebugEnabled)
             return;
         
-        LogEventHandler.Call(new VolteLogEventArgs
+        Log(new VolteLogEventArgs
         {
             Severity = s,
             Source = from,

@@ -1,7 +1,4 @@
-﻿using Avalonia.Input;
-using Avalonia.Media;
-using CommunityToolkit.Mvvm.ComponentModel;
-using Discord;
+﻿using CommunityToolkit.Mvvm.ComponentModel;
 
 namespace Volte.UI.Avalonia.Pages;
 
@@ -9,14 +6,9 @@ namespace Volte.UI.Avalonia.Pages;
 public partial class UIShellViewModel : ObservableObject
 {
     public required UIShellView? View { get; init; } 
-    
-    public required KeyGesture OpenDevTools { get; init; }
 
     [ObservableProperty]
-    private ConnectionState _connection = VolteBot.Client.ConnectionState;
-
-    [ObservableProperty]
-    private string _title = "Volte";
+    private string _connection = "Disconnected";
 
     public UIShellViewModel()
     {
@@ -26,7 +18,7 @@ public partial class UIShellViewModel : ObservableObject
 
     private Task ConnectionChanged()
     {
-        Connection = VolteBot.Client.ConnectionState;
+        Connection = VolteManager.GetConnectionState();
         return Task.CompletedTask;
     }
 }

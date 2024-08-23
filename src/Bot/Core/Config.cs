@@ -4,7 +4,7 @@ namespace Volte;
 
 public static class Config
 {
-    private static BotConfig _configuration;
+    private static IVolteConfig _configuration;
 
     public static readonly JsonSerializerOptions JsonOptions = CreateSerializerOptions(true);
     public static readonly JsonSerializerOptions MinifiedJsonOptions = CreateSerializerOptions(false);
@@ -25,7 +25,7 @@ public static class Config
     private static bool IsValidConfig() 
         => Path.ExistsAsFile && !Path.ReadAllText().IsNullOrEmpty();
 
-    public static bool StartupChecks()
+    public static bool StartupChecks<TConfig>() where TConfig : IVolteConfig, new()
     {
         if (!FilePath.Data.ExistsAsDirectory)
         {
@@ -36,17 +36,17 @@ public static class Config
             //if the config does exist when this block is reached, feel free to become the lead developer of this project
         }
 
-        if (CreateIfAbsent()) return true;
+        if (CreateIfAbsent<TConfig>()) return true;
         Error(LogSource.Volte,
             $"Please fill in the configuration located at \"{Path}\"; restart me when you've done so.");
         return false;
 
     }
         
-    public static bool CreateIfAbsent()
+    public static bool CreateIfAbsent<TConfig>() where TConfig : IVolteConfig, new()
     {
         if (IsValidConfig()) return true;
-        _configuration = new BotConfig
+        _configuration = new TConfig
         {
             Token = "token here",
             SentryDsn = "",
@@ -59,7 +59,7 @@ public static class Config
             ErrorEmbedColor = 0xFF0000,
             LogAllCommands = true,
             BlacklistedGuildOwners = [],
-            EnabledFeatures = new EnabledFeatures()
+            EnabledFeatures = new()
         };
         
         try
@@ -74,18 +74,33 @@ public static class Config
         return false;
     }
 
-    public static void Load()
+    public static void Load<TConfig>() where TConfig : IVolteConfig, new()
     {
-        _ = CreateIfAbsent();
+        _ = CreateIfAbsent<TConfig>();
         if (IsValidConfig())
-            _configuration = JsonSerializer.Deserialize<BotConfig>(Path.ReadAllText(), JsonOptions);                    
+            _configuration = JsonSerializer.Deserialize<TConfig>(Path.ReadAllText(), JsonOptions);                    
     }
 
-    public static bool Reload()
+    public static bool Reload<TConfig>() where TConfig : IVolteConfig
     {
         try
         {
-            _configuration = JsonSerializer.Deserialize<BotConfig>(Path.ReadAllText(), JsonOptions);
+            _configuration = JsonSerializer.Deserialize<TConfig>(Path.ReadAllText(), JsonOptions);
+            return true;
+        }
+        catch (JsonException e)
+        {
+            Error(e);
+            return false;
+        }
+    }
+    
+    public static bool Edit<TConfig>(TConfig newConfig) where TConfig : IVolteConfig
+    {
+        try
+        {
+            Path.WriteAllText(JsonSerializer.Serialize(newConfig));
+            Reload<TConfig>();
             return true;
         }
         catch (JsonException e)
@@ -139,44 +154,82 @@ public static class Config
     public static HashSet<ulong> BlacklistedOwners => _configuration.BlacklistedGuildOwners;
 
     public static EnabledFeatures EnabledFeatures => _configuration.EnabledFeatures;
-        
-    // ReSharper disable MemberHidesStaticFromOuterClass
-    private struct BotConfig
-    {
-        [JsonPropertyName("discord_token")]
-        public string Token { get; set; }
+}
+
+public struct HeadlessBotConfig : IVolteConfig
+{
+    [JsonPropertyName("discord_token")]
+    public string Token { get; set; }
             
-        [JsonPropertyName("sentry_dsn")]
-        public string SentryDsn { get; set; }
+    [JsonPropertyName("sentry_dsn")]
+    public string SentryDsn { get; set; }
 
-        [JsonPropertyName("command_prefix")]
-        public string CommandPrefix { get; set; }
+    [JsonPropertyName("command_prefix")]
+    public string CommandPrefix { get; set; }
 
-        [JsonPropertyName("bot_owner")]
-        public ulong Owner { get; set; }
+    [JsonPropertyName("bot_owner")]
+    public ulong Owner { get; set; }
 
-        [JsonPropertyName("status_game")]
-        public string Game { get; set; }
+    [JsonPropertyName("status_game")]
+    public string Game { get; set; }
 
-        [JsonPropertyName("status_twitch_streamer")]
-        public string Streamer { get; set; }
+    [JsonPropertyName("status_twitch_streamer")]
+    public string Streamer { get; set; }
 
-        [JsonPropertyName("enable_debug_logging")]
-        public bool EnableDebug { get; set; }
+    [JsonPropertyName("enable_debug_logging")]
+    public bool EnableDebug { get; set; }
 
-        [JsonPropertyName("color_success")]
-        public uint SuccessEmbedColor { get; set; }
+    [JsonPropertyName("color_success")]
+    public uint SuccessEmbedColor { get; set; }
 
-        [JsonPropertyName("color_error")]
-        public uint ErrorEmbedColor { get; set; }
+    [JsonPropertyName("color_error")]
+    public uint ErrorEmbedColor { get; set; }
 
-        [JsonPropertyName("log_all_commands")]
-        public bool LogAllCommands { get; set; }
+    [JsonPropertyName("log_all_commands")]
+    public bool LogAllCommands { get; set; }
 
-        [JsonPropertyName("blacklisted_guild_owners")]
-        public HashSet<ulong> BlacklistedGuildOwners { get; set; }
+    [JsonPropertyName("blacklisted_guild_owners")]
+    public HashSet<ulong> BlacklistedGuildOwners { get; set; }
 
-        [JsonPropertyName("enabled_features")]
-        public EnabledFeatures EnabledFeatures { get; set; }
-    }
+    [JsonPropertyName("enabled_features")]
+    public EnabledFeatures EnabledFeatures { get; set; }
+}
+
+public interface IVolteConfig
+{
+    [JsonPropertyName("discord_token")]
+    public string Token { get; set; }
+            
+    [JsonPropertyName("sentry_dsn")]
+    public string SentryDsn { get; set; }
+
+    [JsonPropertyName("command_prefix")]
+    public string CommandPrefix { get; set; }
+
+    [JsonPropertyName("bot_owner")]
+    public ulong Owner { get; set; }
+
+    [JsonPropertyName("status_game")]
+    public string Game { get; set; }
+
+    [JsonPropertyName("status_twitch_streamer")]
+    public string Streamer { get; set; }
+
+    [JsonPropertyName("enable_debug_logging")]
+    public bool EnableDebug { get; set; }
+
+    [JsonPropertyName("color_success")]
+    public uint SuccessEmbedColor { get; set; }
+
+    [JsonPropertyName("color_error")]
+    public uint ErrorEmbedColor { get; set; }
+
+    [JsonPropertyName("log_all_commands")]
+    public bool LogAllCommands { get; set; }
+
+    [JsonPropertyName("blacklisted_guild_owners")]
+    public HashSet<ulong> BlacklistedGuildOwners { get; set; }
+
+    [JsonPropertyName("enabled_features")]
+    public EnabledFeatures EnabledFeatures { get; set; }
 }

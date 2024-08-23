@@ -12,7 +12,7 @@ public sealed class ColorParser : VolteTypeParser<Color>
         Color? c = null;
         
         if (uint.TryParse(value.StartsWith('#') ? value[1..] : value, NumberStyles.HexNumber, CultureInfo.CurrentCulture, out var colorInt))
-            c = new Color(colorInt);
+            c = new(colorInt);
 
         if (c is null)
         {
@@ -30,7 +30,7 @@ public sealed class ColorParser : VolteTypeParser<Color>
                         "A value in an RGB sequence may not be over the value of 255.");
                 }
 
-                c = new Color(r, g, b);
+                c = new(r, g, b);
             }
             catch (Exception)
             { 

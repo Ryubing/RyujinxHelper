@@ -46,7 +46,7 @@ public class TagModule : VolteModule
                 $"Cannot make the tag **{tag.Name}**, as it already exists and is owned by **{user}**.");
         }
 
-        tag = new Tag
+        tag = new()
         {
             Name = name,
             Response = response,

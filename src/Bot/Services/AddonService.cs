@@ -3,7 +3,7 @@ using Microsoft.CodeAnalysis.Scripting;
 
 namespace Volte.Services;
 
-public class AddonService : VolteService
+public sealed class AddonService : VolteService
 {
     public static FilePath AddonsDir = new("addons", true);
         
@@ -60,7 +60,7 @@ public class AddonService : VolteService
 
     private static bool TryGetAddonContent(FilePath addonDir, out VolteAddon addon)
     {
-        addon = new VolteAddon();
+        addon = new();
             
         foreach (var file in addonDir.GetFiles())
         {

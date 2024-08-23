@@ -34,9 +34,11 @@ public partial class AppStatus : ObservableObject
 
     [ObservableProperty] private string _status = "Ready";
 
-    [ObservableProperty] private string _icon = "fa-regular fa-message";
+    [ObservableProperty] private string _icon = FontAwesome.Message;
 
     [ObservableProperty] private bool _isWorking;
+
+    public override string ToString() => Status;
 
     /// <summary>
     /// Resets the modal status to "Ready"
@@ -53,7 +55,7 @@ public partial class AppStatus : ObservableObject
     /// <param name="logSeverity">The severity to print the message to the log as.</param>
     public static void Set(
         string status,
-        string icon = "fa-regular fa-message",
+        string icon = AppStatusEventArgs.AppStatusDefaultIcon,
         bool? isWorkingStatus = null,
         TimeSpan? statusExpiresAfter = null,
         LogSeverity? logSeverity = null

@@ -3,7 +3,7 @@ using System.Text.RegularExpressions;
 namespace Volte.Services;
 
 //thanks discord-csharp/MODiX for the idea and some of the code (definitely the regex lol)
-public partial class QuoteService(DiscordSocketClient client) : VolteService
+public sealed partial class QuoteService(DiscordSocketClient client) : VolteService
 {
     public async Task<bool> CheckMessageAsync(MessageReceivedEventArgs args)
     {

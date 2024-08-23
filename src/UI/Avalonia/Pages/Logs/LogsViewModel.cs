@@ -12,7 +12,7 @@ namespace Volte.UI.Avalonia.Pages;
 
 public partial class LogsViewModel : ObservableObject
 {
-    private const byte MaxLogsInMemory = 100;
+    private const byte MaxLogsInMemory = 200;
 
     private readonly object _logSync = new();
     
@@ -24,9 +24,14 @@ public partial class LogsViewModel : ObservableObject
     [ObservableProperty] 
     private VolteLog? _selected;
     
-    public LogsViewModel() => Logger.LogEvent += Receive;
+    public LogsViewModel() => Logger.Event += Receive;
 
-    ~LogsViewModel() => Logger.LogEvent -= Receive;
+    ~LogsViewModel() => Logger.Event -= Receive;
+
+    public static void UnregisterHandler()
+    {
+        Logger.Event -= PageManager.Shared.GetViewModel<LogsViewModel>().Receive;
+    }
 
     private void Receive(VolteLogEventArgs eventArgs)
     {
@@ -38,13 +43,13 @@ public partial class LogsViewModel : ObservableObject
             if (!(eventArgs.Message.IsNullOrEmpty() || eventArgs.Message.IsNullOrWhitespace()))
             {
                 if (Logs.Count >= MaxLogsInMemory)
-                    Logs.OrderByDescending(x => x.Date)
-                        .FindLast()
-                        .IfPresent(toRemove => Logs.Remove(toRemove));
-        
+                    Logs.WithIndex()
+                        .OrderByDescending(x => x.Value.Date)
+                        .TakeLast(10)
+                        .ForEach(toRemove => Logs.RemoveAt(toRemove.Index));
+                
                 Logs.Add(new VolteLog(eventArgs));
-                if (View?.Viewer is not null)
-                    Lambda.Try(() => Dispatcher.UIThread.Invoke(View.Viewer.ScrollToEnd));
+                Lambda.Try(() => Dispatcher.UIThread.Invoke(() => View?.Viewer?.ScrollToEnd()));
             }
 
             if (eventArgs.Error is not { } err) return;

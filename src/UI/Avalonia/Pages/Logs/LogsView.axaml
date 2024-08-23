@@ -35,14 +35,14 @@
                                 Width="25"
                                 Padding="0"
                                 ToolTip.Tip="Copy">
-                            <pi:Icon Value="fa-regular fa-copy" />
+                            <pi:Icon Name="CopySimpleIcon" />
                         </Button>
                         <Button Name="CopyMarkdown"
                                 Height="25"
                                 Width="25"
                                 Padding="0"
                                 ToolTip.Tip="Copy Markdown">
-                            <pi:Icon Value="fa-solid fa-brush" />
+                            <pi:Icon Name="CopyMarkdownIcon" />
                         </Button>
                     </StackPanel>
                 </Flyout>

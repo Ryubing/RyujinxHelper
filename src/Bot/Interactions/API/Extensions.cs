@@ -42,7 +42,7 @@ public static class Extensions
     public static ComponentBuilder AddActionRows(this ComponentBuilder builder,
         params ActionRowBuilder[] actionRows)
     {
-        builder.ActionRows ??= new List<ActionRowBuilder>();
+        builder.ActionRows ??= [];
         builder.ActionRows.AddRange(actionRows);
         return builder;
     }

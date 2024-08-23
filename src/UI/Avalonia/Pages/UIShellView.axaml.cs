@@ -20,11 +20,7 @@ public partial class UIShellView : AppWindow
         using var bitmap = new Bitmap(AssetLoader.Open(AvaloniaHelper.GetResourceUri("icon.ico")));
         VolteLogo.Source = Icon = bitmap.CreateScaledBitmap(new PixelSize(48, 48));
         
-        DataContext = new UIShellViewModel
-        {
-            View = this,
-            OpenDevTools = new KeyGesture(Key.F4, KeyModifiers.Control)
-        };
+        DataContext = new UIShellViewModel { View = this };
         
         PageManager.Shared.PropertyChanged += (pm, e) =>
         {
@@ -33,7 +29,7 @@ public partial class UIShellView : AppWindow
         };
 
 #if DEBUG
-        this.AttachDevTools(DataContext.Cast<UIShellViewModel>().OpenDevTools);
+        this.AttachDevTools(VolteApp.OpenDevTools);
 #endif
     }
 }

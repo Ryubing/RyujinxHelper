@@ -30,7 +30,7 @@ public sealed class AsyncDuplicateLock<T>
             }
             else
             {
-                item = new RefCounted<SemaphoreSlim>(new SemaphoreSlim(1, 1));
+                item = new(new(1, 1));
                 _semaphores[key] = item;
             }
         }

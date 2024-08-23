@@ -1,11 +1,12 @@
 namespace Volte.Services;
 
-public class ModerationService : VolteService
+public sealed class ModerationService : VolteService
 {
     private readonly DatabaseService _db;
     
     public ModerationService(DiscordSocketClient client, DatabaseService databaseService)
     {
+        _db = databaseService;
         client.UserJoined += user => CheckAccountAgeAsync(new UserJoinedEventArgs(user));
     }
     

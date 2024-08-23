@@ -1,4 +1,5 @@
 ﻿using Discord.Interactions;
+// ReSharper disable MemberCanBePrivate.Global
 
 namespace Volte.Interactions;
 

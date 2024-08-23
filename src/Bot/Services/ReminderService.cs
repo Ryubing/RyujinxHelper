@@ -2,7 +2,7 @@ using System.Text.RegularExpressions;
 
 namespace Volte.Services;
 
-public partial class ReminderService(
+public sealed partial class ReminderService(
     DatabaseService _db,
     DiscordSocketClient _client)
     : VolteService, IDisposable
@@ -77,7 +77,6 @@ public partial class ReminderService(
 
     public void Dispose()
     {
-        GC.SuppressFinalize(this);
         _tickerTokenSource?.Cancel();
             
         _ticker?.Dispose();

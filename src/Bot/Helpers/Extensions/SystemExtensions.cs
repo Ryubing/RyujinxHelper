@@ -41,17 +41,17 @@ public static partial class Extensions
 
         return content;
     }
-
-    public static void SentryCapture(this Exception e, Action<Scope> configureScope = null)
+    
+    #nullable enable
+    
+    public static void SentryCapture(this Exception? e, Action<Scope>? configureScope = null)
     {
-        if (e is TaskCanceledException or OperationCanceledException) return;
+        if (e is null or TaskCanceledException or OperationCanceledException) return;
         
-        if (configureScope != null)
+        if (configureScope != null) 
             SentrySdk.CaptureException(e, configureScope);
         else SentrySdk.CaptureException(e);
     }
-    
-    #nullable enable
     
     public static bool TryParse<T>(this string? s, [MaybeNullWhen(false)] out T result, IFormatProvider? formatProvider = null) where T : IParsable<T>
         => T.TryParse(s, formatProvider, out result);

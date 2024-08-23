@@ -1,12 +1,11 @@
-﻿using System.Collections.Concurrent;
-using Discord.Interactions;
+﻿using Discord.Interactions;
 using Volte.Interactions;
 using Volte.Interactive;
 using RunMode = Qmmands.RunMode;
 
 namespace Volte.Services;
 
-public class InteractiveService : VolteService, IDisposable
+public sealed class InteractiveService : VolteService, IDisposable
 {
     private readonly DiscordSocketClient _client;
     
@@ -185,15 +184,16 @@ public class InteractiveService : VolteService, IDisposable
     {
         if (!_buttonCallbacks.TryGetValue(component.Message.Id, out var callback)) return;
         var ctx = new SocketInteractionContext<SocketMessageComponent>(_client, component);
-        var id = ctx.Interaction.GetId();
-        if (id.Identifier != "pager") return;
+        var id = ctx.GetId();
+        if (id.Identifier is not "pager") return;
         if (id.Value != callback.MessageContext.Message.Id.ToString()) return;
         if (!await callback.Criterion.JudgeAsync(callback.MessageContext, ctx)) return;
 
         var callbackTask = Task.Run(async () =>
         {
             if (await callback.HandleAsync(ctx) && RemoveButtonCallback(callback.PagerMessage.Id))
-                Debug(LogSource.Service, $"Button paginator for {callback.MessageContext.Message.Id} deleted, pager was ID {callback.PagerMessage.Id}");
+                Debug(LogSource.Service,
+                    $"Button paginator for {callback.MessageContext.Message.Id} deleted, pager was ID {callback.PagerMessage.Id}");
         });
 
         if (callback.RunMode is RunMode.Sequential)

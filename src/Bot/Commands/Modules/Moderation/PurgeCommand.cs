@@ -15,7 +15,7 @@ public sealed partial class ModerationModule : VolteModule
         {
             await Context.Channel.DeleteMessagesAsync(
                 messages.Where(x => targetAuthor is null || x.Author.Id == targetAuthor.Id),
-                DiscordHelper.CreateRequestOptions(opts =>
+                DiscordHelper.RequestOptions(opts =>
                     opts.AuditLogReason = $"Messages purged by {Context.User}."));
         }
         catch (ArgumentOutOfRangeException)

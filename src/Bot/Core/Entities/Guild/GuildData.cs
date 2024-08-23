@@ -9,11 +9,11 @@ public sealed class GuildData
         {
             Id = guild.Id,
             OwnerId = guild.OwnerId,
-            Configuration = new GuildConfiguration
+            Configuration = new()
             {
                 Autorole = default,
                 CommandPrefix = Config.CommandPrefix,
-                Moderation = new ModerationOptions
+                Moderation = new()
                 {
                     AdminRole = default,
                     ModActionLogChannel = default,
@@ -23,7 +23,7 @@ public sealed class GuildData
                     UnverifiedRole = default,
                     ShowResponsibleModerator = true
                 },
-                Welcome = new WelcomeOptions
+                Welcome = new()
                 {
                     LeavingMessage = string.Empty,
                     WelcomeChannel = default,
@@ -31,19 +31,19 @@ public sealed class GuildData
                     WelcomeMessage = string.Empty
                 }
             },
-            Extras = new GuildExtras
+            Extras = new()
             {
                 ModActionCaseNumber = default,
-                SelfRoles = new HashSet<ulong>(),
-                Tags = new HashSet<Tag>(),
-                Warns = new HashSet<Warn>()
+                SelfRoles = [],
+                Tags = [],
+                Warns = []
             }
         };
 
     public GuildData()
     {
-        Configuration = new GuildConfiguration();
-        Extras = new GuildExtras();
+        Configuration = new();
+        Extras = new();
     }
 
     [JsonPropertyName("id")]

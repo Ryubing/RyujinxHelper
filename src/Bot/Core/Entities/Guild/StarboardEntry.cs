@@ -18,7 +18,7 @@ public class StarboardEntry
 {
     public StarboardEntry()
     {
-        Stargazers = new Dictionary<ulong, StarTarget>();
+        Stargazers = new();
     }
 
     [JsonPropertyName("guild_id")]

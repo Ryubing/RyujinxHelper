@@ -49,29 +49,30 @@
             </ListBox.ContextFlyout>
             <ListBox.ItemTemplate>
                 <DataTemplate DataType="{x:Type local:VolteLog}">
-                    <Grid>
-                        <Border Margin="1"
-                                HorizontalAlignment="Stretch"
-                                VerticalAlignment="Stretch"
-                                CornerRadius="3"
-                                Background="{Binding Severity, Converter={x:Static converters:LogSeverityToBrush.Shared}}"
-                                Opacity="0.3" />
-                        <Grid ColumnDefinitions="*,Auto" Margin="5">
-                            <TextBlock Grid.Column="0"
-                                       VerticalAlignment="Center"
-                                       HorizontalAlignment="Left"
-                                       FontFamily="{StaticResource JetBrainsMono}"
-                                       Text="{Binding String}"
-                                       TextWrapping="WrapWithOverflow" />
-                            <TextBlock Grid.Column="1"
-                                       VerticalAlignment="Center"
-                                       HorizontalAlignment="Right"
-                                       FontFamily="{StaticResource JetBrainsMono}"
-                                       FontStyle="Oblique"
-                                       TextDecorations="Underline"
-                                       FontSize="9"
-                                       Text="{Binding Date}" />
-                        </Grid>
+                    <Grid ColumnDefinitions="Auto,Auto,*,Auto" Margin="5">
+                        <TextBlock Grid.Column="0"
+                                   FontFamily="{StaticResource JetBrainsMono}"
+                                   Text="{Binding FormattedSeverityName}"
+                                   Foreground="{Binding Severity, Converter={x:Static converters:LogSeverityToBrush.Shared}}"
+                                   TextWrapping="NoWrap" />
+                        <TextBlock Grid.Column="1"
+                                   FontFamily="{StaticResource JetBrainsMono}"
+                                   Text="{Binding FormattedSourceName}"
+                                   Foreground="{Binding Source, Converter={x:Static converters:LogSourceToBrush.Shared}}"
+                                   TextWrapping="NoWrap" />
+                        <TextBlock Grid.Column="2"
+                                   VerticalAlignment="Center"
+                                   FontFamily="{StaticResource JetBrainsMono}"
+                                   Text="{Binding FormattedMessage}"
+                                   TextWrapping="WrapWithOverflow" />
+                        <TextBlock Grid.Column="3"
+                                   VerticalAlignment="Center"
+                                   HorizontalAlignment="Right"
+                                   FontFamily="{StaticResource JetBrainsMono}"
+                                   FontStyle="Oblique"
+                                   TextDecorations="Underline"
+                                   FontSize="9"
+                                   Text="{Binding Date}" />
                     </Grid>
                 </DataTemplate>
             </ListBox.ItemTemplate>

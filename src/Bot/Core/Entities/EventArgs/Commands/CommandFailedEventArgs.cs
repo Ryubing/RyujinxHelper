@@ -14,5 +14,5 @@ public sealed class CommandFailedEventArgs : CommandEventArgs
     }
 
     public string ExecutedLogMessage(string reason)
-        => $"                    |           -Executed: {Result.IsSuccessful} | Reason: {reason}";
+        => Fmt(Executed, $"{Result.IsSuccessful} | Reason: {reason}");
 }

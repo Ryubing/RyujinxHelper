@@ -67,12 +67,11 @@ public class VolteInteractionService : VolteService
         {
             await _backing.AddModulesAsync(Assembly.GetExecutingAssembly(), _provider);
 
-#if !DEBUG
-            await _backing.RegisterCommandsGloballyAsync();
-#else
+#if DEBUG
             await _backing.RegisterCommandsToGuildAsync(DiscordHelper.DevGuildId);
+#else
+            await _backing.RegisterCommandsGloballyAsync();
 #endif
-
             _commandsRegistered = true;
         }
     }
@@ -94,7 +93,7 @@ public class VolteInteractionService : VolteService
 
     private static async Task OnCommandExecuted<TInteraction, TCommandInfo, TParameterInfo>(TCommandInfo _,
         SocketInteractionContext<TInteraction> context, IResult result)
-        where TInteraction : SocketInteraction
+        where TInteraction : SocketInteraction 
         where TParameterInfo : CommandParameterInfo
         where TCommandInfo : CommandInfo<TParameterInfo>
     {

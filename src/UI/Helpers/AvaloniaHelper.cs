@@ -4,7 +4,7 @@ using Gommon;
 
 namespace Volte.UI.Helpers;
 
-public class AvaloniaHelper
+public static class AvaloniaHelper
 {
     public static string GetResource(string assetSubdir) 
         => $"avares://Volte.UI/Assets/{assetSubdir}";
@@ -13,21 +13,13 @@ public class AvaloniaHelper
     
     public static bool RequestAvaloniaShutdown(int exitCode = 0) 
         => DesktopLifetime?.TryShutdown(exitCode) ?? false;
-
-    public static bool TryGetDesktop(out IClassicDesktopStyleApplicationLifetime desktopLifetime)
-    {
-        if (Application.Current?.ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop)
-        {
-            desktopLifetime = desktop;
-            return true;
-        }
-        
-        desktopLifetime = null!;
-        return false;
-    }
-
-
-
+    
     public static IClassicDesktopStyleApplicationLifetime? DesktopLifetime
-        => TryGetDesktop(out var desktop) ? desktop : null;
+        => Application.Current?.ApplicationLifetime?.Cast<IClassicDesktopStyleApplicationLifetime>();
+
+    public static bool TryGetDesktop(out IClassicDesktopStyleApplicationLifetime desktopLifetime) 
+        => (desktopLifetime = DesktopLifetime!) != null;
+
+    public static T Context<T>(this StyledElement styledElement)
+        => styledElement.DataContext.HardCast<T>();
 }

@@ -71,6 +71,7 @@ public static class UnixHelper
                     state = ParsingState.Neutral;
                     result.Add(argName, true.ToString());
                     argName = string.Empty;
+                    argVal = string.Empty;
                     break;
                 case '-':
                     state = ParsingState.ArgumentName;
@@ -81,7 +82,10 @@ public static class UnixHelper
                 case ' ' when inQuote:
                     argVal += ' ';
                     break;
-                case ' ' when state is ParsingState.ArgumentName && (input.ElementAtOrDefault(index + 1) is '-' || input[index..].All(x => x != ' ')):
+                case ' ' when state is ParsingState.ArgumentName && 
+                              (input.ElementAtOrDefault(index + 1) is '-' || 
+                               input[index..].All(static x => x != ' ')
+                              ):
                     state = ParsingState.Neutral;
                     result.Add(argName, true.ToString());
                     argName = string.Empty;

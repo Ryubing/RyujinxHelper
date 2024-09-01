@@ -101,7 +101,7 @@ public partial class UtilityModule
                 Ok(Context.CreateEmbedBuilder()
                     .AddField("Input", Format.Code(input))
                     .AddField("Output", Format.Code(input.ToCharArray()
-                        .Where(x => !char.IsWhiteSpace(x))
+                        .Where(static x => !char.IsWhiteSpace(x))
                         .Select(x => GetNato(char.ToLower(x)))
                         .JoinToString(" "))
                     )),

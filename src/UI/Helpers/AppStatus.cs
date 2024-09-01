@@ -26,9 +26,9 @@ public partial class AppStatus : ObservableObject
         _timer = new(_ =>
         {
             if (!IsWorking) return;
-
-            Status = Status.Replace(".....", string.Empty);
+            
             Status += '.';
+            Status = Status.Replace(".....", string.Empty);
         }, null, dueTime: 0.Seconds(), period: 0.3.Seconds());
     }
 

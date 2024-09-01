@@ -1,40 +1,56 @@
 ﻿using System.IO;
+using System.Runtime.CompilerServices;
 
 namespace Gommon;
+
+[SuppressMessage("ReSharper", "InconsistentNaming")]
+public enum HexNumberFormat
+{
+    RGB,
+    ARGB,
+    RGBA
+}
 
 /// <summary>
 ///     Extensions for any class in the System namespace, including sub-namespaces, such as System.Text.
 /// </summary>
 public static partial class Extensions
 {
+    public static string ToHexadecimalString(this System.Drawing.Color color, 
+        HexNumberFormat numberFormat = HexNumberFormat.RGB, 
+        string prefix = "#")
+    {
+        prefix ??= string.Empty;
+
+        return (numberFormat switch
+        {
+            HexNumberFormat.ARGB => color.A.ToString("X2") + rgb(),
+            HexNumberFormat.RGBA => rgb() + color.A.ToString("X2"),
+            _ => rgb()
+        }).Prepend(prefix);
+
+
+        string rgb() => $"{color.R:X2}{color.G:X2}{color.B:X2}";
+    }
+    
     public static bool ExistsInAny<T>(this T @this, params IEnumerable<T>[] collections) 
         => collections.Any(x => x.Contains(@this));
 
     public static string CalculateUptime(this Process process)
         => (DateTime.Now - process.StartTime).Humanize(3);
 
-    public static Task<IUserMessage> SendFileToAsync(this MemoryStream stream,
+    public static Task<IUserMessage> SendFileToAsync(this Stream stream,
         ITextChannel channel, string filename, string text = null, bool isTts = false, Embed embed = null,
         RequestOptions options = null,
         bool isSpoiler = false, AllowedMentions allowedMentions = null, MessageReference reference = null)
         => channel.SendFileAsync(stream, filename, text, isTts, embed, options, isSpoiler, allowedMentions,
             reference);
 
-    public static string FormatBoldString(this DateTime dt)
-        => dt.FormatPrettyString().Split(" ").Apply(arr =>
-        {
-            arr[1] = Format.Bold(arr[1]);
-            arr[2] = $"{Format.Bold(arr[2].TrimEnd(','))},";
-            arr[4] = Format.Bold(arr[4]);
-        }).JoinToString(" ");
 
-    public static string FormatBoldString(this DateTimeOffset dt) 
-        => dt.DateTime.FormatBoldString();
-
-
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static string Truncate(this string value, int limit, Func<int, string> truncationString)
     {
-        var content = value.Take(limit).JoinToString(string.Empty);
+        var content = value[..(limit+1)];
         var truncatedCharacters = value.Length - content.Length;
         if (truncatedCharacters > 0)
             content += truncationString(truncatedCharacters);

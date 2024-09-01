@@ -45,7 +45,8 @@ public enum LogSource
     /// <summary>
     ///     Indicates that this log message is from the Avalonia UI.
     /// </summary>
-    UI = 7,
+    // ReSharper disable once InconsistentNaming
+    UI = 8,
     /// <summary>
     ///     Indicates that this log message came from an unknown source.
     /// </summary>

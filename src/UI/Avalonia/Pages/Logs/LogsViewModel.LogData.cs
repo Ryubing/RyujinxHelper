@@ -3,22 +3,21 @@ using Discord;
 using Gommon;
 using Volte.Entities;
 using Volte.Helpers;
-using Volte.Services;
+
 // ReSharper disable MemberCanBePrivate.Global
 
 namespace Volte.UI.Avalonia.Pages;
 
-public readonly record struct VolteLog
+public record struct VolteLog
 {
     private static readonly int LongestSeverity = Enum.GetValues<LogSeverity>()
         .Max(sev => Enum.GetName(sev)!.Length);
 
     private static readonly int LongestSource = Enum.GetValues<LogSource>()
         .Max(src => Enum.GetName(src)!.Length);
-    
+
     private static readonly int SeverityPadding = (int)(LongestSeverity * 1.33);
     private static readonly int SourcePadding = (int)(LongestSource * 1.85);
-    private static readonly string PaddingLengthBlankSpace = new(' ', SeverityPadding + SourcePadding);
 
     public VolteLog(VolteLogEventArgs eventData)
     {
@@ -35,42 +34,51 @@ public readonly record struct VolteLog
     public string? Message { get; }
     public Exception? Error { get; }
 
-    public string? AlignedMessage => Message?.Replace(MessageService.Whitespace, PaddingLengthBlankSpace);
+    private StringBuilder? _formatted = null;
+
+    public string? StrippedMessage => Message?.Replace(CommandEventArgs.Whitespace, string.Empty);
     public string SeverityName => Enum.GetName(Severity)!.ToUpper();
     public string SourceName => Enum.GetName(Source)!.ToUpper();
 
-    public string String
+    public string FormattedSeverityName => $"{SeverityName}:".P(SeverityPadding);
+    public string FormattedSourceName => $"[{SourceName}] ->".P(SourcePadding + 3); //+3 accounts for the space and arrow 
+
+    public string FormattedMessage
     {
         get
         {
-            var sb = new StringBuilder();
-            sb.Append($"{SeverityName}:".P(SeverityPadding));
-            sb.Append($"[{SourceName}]".P(SourcePadding));
-
             if (Message is not null)
-                sb.Append(AlignedMessage);
+                return StrippedMessage!;
 
-            if (Error is not null)
-                sb.AppendAllLines(new StringBuilder()
-                    .AppendLine()
-                    .Append($"{Error!.GetType().AsFullNamePrettyString()}: ")
-                    .AppendLine(Error.Message.IsNullOrEmpty() ? "No message provided" : Error.Message)
-                    .Append(Error.StackTrace)
-                    .ToString()
-                    .ReplaceLineEndings(PaddingLengthBlankSpace.Prepend(Environment.NewLine))
-                    .Split(Environment.NewLine)
-                );
+            return new StringBuilder($"{Error!.GetType().AsFullNamePrettyString()}: ")
+                .AppendLine(Error.Message.IsNullOrEmpty() ? "No message provided" : Error.Message)
+                .Append(Error.StackTrace)
+                .ToString();
+        }
+    }
 
-            return sb.ToString();
+    public string FormattedString
+    {
+        get
+        {
+            if (_formatted is not null) return _formatted.ToString();
+
+            _formatted = new StringBuilder();
+            _formatted.Append(FormattedSeverityName);
+            _formatted.Append($"[{SourceName}]".P(SourcePadding));
+
+            _formatted.Append(FormattedMessage);
+
+            return _formatted.ToString();
         }
     }
 
 
     public string Markdown =>
         $"""
-         `[{SourceName}]` `[{SeverityName}]` 
-         `[{Date}]`
+          `[{Date.FormatDate()} @ {Date.FormatFullTime()}]`
+          `[{SourceName}]` `[{SeverityName}]` 
 
-         {Format.Code(Message, string.Empty)}
-         """;
+          {Format.Code(StrippedMessage, string.Empty)}
+          """;
 }

@@ -65,9 +65,9 @@ public partial class PageManager : ObservableObject
 
     public T GetViewModel<T>() where T : ObservableObject
         => TryGetViewModel<T>(out var result)
-            ? result!
+            ? result
             : throw new InvalidOperationException(
-                $"No registered page has the DataContext type of '{typeof(T).AsPrettyString()}'");
+                $"No registered page has the DataContext type of '{typeof(T).AsFullNamePrettyString()}'");
 
 
     #region Attributes

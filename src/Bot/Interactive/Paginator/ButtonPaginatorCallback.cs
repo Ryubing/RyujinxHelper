@@ -52,7 +52,8 @@ public class ButtonPaginatorCallback : IButtonCallback
     public async Task StartAsync()
     {
         PagerMessage =
-            await MessageContext.Channel.SendMessageAsync(_pager.Content, embed: BuildEmbed(),
+            await MessageContext.Channel.SendMessageAsync(_pager.Content, 
+                embed: BuildEmbed(),
                 components: BuildComponent());
         Interactive.AddButtonCallback(PagerMessage, this);
     }

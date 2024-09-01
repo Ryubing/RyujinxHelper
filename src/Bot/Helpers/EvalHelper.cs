@@ -8,7 +8,8 @@ namespace Volte.Helpers;
 
 public static partial class EvalHelper
 {
-    public static readonly string[] Imports = [
+    public static readonly string[] Imports =
+    [
         "System", "System.IO", "System.Linq", "System.Text", "System.Threading", "System.Threading.Tasks",
         "System.Collections.Generic", "System.Diagnostics", "System.Globalization", "System.Net.Http",
 
@@ -18,13 +19,13 @@ public static partial class EvalHelper
 
         "Humanizer", "Gommon", "Qmmands"
     ];
-        
+
     public static readonly ScriptOptions Options = ScriptOptions.Default
         .WithImports(Imports)
         .WithReferences(
             AppDomain.CurrentDomain.GetAssemblies()
-                .Where(x => !x.IsDynamic && !x.Location.IsNullOrWhitespace())
-            );
+                .Where(static x => !x.IsDynamic && !x.Location.IsNullOrWhitespace())
+        );
 
     public static Task EvaluateAsync(VolteContext ctx, string code)
     {
@@ -64,14 +65,14 @@ public static partial class EvalHelper
         var msg = await embed.WithTitle("Evaluating")
             .WithDescription(Format.Code(code, "cs"))
             .SendToAsync(ctx.Channel);
-        
+
         try
         {
             var env = CreateEvalEnvironment(ctx);
             var sw = Stopwatch.StartNew();
             var state = await CSharpScript.RunAsync(code, Options, env);
             sw.Stop();
-            
+
             var shouldReply = true;
             if (state.ReturnValue != null)
             {
@@ -79,14 +80,21 @@ public static partial class EvalHelper
                 {
                     case EmbedBuilder eb:
                         shouldReply = false;
-                        await env.ReplyAsync(eb);
+                        await eb.SendToAsync(env.Context.Channel);
                         break;
                     case Embed e:
                         shouldReply = false;
-                        await env.ReplyAsync(e);
+                        await e.SendToAsync(env.Context.Channel);
                         break;
                 }
-                    
+
+                if (!shouldReply)
+                {
+                    await msg.DeleteAsync().Then(() => env.Context.Message.AddReactionAsync(Emojis.BallotBoxWithCheck));
+                    return;
+                }
+
+
                 var res = state.ReturnValue switch
                 {
                     bool b => b.ToString().ToLower(),
@@ -98,25 +106,21 @@ public static partial class EvalHelper
                     _ => state.ReturnValue.ToString()
                 };
 
-
-                if (shouldReply)
-                    await msg.ModifyAsync(m =>
-                        m.Embed = embed.WithTitle("Eval")
-                            .AddField("Elapsed Time", $"{sw.Elapsed.Humanize()}", true)
-                            .AddField("Return Type", state.ReturnValue.GetType().AsPrettyString(), true)
-                            .WithDescription(Format.Code(res, res.IsNullOrEmpty() ? string.Empty : "ini")).Build());
-                else
-                    await msg.DeleteAsync().Then(() => env.ReactAsync(Emojis.BallotBoxWithCheck));
+                await msg.ModifyAsync(m =>
+                    m.Embed = embed.WithTitle("Eval")
+                        .AddField("Elapsed Time", $"{sw.Elapsed.Humanize()}", true)
+                        .AddField("Return Type", state.ReturnValue.GetType().AsPrettyString(), true)
+                        .WithDescription(Format.Code(res, res.IsNullOrEmpty() ? string.Empty : "ini")).Build());
             }
             else
-                await msg.DeleteAsync().Then(() => env.ReactAsync(Emojis.BallotBoxWithCheck));
+                await msg.DeleteAsync().Then(() => env.Context.Message.AddReactionAsync(Emojis.BallotBoxWithCheck));
         }
         catch (Exception ex)
         {
             ex.SentryCapture(scope =>
                 scope.AddBreadcrumb("This exception comes from a dynamically executed C# script.")
             );
-            
+
             await msg.ModifyAsync(m =>
                 m.Embed = embed
                     .AddField("Exception Type", ex.GetType().AsPrettyString(), true)
@@ -126,9 +130,10 @@ public static partial class EvalHelper
             );
         }
     }
-    
+
     private static readonly Regex Pattern = CodeInputPattern();
 
-    [GeneratedRegex("[\t\n\r]*`{3}(?:cs)?[\n\r]+((?:.|\n|\t\r)+)`{3}", RegexOptions.IgnoreCase | RegexOptions.Compiled | RegexOptions.CultureInvariant)]
+    [GeneratedRegex("[\t\n\r]*`{3}(?:cs)?[\n\r]+((?:.|\n|\t\r)+)`{3}",
+        RegexOptions.IgnoreCase | RegexOptions.Compiled | RegexOptions.CultureInvariant)]
     private static partial Regex CodeInputPattern();
 }

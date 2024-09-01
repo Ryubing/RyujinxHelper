@@ -66,7 +66,7 @@ public static class DiscordHelper
         
         return sgu.Roles
             .Where(x => !requireColor || x.HasColor())
-            .MaxBy(x => x.Position);
+            .MaxBy(static x => x.Position);
     }
     
     public static bool TryGetSpotifyStatus(this IUser user, out SpotifyGame spotify)

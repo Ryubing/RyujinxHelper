@@ -19,7 +19,7 @@ public sealed class ColorParser : VolteTypeParser<Color>
             try
             {
                 var val = value.Split(" ");
-                
+
                 var r = val[0].Parse<int>();
                 var g = val[1].Parse<int>();
                 var b = val[2].Parse<int>();
@@ -32,9 +32,9 @@ public sealed class ColorParser : VolteTypeParser<Color>
 
                 c = new(r, g, b);
             }
-            catch (Exception)
-            { 
-                c = null;
+            catch
+            {
+                // ignored
             }
         }
 

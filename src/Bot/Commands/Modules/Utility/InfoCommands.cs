@@ -26,7 +26,7 @@ public sealed partial class UtilityModule
             .AddField("Guilds", Context.Client.Guilds.Count, true)
             .AddField("Channels",
                 Context.Client.Guilds.SelectMany(x => x.Channels).Where(x => x is not SocketCategoryChannel)
-                    .DistinctBy(x => x.Id).Count(),
+                    .DistinctBy(static x => x.Id).Count(),
                 true)
             .WithFooter($"Version: {Version.InformationVersion}")
             .WithThumbnailUrl(Context.Client.CurrentUser.GetEffectiveAvatarUrl(size: 512)));

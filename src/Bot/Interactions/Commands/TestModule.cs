@@ -1,4 +1,6 @@
-﻿using Discord.Interactions;
+﻿#if DEBUG
+
+using Discord.Interactions;
 
 namespace Volte.Interactions.Commands;
 
@@ -10,3 +12,5 @@ public class TestModule : VolteSlashCommandModule
         return BadRequest($"Bruh {parameter1}");
     }
 }
+
+#endif

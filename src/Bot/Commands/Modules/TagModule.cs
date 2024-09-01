@@ -25,8 +25,8 @@ public class TagModule : VolteModule
     [Description("Lists all available tags in the current guild.")]
     public Task<ActionResult> TagsAsync()
         => Ok(Context.CreateEmbedBuilder(
-            Context.GuildData.Extras.Tags.Any()
-                ? Context.GuildData.Extras.Tags.Select(x => Format.Code(x.Name)).JoinToString(", ")
+            Context.GuildData.Extras.Tags.Count != 0
+                ? Context.GuildData.Extras.Tags.Select(static x => Format.Code(x.Name)).JoinToString(", ")
                 : "None"
         ).WithTitle($"Available Tags for {Context.Guild.Name}"));
 

@@ -102,12 +102,12 @@ public sealed class MessageService : VolteService
 
             default:
             {
-                Error(LogSource.Volte, "---------- IMPORTANT ----------");
-                Error(LogSource.Service,
+                Critical(LogSource.Volte, "---------- IMPORTANT ----------");
+                Critical(LogSource.Service,
                     $"The command {args.Context.Command.Name} didn't return some form of {typeof(ActionResult)}. " +
                     "This is developer error. " +
                     "Please report this to my developers: https://github.com/Polyhaze/Volte. Thank you!");
-                Error(LogSource.Volte, "---------- IMPORTANT ----------");
+                Critical(LogSource.Volte, "---------- IMPORTANT ----------");
                 return;
             }
         }
@@ -116,19 +116,19 @@ public sealed class MessageService : VolteService
         if (!Config.LogAllCommands) return;
 
         var sb = new StringBuilder()
-            .AppendLine(CommandFrom(args))
-            .AppendLine(CommandIssued(args))
-            .AppendLine(FullMessage(args))
-            .AppendLine(InGuild(args))
-            .AppendLine(InChannel(args))
-            .AppendLine(TimeIssued(args))
+            .AppendLine(args.FormatInvocator())
+            .AppendLine(args.FormatTargetCommand())
+            .AppendLine(args.FormatInvocationMessage())
+            .AppendLine(args.FormatSourceGuild())
+            .AppendLine(args.FormatSourceChannel())
+            .AppendLine(args.FormatTimestamp())
             .AppendLine(args.ExecutedLogMessage())
-            .AppendLine(After(args));
+            .AppendLine(args.FormatTimeTaken());
         
         if (data)
             sb.AppendLine(ResultMessage(data));
 
-        sb.Append(Separator);
+        sb.Append(CommandEventArgs.Separator);
         Info(LogSource.Volte, sb.ToString());
     }
 
@@ -157,15 +157,15 @@ public sealed class MessageService : VolteService
             if (!Config.LogAllCommands) return;
 
             Error(LogSource.Module, new StringBuilder()
-                .AppendLine(CommandFrom(args))
-                .AppendLine(CommandIssued(args))
-                .AppendLine(FullMessage(args))
-                .AppendLine(InGuild(args))
-                .AppendLine(InChannel(args))
-                .AppendLine(TimeIssued(args))
+                .AppendLine(args.FormatInvocator())
+                .AppendLine(args.FormatTargetCommand())
+                .AppendLine(args.FormatInvocationMessage())
+                .AppendLine(args.FormatSourceGuild())
+                .AppendLine(args.FormatSourceChannel())
+                .AppendLine(args.FormatTimestamp())
                 .AppendLine(args.ExecutedLogMessage(reason))
-                .AppendLine(After(args))
-                .Append(Separator).ToString());
+                .AppendLine(args.FormatTimeTaken())
+                .Append(CommandEventArgs.Separator).ToString());
         }
 
         return;
@@ -209,59 +209,22 @@ public sealed class MessageService : VolteService
     private static void OnBadRequest(CommandBadRequestEventArgs args)
     {
         var sb = new StringBuilder()
-            .AppendLine(CommandFrom(args))
-            .AppendLine(CommandIssued(args))
-            .AppendLine(FullMessage(args))
-            .AppendLine(InGuild(args))
-            .AppendLine(InChannel(args))
-            .AppendLine(TimeIssued(args))
-            .AppendLine(args.ExecutedLogMessage())
-            .AppendLine(After(args))
-            .AppendLine(ResultMessage(args.ResultCompletionData));
+            .AppendLine(args.FormatInvocator())
+            .AppendLine(args.FormatTargetCommand())
+            .AppendLine(args.FormatInvocationMessage())
+            .AppendLine(args.FormatSourceGuild())
+            .AppendLine(args.FormatSourceChannel())
+            .AppendLine(args.FormatTimestamp())
+            .AppendLine(args.FormatResult())
+            .AppendLine(args.FormatTimeTaken())
+            .AppendLine(args.FormatCommandResultMessage());
 
-        sb.Append(Separator);
+        sb.Append(CommandEventArgs.Separator);
         Error(LogSource.Module, sb.ToString());
     }
 
-    private const int SpaceCount = 20;
-    private const int HyphenCount = 49;
-    
-    public static readonly string Whitespace = string.Intern(new string(' ', SpaceCount));
-    
-    public static readonly string Separator = string.Intern(
-        String(sb => sb
-            .Append(Whitespace)
-            .Append(new string('-', HyphenCount))
-        ));
-
-    private static string CommandFrom(CommandEventArgs args) => 
-        $"|  -Command from user: {args.Context.User} ({args.Context.User.Id})";
-
-    private static string CommandIssued(CommandEventArgs args) 
-        => new StringBuilder(Whitespace)
-            .Append($"|     -Command Issued: {args.Context.Command.Name}").ToString();
-
-    private static string FullMessage(CommandEventArgs args) 
-        => new StringBuilder(Whitespace)
-            .Append($"|       -Full Message: {args.Context.Message.Content}").ToString();
-
-    private static string InGuild(CommandEventArgs args) 
-        => new StringBuilder(Whitespace)
-            .Append($"|           -In Guild: {args.Context.Guild.Name} ({args.Context.Guild.Id})").ToString();
-
-    private static string InChannel(CommandEventArgs args) 
-        => new StringBuilder(Whitespace)
-            .Append($"|         -In Channel: #{args.Context.Channel.Name} ({args.Context.Channel.Id})").ToString();
-
-    private static string TimeIssued(CommandEventArgs args) 
-        => new StringBuilder(Whitespace)
-            .Append($"|        -Time Issued: {args.Context.Now.FormatFullTime()}, {args.Context.Now.FormatDate()}").ToString();
-
-    private static string After(CommandEventArgs args) 
-        => new StringBuilder(Whitespace)
-            .Append($"|              -After: {args.Stopwatch.Elapsed.Humanize()}").ToString();
-
     private static string ResultMessage(ResultCompletionData data) 
-        => new StringBuilder(Whitespace)
-            .Append($"|     -Result Message: {data.Message?.Id}").ToString();
+        => new StringBuilder(CommandEventArgs.Whitespace)
+            .Append($"|     -Result Message: {data.Message?.Id}")
+            .ToString();
 }

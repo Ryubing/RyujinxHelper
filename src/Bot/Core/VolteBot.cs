@@ -11,7 +11,7 @@ public class VolteBot
         return LoginAsync(cts);
     }
 
-    public static bool AvaloniaIsAttached { get; set; }
+    public static bool IsHeadless { get; set; }
 
     public static ServiceProvider Services { get; private set; }
 

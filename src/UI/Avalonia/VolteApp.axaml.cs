@@ -1,12 +1,16 @@
 ﻿using Avalonia;
 using Avalonia.Controls;
-using Avalonia.Controls.ApplicationLifetimes;
 using Avalonia.Controls.Notifications;
 using Avalonia.Input;
+#if DEBUG
+using Avalonia.Diagnostics;
+using Avalonia.Media;
+#endif
 using Avalonia.Markup.Xaml;
 using Avalonia.Threading;
 using Gommon;
 using Humanizer;
+using Volte.Entities;
 using Volte.UI.Avalonia.Pages;
 using Volte.UI.Helpers;
 
@@ -23,6 +27,22 @@ public class VolteApp : Application
     public override void Initialize()
     {
         AvaloniaXamlLoader.Load(this);
+        NotificationEventArgs.NotificationSent += notif =>
+        {
+            switch (notif)
+            {
+                case CustomNotificationEventArgs custom:
+                    Notify(custom.Message, custom.Title, 
+                        custom.RawType.HardCast<NotificationType>(), 
+                        custom.Expiration,
+                        notif.Clicked, notif.Closed
+                        );
+                    break;
+                case ErrorNotificationEventArgs custom:
+                    NotifyError(custom.Error, custom.Expiration, notif.Clicked, notif.Closed);
+                    break;
+            }
+        };
     }
 
     public override void OnFrameworkInitializationCompleted()
@@ -37,20 +57,30 @@ public class VolteApp : Application
                 MaxItems = 4,
                 Margin = new(0, 0, 4, 30)
             };
-
-            TaskScheduler.UnobservedTaskException += (_, eventArgs) =>
-            {
-                NotifyError(eventArgs.Exception);
-                eventArgs.SetObserved();
-            };
             
             desktop.MainWindow.Closing += (_, _) =>
             {
                 LogsViewModel.UnregisterHandler();
                 VolteManager.Stop();
             };
+            
+            TaskScheduler.UnobservedTaskException += (_, eventArgs) =>
+            {
+                NotifyError(eventArgs.Exception);
+                eventArgs.SetObserved();
+            };
 
             PageManager.Init();
+            
+#if DEBUG
+            XamlRoot.AttachDevTools(new DevToolsOptions
+            {
+                Gesture = OpenDevTools,
+                Size = new Size(800, 800),
+                LaunchView = DevToolsViewKind.LogicalTree,
+                FocusHighlighterBrush = Brushes.Crimson
+            });
+#endif
         }
 
         VolteManager.Start();
@@ -65,7 +95,8 @@ public class VolteApp : Application
         string title = "Notice",
         NotificationType type = NotificationType.Information,
         Optional<TimeSpan> expiration = default,
-        Action? onClick = null
+        Action? onClick = null,
+        Action? onClose = null
     )
         => Notify(new Notification
         {
@@ -73,19 +104,23 @@ public class VolteApp : Application
             Message = message,
             Type = type,
             Expiration = expiration.OrElse(5.Seconds()),
-            OnClick = onClick
+            OnClick = onClick,
+            OnClose = onClose
         });
 
     public static void NotifyError<TException>(
         TException ex,
         Optional<TimeSpan> expiration = default,
-        Action? onClick = null
+        Action? onClick = null,
+        Action? onClose = null
     ) where TException : Exception
-        => Notify(
-            message: ex.Message,
-            title: typeof(TException).AsPrettyString(),
-            type: NotificationType.Error,
-            expiration: expiration.OrElse(10.Seconds()),
-            onClick: onClick ?? (() => PageManager.Shared.Focus(PageType.Logs))
-        );
+        => Notify(new Notification 
+        {
+            Title = typeof(TException).AsPrettyString(),
+            Message = ex.Message,
+            Type = NotificationType.Error,
+            Expiration = expiration.OrElse(10.Seconds()),
+            OnClick = onClick ?? (() => PageManager.Shared.Focus(PageType.Logs)),
+            OnClose = onClose
+        });
 }

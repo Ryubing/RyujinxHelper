@@ -58,8 +58,10 @@ public sealed partial class UtilityModule : VolteModule
         return JsonSerializer.Deserialize<UrbanApiResponse>(await get.Content.ReadAsStringAsync()).Entries;
     }
 
-    private (IOrderedEnumerable<(string Name, bool Value)> Allowed, IOrderedEnumerable<(string Name, bool Value)>
-        Disallowed) GetPermissions(
+    private (
+        IOrderedEnumerable<(string Name, bool Value)> Allowed, 
+        IOrderedEnumerable<(string Name, bool Value)> Disallowed
+        ) GetPermissions(
             IGuildUser user)
     {
         var propDict = user.GuildPermissions.GetType().GetProperties()
@@ -68,8 +70,8 @@ public sealed partial class UtilityModule : VolteModule
             .OrderByDescending(ab => ab.Item2 ? 1 : 0)
             .ToList(); //holy reflection
 
-        return (propDict.Where(ab => ab.Item2).OrderBy(a => a.Item1),
-            propDict.Where(ab => !ab.Item2).OrderBy(a => a.Item2));
+        return (propDict.Where(ab => ab.Item2).OrderBy(a => a.Item1.Length),
+            propDict.Where(ab => !ab.Item2).OrderBy(a => a.Item1.Length));
     }
 }
 

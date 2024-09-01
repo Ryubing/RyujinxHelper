@@ -3,7 +3,7 @@
 public sealed partial class UtilityModule
 {
     [Command("Choose")]
-    [Description("Choose an item from a list separated by |.")]
+    [Description("Randomly choose an item from a list separated by |.")]
     public Task<ActionResult> ChooseAsync(
         [Remainder, Description("The options you want to choose from; separated by `|`.")]
         string options)

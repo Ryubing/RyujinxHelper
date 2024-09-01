@@ -69,7 +69,7 @@ public class PaginatedMessage
 
             do
             {
-                newList.Add(temp.Take(perPage).Select(x => x.ToString()).JoinToString("\n"));
+                newList.Add(temp.Take(perPage).Select(static x => x.ToString()).JoinToString("\n"));
                 temp.RemoveRange(0, temp.Count < perPage ? temp.Count : perPage);
             } while (temp.Count != 0);
 
@@ -98,13 +98,15 @@ public class PaginatedMessage
     /// Pages contains a collection of elements to page over in the embed. It is expected
     /// that a string-like object is used in this collection, as objects will be converted
     /// to a displayable string only through their generic ToString method, with the sole
-    /// exception of EmbedFieldBuilders.
+    /// exception of <see cref="EmbedFieldBuilder"/> and <see cref="EmbedBuilder"/>.
     /// 
     /// If this collection is of <see cref="EmbedFieldBuilder"/>, then the pages will be displayed in
     /// batches of <see cref="PaginatedAppearanceOptions.FieldsPerPage"/>.
     ///
     /// If this collection is of <see cref="EmbedBuilder"/>, every setting in <see cref="PaginatedMessage"/> will be ignored as
     /// the contents of the EmbedBuilders are used instead.
+    ///
+    /// Mixing types is not supported.
     /// </summary>
     public List<object> Pages { get; internal set; }
 
@@ -129,9 +131,9 @@ public class PaginatedMessage
 
         do
         {
-            newList.Add(temp.Take(entriesPerPage).Select(x => x.ToString()).JoinToString("\n"));
+            newList.Add(temp.Take(entriesPerPage).Select(static x => x.ToString()).JoinToString("\n"));
             temp.RemoveRange(0, temp.Count < entriesPerPage ? temp.Count : entriesPerPage);
-        } while (temp.Any());
+        } while (temp.Count != 0);
 
         Pages = newList;
 

@@ -12,9 +12,9 @@ public sealed partial class AdminUtilityModule
             ? Ok(role.Mention, shouldEmbed: false)
             : Ok(async () =>
             {
-                await role.ModifyAsync(x => x.Mentionable = true);
+                await role.ModifyAsync(static x => x.Mentionable = true);
                 await Context.Channel.SendMessageAsync(role.Mention);
-                await role.ModifyAsync(x => x.Mentionable = false);
+                await role.ModifyAsync(static x => x.Mentionable = false);
             });
     }
 }

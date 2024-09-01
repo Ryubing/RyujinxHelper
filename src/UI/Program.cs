@@ -13,13 +13,16 @@ public class Program
     // SynchronizationContext-reliant code before AppMain is called: things aren't initialized
     // yet and stuff might break.
     [STAThread]
-    public static int Main(string[] args)
+    public static async Task<int> Main(string[] args)
     {
-        VolteBot.AvaloniaIsAttached = true;
-        
         if (!UnixHelper.TryParseNamedArguments(args, out var output) && output.Error is not InvalidOperationException)
             Logger.Error(output.Error);
+        
+        VolteBot.IsHeadless = args.Contains("--no-gui");
 
+        if (VolteBot.IsHeadless) 
+            return await VolteManager.StartWait();
+        
         VolteManager.Start();
 
         IconProvider.Current.Register<FontAwesomeIconProvider>();

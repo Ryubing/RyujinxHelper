@@ -1,5 +1,7 @@
 ﻿namespace Volte.Entities;
 
+#nullable enable
+
 public struct AppStatusEventArgs
 {
     public const string AppStatusDefaultIcon = "fa-regular fa-message";
@@ -38,38 +40,4 @@ public struct AppStatusEventArgs
             StatusExpiresAfter = statusExpiresAfter,
             Severity = severity
         });
-}
-
-public struct NotificationEventArgs
-{
-    public const string AppStatusDefaultIcon = "fa-regular fa-message";
-    
-    public NotificationEventArgs()
-    {
-    }
-
-
-    public static event Action<NotificationEventArgs> ChangeRequested
-    {
-        add => ChangeRequestedHandler.Add(value);
-        remove => ChangeRequestedHandler.Remove(value);
-    }
-
-    private static readonly Event<Action<NotificationEventArgs>> ChangeRequestedHandler = new();
-
-    /*public static void SendNotification(
-        string status,
-        string icon = AppStatusDefaultIcon,
-        bool? isWorkingStatus = null,
-        TimeSpan? statusExpiresAfter = null,
-        LogSeverity? severity = null
-    )
-        => ChangeRequestedHandler.Call(new AppStatusEventArgs
-        {
-            Status = status,
-            Icon = icon,
-            IsWorkingStatus = isWorkingStatus,
-            StatusExpiresAfter = statusExpiresAfter,
-            Severity = severity
-        });*/
 }

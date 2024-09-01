@@ -14,10 +14,12 @@ public sealed partial class UtilityModule
     public Task<ActionResult> EmotesAsync()
     {
         var embeds = Context.Guild.Emotes.Select(GenerateEmbed).ToList();
-        if (embeds.Any()) 
-            return embeds.Count is 1 ? Ok(embeds.First()) : Ok(embeds);    
-            
-        return BadRequest("This guild doesn't have any emotes.");
+        return embeds.Count switch
+        {
+            0 => BadRequest("This guild doesn't have any emotes."),
+            1 => Ok(embeds.First()),
+            _ => Ok(embeds)
+        };
     }
 
     private EmbedBuilder GenerateEmbed(Emote emote)

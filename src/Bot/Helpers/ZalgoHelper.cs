@@ -1,3 +1,5 @@
+using System.Collections.Immutable;
+
 namespace Volte.Helpers;
 
 [Flags]
@@ -17,7 +19,7 @@ public enum ZalgoIntensity
 
 public static class ZalgoHelper
 {
-    private static readonly char[] UpChars =
+    private static readonly ImmutableArray<char> UpChars =
     [
         '\u030d', /*     ̍     */ '\u030e', /*     ̎     */ '\u0304', /*     ̄     */ '\u0305', /*     ̅     */
         '\u033f', /*     ̿     */ '\u0311', /*     ̑     */ '\u0306', /*     ̆     */ '\u0310', /*     ̐     */
@@ -34,7 +36,7 @@ public static class ZalgoHelper
         '\u0346', /*     ͆     */ '\u031a' /*     ̚     */
     ];
 
-    private static readonly char[] MidChars =
+    private static readonly ImmutableArray<char> MidChars =
     [
         '\u0315', /*     ̕     */ '\u031b', /*     ̛     */ '\u0340', /*     ̀     */ '\u0341', /*     ́     */
         '\u0358', /*     ͘     */ '\u0321', /*     ̡     */ '\u0322', /*     ̢     */ '\u0327', /*     ̧     */
@@ -44,7 +46,7 @@ public static class ZalgoHelper
         '\u0337', /*     ̷     */ '\u0361', /*     ͡     */ '\u0489' /*     ҉_     */
     ];
 
-    private static readonly char[] DownChars =
+    private static readonly ImmutableArray<char> DownChars =
     [
         '\u0316', /*     ̖     */ '\u0317', /*     ̗     */ '\u0318', /*     ̘     */ '\u0319', /*     ̙     */
         '\u031c', /*     ̜     */ '\u031d', /*     ̝     */ '\u031e', /*     ̞     */ '\u031f', /*     ̟     */

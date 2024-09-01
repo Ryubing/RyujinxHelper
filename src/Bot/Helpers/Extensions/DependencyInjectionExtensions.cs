@@ -40,11 +40,11 @@ public static partial class Extensions
                         opts.DiagnosticLogger = new SentryTranslator();
                     }));
                 
-                //get all the classes that inherit IVolteService, and aren't abstract.
+                //get all the classes that inherit VolteService, and aren't abstract; add them to the service provider
                 var l = Assembly.GetExecutingAssembly().GetTypes()
                     .Where(IsEligibleService)
                     .Apply(ls => ls.ForEach(coll.TryAddSingleton));
-                Info(LogSource.Volte, $"Injected services [{l.Select(x => x.Name.ReplaceIgnoreCase("Service", "")).JoinToString(", ")}] into the provider.");
+                Info(LogSource.Volte, $"Injected services [{l.Select(static x => x.Name.ReplaceIgnoreCase("Service", "")).JoinToString(", ")}] into the provider.");
             });
 
     private const GatewayIntents Intents

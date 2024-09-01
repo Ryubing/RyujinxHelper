@@ -20,18 +20,12 @@ public class OkResult : ActionResult
         _pager = PaginatedMessage.Builder.New()
             .WithPages(pages);
 
-        if (color.HasValue)
-            _pager.WithColor(color.Value);
-        if (author != null)
-            _pager.WithAuthor(author);
-        if (ctx != null)
-            _pager.WithDefaults(ctx);
-        if (title != null)
-            _pager.WithTitle(title);
-        if (options != null)
-            _pager.WithOptions(options);
-        if (pageSplit > 0)
-            _pager.SplitPages(pageSplit);
+        if (color is { } clr) _pager.WithColor(clr);
+        if (author is not null) _pager.WithAuthor(author);
+        if (ctx is not null) _pager.WithDefaults(ctx);
+        if (title is not null) _pager.WithTitle(title);
+        if (options is not null) _pager.WithOptions(options);
+        if (pageSplit > 0) _pager.SplitPages(pageSplit);
     }
 
     public OkResult(PaginatedMessage.Builder pager) => _pager = pager;

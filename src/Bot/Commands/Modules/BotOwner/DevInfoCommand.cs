@@ -11,7 +11,7 @@ public sealed partial class BotOwnerModule
         => Ok(Format.Code(new StringBuilder()
             .AppendLine("== Core ==")
             .AppendLine($"[{Context.Client.Guilds.Count}] Guilds")
-            .AppendLine($"[{Context.Client.Guilds.Sum(x => x.Channels.Count)}] Text/Voice Channels")
+            .AppendLine($"[{Context.Client.Guilds.Sum(static x => x.Channels.Count)}] Text/Voice Channels")
             .AppendLine("== Commands ==")
             .AppendLine($"[{CommandService.GetAllModules().Count}] Modules")
             .AppendLine($"[{CommandService.GetAllCommands().Count}] Commands")

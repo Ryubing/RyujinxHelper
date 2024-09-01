@@ -15,5 +15,5 @@ public sealed class CommandCalledEventArgs : CommandEventArgs
     }
 
     public string ExecutedLogMessage()
-        => $"                    |           -Executed: {Result.IsSuccessful}";
+        => Fmt(Executed, Result.IsSuccessful.ToString());
 }

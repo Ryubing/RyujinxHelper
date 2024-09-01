@@ -1,4 +1,6 @@
-﻿namespace Volte.UI;
+﻿using Volte.Helpers;
+
+namespace Volte.UI;
 
 public class VolteManager
 {
@@ -18,7 +20,17 @@ public class VolteManager
 
         Cts = new();
         
-        _botTask = Task.Run(async () => await VolteBot.LoginAsync(Cts));
+        _botTask = Task.Run(async () => await VolteBot.LoginAsync(Cts), Cts.Token);
+    }
+    
+    public static async Task<int> StartWait()
+    {
+        if (VolteBot.IsHeadless)
+            Logger.OutputLogToStandardOut();
+        
+        Start();
+        await _botTask!;
+        return 0;
     }
     
     public static void Stop()

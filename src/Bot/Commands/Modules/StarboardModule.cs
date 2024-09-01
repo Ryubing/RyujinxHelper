@@ -35,15 +35,16 @@ public sealed class StarboardModule : VolteModule
     [Command("Setup")]
     [Description("A one-off command that creates a channel for Starboard, with read-only permissions for everyone, and enables the starboard.")]
     public async Task<ActionResult> SetupAsync(
-        [Description("The name for the Starboard channel that will be created."), Remainder] string channelName = "starboard")
+        [Description("The name for the Starboard channel that will be created."), Remainder] 
+        string channelName = "starboard")
     {
         var channel = await Context.Guild.CreateTextChannelAsync(channelName.Replace(" ", "-"), props =>
         {
             props.CategoryId = Context.Channel.CategoryId;
             props.PermissionOverwrites = new List<Overwrite>
             {
-                new Overwrite(Context.Guild.EveryoneRole.Id, PermissionTarget.Role, 
-                    new OverwritePermissions(viewChannel: PermValue.Allow, sendMessages: PermValue.Deny))
+                new(Context.Guild.EveryoneRole.Id, PermissionTarget.Role, 
+                    new(viewChannel: PermValue.Allow, sendMessages: PermValue.Deny))
             };
         });
             

@@ -2,7 +2,7 @@
 
 namespace Volte.Helpers;
 
-internal class Event<T>
+public class Event<T>
     where T : class
 {
     private readonly object _subLock = new();
@@ -17,7 +17,7 @@ internal class Event<T>
         }
     }
 
-    public IReadOnlyList<T> Subscriptions
+    public ImmutableArray<T> Subscriptions
     {
         get
         {
@@ -47,17 +47,17 @@ internal class Event<T>
     }
 }
 
-internal static class EventExtensions
+public static class EventExtensions
 {
     public static Task CallAsync(this Event<Func<Task>> eventHandler)
-        => eventHandler.Subscriptions.ForEachAsync(x => x());
+        => eventHandler.Subscriptions.ForEachAsync(static x => x());
 
     public static Task CallAsync<T>(this Event<Func<T, Task>> eventHandler,
         T arg
     ) => eventHandler.Subscriptions.ForEachAsync(x => x(arg));
 
     public static void Call(this Event<Action> eventHandler)
-        => eventHandler.Subscriptions.ForEach(x => x());
+        => eventHandler.Subscriptions.ForEach(static x => x());
 
     public static void Call<T>(this Event<Action<T>> eventHandler,
         T arg

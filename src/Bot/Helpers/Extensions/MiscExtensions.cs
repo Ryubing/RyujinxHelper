@@ -29,7 +29,7 @@ public partial class Extensions
     
     public static bool LengthEquals(this Stream stream, long exactLength) => stream.Length == exactLength;
     
-    public static MemoryStream CreateColorImage(this Rgba32 color, int width = 125, int height = 200) => new MemoryStream().Apply(ms =>
+    public static MemoryStream CreateColorImage(this Rgba32 color, int width = 125, int height = 125) => new MemoryStream().Apply(ms =>
     {
         using var image = new Image<Rgba32>(width, height);
         image.Mutate(a => a.BackgroundColor(color));

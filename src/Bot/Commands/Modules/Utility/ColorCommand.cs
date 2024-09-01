@@ -42,7 +42,7 @@ public sealed partial class UtilityModule
         return Ok(async () =>
         {
             await using var stream = color.ToRgba32().CreateColorImage();
-            await stream.SendFileToAsync(Context.Channel, "role.png", string.Empty, false, new EmbedBuilder()
+            await stream.SendFileToAsync(Context.Channel, "role.png", embed: new EmbedBuilder()
                     .WithColor(color)
                     .WithDescription(new StringBuilder()
                         .AppendLine($"**Hex:** {color.ToString().ToUpper()}")

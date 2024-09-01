@@ -11,11 +11,11 @@ public sealed class EvalEnvironment
         Environment = this;
     }
 
-    public required VolteContext Context { get; set; }
-    public required DiscordSocketClient Client { get; set; }
-    public required GuildData Data { get; set; }
-    public required CommandService Commands { get; set; }
-    public required DatabaseService Database { get; set; }
+    public required VolteContext Context { get; init; }
+    public required DiscordSocketClient Client { get; init; }
+    public required GuildData Data { get; init; }
+    public required CommandService Commands { get; init; }
+    public required DatabaseService Database { get; init; }
     public EvalEnvironment Environment { get; }
 
     public SocketGuildUser Member(ulong id) => Context.Guild.GetUser(id);
@@ -90,13 +90,11 @@ public sealed class EvalEnvironment
 
             foreach (var baseType in baseTypes)
             {
-                sb.Append($"[{baseType.AsPrettyString()}]");
                 var inheritors = baseType.GetInterfaces().ToList();
                 if (baseType.BaseType != null)
-                {
-                    inheritors = inheritors.ToList();
-                    inheritors.Add(baseType.BaseType);
-                }
+                    inheritors = inheritors.Prepend(baseType.BaseType).ToList();
+                
+                sb.Append($"[{baseType.AsPrettyString()}]");
 
                 if (inheritors.Count > 0)
                     sb.Append($": {inheritors.Select(x => x.AsPrettyString()).JoinToString(", ")}");
@@ -114,7 +112,8 @@ public sealed class EvalEnvironment
         inspection.Append("<< Inspecting type [").Append(type.AsPrettyString()).AppendLine("] >>");
         inspection.AppendLine();
 
-        var props = type.GetProperties().Where(a => a.GetIndexParameters().Length == 0)
+        var props = type.GetProperties()
+            .Where(a => a.GetIndexParameters().Length == 0)
             .OrderBy(a => a.Name).ToList();
 
         var fields = type.GetFields().OrderBy(a => a.Name).ToList();
@@ -159,7 +158,7 @@ public sealed class EvalEnvironment
             inspection.AppendLine();
             inspection.AppendLine("<< Items >>");
             foreach (var prop in arr)
-                inspection.Append(" - ").Append(prop).AppendLine();
+                inspection.AppendLine($" - {prop}");
         }
 
         return inspection.ToString();

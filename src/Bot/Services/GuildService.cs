@@ -45,7 +45,7 @@ public sealed class GuildService : VolteService
         }
         catch (Exception)
         {
-            var c = args.Guild.TextChannels.MaxBy(x => x.Position);
+            var c = args.Guild.TextChannels.MaxBy(static x => x.Position);
             Error(LogSource.Volte,
                 "Could not DM the guild owner; sending to the upper-most channel instead.");
             if (c != null) await embed.SendToAsync(c);

@@ -1,9 +1,7 @@
 ﻿using Avalonia;
-using Avalonia.Input;
 using Avalonia.Media.Imaging;
 using Avalonia.Platform;
 using FluentAvalonia.UI.Windowing;
-using Gommon;
 using Volte.UI.Helpers;
 // ReSharper disable InconsistentNaming
 
@@ -27,9 +25,5 @@ public partial class UIShellView : AppWindow
             if (e.PropertyName == nameof(PageManager.Current) && pm is PageManager pageManager)
                 Navigation.Content = pageManager.Current?.Content;
         };
-
-#if DEBUG
-        this.AttachDevTools(VolteApp.OpenDevTools);
-#endif
     }
 }

@@ -60,7 +60,7 @@ public sealed class PollInfo
 
     public PollInfo AddFields(IEnumerable<(object Name, object Value)> fields)
     {
-        foreach (var (name, value) in fields.Select(x => (x.Name.ToString(), x.Value.ToString())))
+        foreach (var (name, value) in fields.Select(static x => (x.Name.ToString(), x.Value.ToString())))
             if (!(name.IsNullOrEmpty() || value is null)) Fields.Add(name, value);
             
         return this;

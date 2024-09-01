@@ -33,11 +33,11 @@ public static partial class Logger
     
     internal static void PrintHeader()
     {
-        if (VolteBot.AvaloniaIsAttached) return;
+        if (!VolteBot.IsHeadless) return;
         
-        Info(LogSource.Volte, MessageService.Separator.Trim());
-        VolteAscii.ForEach(ln => Info(LogSource.Volte, ln));
-        Info(LogSource.Volte, MessageService.Separator.Trim());
+        Info(LogSource.Volte, CommandEventArgs.Separator.Trim());
+        VolteAscii.ForEach(static ln => Info(LogSource.Volte, ln));
+        Info(LogSource.Volte, CommandEventArgs.Separator.Trim());
     }
 
     private const string Side = "----------------------------------------------------------";
@@ -73,16 +73,9 @@ public static partial class Logger
 
         if (IsDebugLoggingEnabled && caller.IsInitialized)
         {
-            Gommon.Optional<string> debugInfo = caller.Type switch
+            caller.ToString().IfPresent(debugInfoContent =>
             {
-                { Full: true } => $"{caller.GetSourceFileName()}:{caller.LineInFile}->{caller.CallerName}",
-                { CallerOnly: true } => caller.CallerName,
-                { FileLoc: true } => $"{caller.GetSourceFileName()}:{caller.LineInFile}",
-                _ => default
-            };
-
-            debugInfo.IfPresent(debugInfoContent =>
-            {
+                // ReSharper disable once AccessToModifiedClosure
                 Append(debugInfoContent, Color.Aquamarine, ref content);
                 Append(" |>  ", Color.Goldenrod, ref content);
             });
@@ -150,6 +143,7 @@ public static partial class Logger
             LogSource.Rest => (Color.Red, "REST"),
             LogSource.Unknown => (Color.Fuchsia, "UNKNOWN"),
             LogSource.Sentry => (Color.Chartreuse, "SENTRY"),
+            LogSource.UI => (Color.Crimson, "UI"),
             _ => throw new InvalidOperationException($"The specified LogSource {source} is invalid.")
         };
 

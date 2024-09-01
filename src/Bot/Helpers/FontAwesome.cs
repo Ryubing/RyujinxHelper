@@ -24,14 +24,14 @@ public readonly record struct FontAwesomeIcon
         
     public FontAwesomeIcon(string name, IconVariant defaultVariant)
     {
-        FaName = "fa-" + name;
+        Name = name;
         DefaultVariant = defaultVariant;
     }
         
-    public readonly string FaName;
+    public readonly string Name;
     public readonly IconVariant DefaultVariant;
         
-    public string Format(IconVariant variant = IconVariant.Regular) => $"fa-{Enum.GetName(variant)?.ToLower() ?? "regular"} {FaName}";
+    public string Format(IconVariant variant = IconVariant.Regular) => $"fa-{Enum.GetName(variant)?.ToLower() ?? "regular"} fa-{Name}";
         
     public string Solid => Format(IconVariant.Solid);
     public string Regular => Format();
@@ -39,6 +39,6 @@ public readonly record struct FontAwesomeIcon
     public string Thin => Format(IconVariant.Thin);
 
     public override string ToString() => Format(DefaultVariant);
-    public static implicit operator string(FontAwesomeIcon icon) => icon.Format(icon.DefaultVariant);
+    public static implicit operator string(FontAwesomeIcon icon) => icon.ToString();
 }
 

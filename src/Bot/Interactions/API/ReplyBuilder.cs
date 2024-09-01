@@ -44,7 +44,7 @@ public class ReplyBuilder<TInteraction> where TInteraction : SocketInteraction
     }
 
     public ReplyBuilder<TInteraction> WithEmbeds(params EmbedBuilder[] embedBuilders) =>
-        WithEmbeds(embedBuilders.Select(x => x.Build()));
+        WithEmbeds(embedBuilders.Select(static x => x.Build()));
 
     public ReplyBuilder<TInteraction> WithEmbeds(params Embed[] embeds) => WithEmbeds(embeds.ToList());
 
@@ -100,7 +100,7 @@ public class ReplyBuilder<TInteraction> where TInteraction : SocketInteraction
         => WithButtons(buttons.ToArray());
 
     public ReplyBuilder<TInteraction> WithButtons(params ButtonBuilder[] buttons)
-        => WithActionRows(buttons.Select(x => x.Build()).AsActionRow());
+        => WithActionRows(buttons.Select(static x => x.Build()).AsActionRow());
 
 
     public ReplyBuilder<TInteraction> WithSelectMenu(SelectMenuBuilder menu)

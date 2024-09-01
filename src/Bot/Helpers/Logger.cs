@@ -1,5 +1,6 @@
 using System.IO;
 using System.Runtime.CompilerServices;
+// ReSharper disable MemberCanBePrivate.Global
 
 namespace Volte.Helpers;
 
@@ -89,7 +90,7 @@ public static partial class Logger
     /// <param name="src">Source to print the message from.</param>
     /// <param name="message">Message to print.</param>
     public static void Debug(LogSource src, string message)
-        => Log(LogSeverity.Debug, src, message, null);
+        => Log(LogSeverity.Debug, src, message);
 
     /// <summary>
     ///     Prints a <see cref="LogSeverity.Info"/> message to the console from the specified <paramref name="src"/> source, with the given <paramref name="message"/> message.
@@ -97,7 +98,7 @@ public static partial class Logger
     /// <param name="src">Source to print the message from.</param>
     /// <param name="message">Message to print.</param>
     public static void Info(LogSource src, string message)
-        => Log(LogSeverity.Info, src, message, null);
+        => Log(LogSeverity.Info, src, message);
 
     /// <summary>
     ///     Prints a <see cref="LogSeverity.Error"/> message to the console from the specified <paramref name="src"/> source, with the given <paramref name="message"/> message, with the specified <paramref name="e"/> exception if provided.
@@ -132,7 +133,7 @@ public static partial class Logger
     /// <param name="src">Source to print the message from.</param>
     /// <param name="message">Message to print.</param>
     public static void Verbose(LogSource src, string message)
-        => Log(LogSeverity.Verbose, src, message, null);
+        => Log(LogSeverity.Verbose, src, message);
 
     /// <summary>
     ///     Prints a <see cref="LogSeverity.Error"/> message to the console from the specified <paramref name="e"/> exception.
@@ -242,6 +243,16 @@ public readonly struct InvocationInfo
 
         CallerName = caller;
     }
+
+    public new Gommon.Optional<string> ToString() 
+        => Type switch
+        {
+            { Full: true } => $"{CallerName}:{this.GetSourceFileName()}:{LineInFile}",
+            { CallerOnly: true } => CallerName,
+            { FileLoc: true } => $"{this.GetSourceFileName()}:{LineInFile}",
+            _ => (Gommon.Optional<string>) default 
+            //casting to ensure default branch returns a default optional and not an optional with a null string value
+        };
 }
 
 public static class InvocationInfoExt

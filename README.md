@@ -10,7 +10,7 @@
 A free, robust, open-source Discord bot written in C# with [Discord.Net](https://github.com/discord-net/Discord.Net).
 
 [![Discord](https://img.shields.io/discord/405806471578648588.svg?color=7000FB&label=discord&style=for-the-badge)](https://discord.gg/H8bcFr2)
-[![License](https://img.shields.io/github/license/GreemDev/Volte.svg?color=7000FB&style=for-the-badge)](https://github.com/GreemDev/Volte/blob/rewrite/LICENSE)
+[![License](https://img.shields.io/github/license/Polyhaze/Volte.svg?color=7000FB&style=for-the-badge)](https://github.com/Polyhaze/Volte/blob/v4/LICENSE)
         </td>
     </tr>
 </table>

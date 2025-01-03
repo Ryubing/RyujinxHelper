@@ -22,7 +22,7 @@
         <ProjectReference Include="..\Bot\RyuBot.csproj" />
     </ItemGroup>
     <ItemGroup>
-        <AvaloniaResource Include="../Bot/Resources/Volte.ico" Link="Assets\icon.ico" />
+        <AvaloniaResource Include="../Bot/Resources/RyujinxBot.ico" Link="Assets\icon.ico" />
         <AvaloniaResource Include="Assets/**" />
     </ItemGroup>
     <ItemGroup>

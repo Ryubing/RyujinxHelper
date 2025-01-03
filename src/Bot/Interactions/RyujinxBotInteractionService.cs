@@ -14,8 +14,6 @@ public class RyujinxBotInteractionService : BotService
     private readonly IServiceProvider _provider;
     private readonly InteractionService _backing;
 
-
-
     public RyujinxBotInteractionService(IServiceProvider provider, DiscordSocketClient client)
     {
         _provider = provider;

@@ -5,7 +5,7 @@ using RyuBot.Services;
 
 namespace RyuBot.Interactions.Commands;
 
-public class RyujinxBotInteractionModule<T> : InteractionModuleBase<SocketInteractionContext<T>> where T : SocketInteraction
+public abstract class RyujinxBotInteractionModule<T> : InteractionModuleBase<SocketInteractionContext<T>> where T : SocketInteraction
 {
     public bool IsInGuild() => Context.Guild != null;
 
@@ -20,8 +20,8 @@ public class RyujinxBotInteractionModule<T> : InteractionModuleBase<SocketIntera
         => new(Context.CreateReplyBuilder(ephemeral).WithEmbeds(embed));
 }
 
-public class RyujinxBotSlashCommandModule : RyujinxBotInteractionModule<SocketSlashCommand>;
-public class RyujinxBotMessageCommandModule : RyujinxBotInteractionModule<SocketMessageCommand>;
-public class RyujinxBotUserCommandModule : RyujinxBotInteractionModule<SocketUserCommand>;
-public class RyujinxBotMessageComponentModule : RyujinxBotInteractionModule<SocketMessageComponent>;
-public class RyujinxBotModalModule : RyujinxBotInteractionModule<SocketModal>;
+public abstract class RyujinxBotSlashCommandModule : RyujinxBotInteractionModule<SocketSlashCommand>;
+public abstract class RyujinxBotMessageCommandModule : RyujinxBotInteractionModule<SocketMessageCommand>;
+public abstract class RyujinxBotUserCommandModule : RyujinxBotInteractionModule<SocketUserCommand>;
+public abstract class RyujinxBotMessageComponentModule : RyujinxBotInteractionModule<SocketMessageComponent>;
+public abstract class RyujinxBotModalModule : RyujinxBotInteractionModule<SocketModal>;

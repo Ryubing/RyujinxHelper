@@ -16,10 +16,9 @@ public static partial class Extensions
                 LogLevel = Config.DebugEnabled || Version.IsDevelopment 
                     ? LogSeverity.Debug 
                     : LogSeverity.Verbose,
-                GatewayIntents = Intents,
-                AlwaysDownloadUsers = true,
+                GatewayIntents = GatewayIntents.None,
                 ConnectionTimeout = 10000,
-                MessageCacheSize = 50
+                MessageCacheSize = 0
             }))
             .Apply(_ =>
             {
@@ -37,10 +36,6 @@ public static partial class Extensions
                     .Apply(ls => ls.ForEach(coll.TryAddSingleton));
                 Info(LogSource.Volte, $"Injected services [{l.Select(static x => x.Name.ReplaceIgnoreCase("Service", "")).JoinToString(", ")}] into the provider.");
             });
-
-    private const GatewayIntents Intents
-        = GatewayIntents.Guilds | GatewayIntents.GuildMessageReactions | GatewayIntents.GuildMembers |
-           GatewayIntents.GuildMessages | GatewayIntents.GuildPresences | GatewayIntents.MessageContent;
 
     private static bool IsEligibleService(Type type) => type.Inherits<BotService>() && !type.IsAbstract;
 }

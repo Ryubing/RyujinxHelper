@@ -1,3 +1,4 @@
+buildOutput/
 .idea/
 .vs/
 src/Bot/bin/

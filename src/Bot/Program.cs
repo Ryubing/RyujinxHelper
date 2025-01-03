@@ -22,6 +22,6 @@ public static class Program
     public static async Task StartBotAsync(Dictionary<string, string> args = null)
     {
         CommandLineArguments = new (args ?? new Dictionary<string, string>());
-        await VolteBot.StartAsync();
+        await RyujinxBot.StartAsync();
     }
 }

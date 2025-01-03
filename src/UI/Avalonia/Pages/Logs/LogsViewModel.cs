@@ -58,7 +58,7 @@ public partial class LogsViewModel : ObservableObject
 
             if (eventArgs.Error is not { } err) return;
 
-            VolteApp.NotifyError(err);
+            RyujinxBotApp.NotifyError(err);
             err.SentryCapture(scope =>
                 scope.AddBreadcrumb(
                     "This exception might not have been thrown, and may not be important; it is merely being logged.")

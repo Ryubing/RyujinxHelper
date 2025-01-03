@@ -16,7 +16,7 @@ using RyuBot.UI.Helpers;
 
 namespace RyuBot.UI.Avalonia;
 
-public class VolteApp : Application
+public class RyujinxBotApp : Application
 {
     private static WindowNotificationManager? _notificationManager;
 
@@ -61,7 +61,7 @@ public class VolteApp : Application
             desktop.MainWindow.Closing += (_, _) =>
             {
                 LogsViewModel.UnregisterHandler();
-                VolteManager.Stop();
+                BotManager.Stop();
             };
             
             TaskScheduler.UnobservedTaskException += (_, eventArgs) =>
@@ -83,7 +83,7 @@ public class VolteApp : Application
 #endif
         }
 
-        VolteManager.Start();
+        BotManager.Start();
     }
 
     public static void Notify(Notification notification)

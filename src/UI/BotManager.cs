@@ -2,9 +2,9 @@
 
 namespace RyuBot.UI;
 
-public class VolteManager
+public class BotManager
 {
-    static VolteManager()
+    static BotManager()
     {
         Console.Title = $"RyuBot {Version.InformationVersion}";
         Console.CursorVisible = false;
@@ -16,16 +16,16 @@ public class VolteManager
 
     public static void Start()
     {
-        if (VolteBot.Client is not null && Cts is not null) return;
+        if (RyujinxBot.Client is not null && Cts is not null) return;
 
         Cts = new();
         
-        _botTask = Task.Run(async () => await VolteBot.LoginAsync(Cts), Cts.Token);
+        _botTask = Task.Run(async () => await RyujinxBot.LoginAsync(Cts), Cts.Token);
     }
     
     public static async Task<int> StartWait()
     {
-        if (VolteBot.IsHeadless)
+        if (RyujinxBot.IsHeadless)
             Logger.OutputLogToStandardOut();
         
         Start();
@@ -35,7 +35,7 @@ public class VolteManager
     
     public static void Stop()
     {
-        if (VolteBot.Client is null && Cts is null) return;
+        if (RyujinxBot.Client is null && Cts is null) return;
         
         Cts!.Cancel();
         _botTask = null;
@@ -44,7 +44,7 @@ public class VolteManager
     }
     
     public static string GetConnectionState()
-        => VolteBot.Client is null
+        => RyujinxBot.Client is null
             ? "Disconnected"
-            : Enum.GetName(VolteBot.Client.ConnectionState) ?? "Disconnected";
+            : Enum.GetName(RyujinxBot.Client.ConnectionState) ?? "Disconnected";
 }

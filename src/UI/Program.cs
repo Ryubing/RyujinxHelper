@@ -18,12 +18,12 @@ public class Program
         if (!UnixHelper.TryParseNamedArguments(args, out var output) && output.Error is not InvalidOperationException)
             Logger.Error(output.Error);
         
-        VolteBot.IsHeadless = args.Contains("--no-gui");
+        RyujinxBot.IsHeadless = args.Contains("--no-gui");
 
-        if (VolteBot.IsHeadless) 
-            return await VolteManager.StartWait();
+        if (RyujinxBot.IsHeadless) 
+            return await BotManager.StartWait();
         
-        VolteManager.Start();
+        BotManager.Start();
 
         IconProvider.Current.Register<FontAwesomeIconProvider>();
         
@@ -33,7 +33,7 @@ public class Program
 
     // Avalonia configuration, don't remove; also used by visual designer.
     private static AppBuilder BuildAvaloniaApp()
-        => AppBuilder.Configure<VolteApp>()
+        => AppBuilder.Configure<RyujinxBotApp>()
             .UsePlatformDetect()
             .WithInterFont();
 }

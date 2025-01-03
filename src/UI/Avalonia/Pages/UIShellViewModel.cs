@@ -12,25 +12,25 @@ public partial class UIShellViewModel : ObservableObject
 
     public UIShellViewModel()
     {
-        VolteBot.Client.Connected += ChangeConnectionState;
-        VolteBot.Client.Disconnected += Disconnected;
+        RyujinxBot.Client.Connected += ChangeConnectionState;
+        RyujinxBot.Client.Disconnected += Disconnected;
     }
 
     ~UIShellViewModel()
     {
-        VolteBot.Client.Connected -= ChangeConnectionState;
-        VolteBot.Client.Disconnected -= Disconnected;
+        RyujinxBot.Client.Connected -= ChangeConnectionState;
+        RyujinxBot.Client.Disconnected -= Disconnected;
     }
 
     private Task ChangeConnectionState()
     {
-        Connection = VolteManager.GetConnectionState();
+        Connection = BotManager.GetConnectionState();
         return Task.CompletedTask;
     }
     
     private Task Disconnected(Exception e)
     {
-        VolteApp.NotifyError(e);
+        RyujinxBotApp.NotifyError(e);
         return ChangeConnectionState();
     }
 }

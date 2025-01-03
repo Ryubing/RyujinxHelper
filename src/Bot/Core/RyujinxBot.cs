@@ -5,7 +5,7 @@ using RyuBot.Services;
 
 namespace RyuBot;
 
-public class VolteBot
+public class RyujinxBot
 {
     public static Task StartAsync(Gommon.Optional<CancellationTokenSource> cts = default)
     {
@@ -21,7 +21,7 @@ public class VolteBot
     public static DiscordSocketClient Client { get; private set; }
     public static CancellationTokenSource Cts { get; private set; }
 
-    public VolteBot()
+    public RyujinxBot()
         => Console.CancelKeyPress += (_, _) => Cts?.Cancel();
 
     public static async Task LoginAsync(Gommon.Optional<CancellationTokenSource> cts = default)

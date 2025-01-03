@@ -10,10 +10,10 @@ public class VolteInteractionModule<T> : InteractionModuleBase<SocketInteraction
     public bool IsInGuild() => Context.Guild != null;
 
     public GuildData GetData() 
-        => VolteBot.Services.Get<DatabaseService>().GetData(Context.Guild);
+        => RyujinxBot.Services.Get<DatabaseService>().GetData(Context.Guild);
     
     public void ModifyData(DataEditor modifier)
-        => VolteBot.Services.Get<DatabaseService>().Modify(Context.Guild.Id, modifier);
+        => RyujinxBot.Services.Get<DatabaseService>().Modify(Context.Guild.Id, modifier);
 
     protected InteractionBadRequestResult BadRequest(string reason) => new(reason);
 

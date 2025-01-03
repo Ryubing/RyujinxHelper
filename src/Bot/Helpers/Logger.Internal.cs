@@ -34,7 +34,7 @@ public static partial class Logger
     
     internal static void PrintHeader()
     {
-        if (!VolteBot.IsHeadless) return;
+        if (!RyujinxBot.IsHeadless) return;
         
         Info(LogSource.Volte, CommandEventArgs.Separator.Trim());
         VolteAscii.ForEach(static ln => Info(LogSource.Volte, ln));

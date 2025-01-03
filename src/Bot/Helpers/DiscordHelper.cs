@@ -90,18 +90,6 @@ public static class DiscordHelper
     public static void RegisterVolteEventHandlers(this DiscordSocketClient client, ServiceProvider provider)
     {
         Listen(client);
-        
-        CalledCommandsInfo.StartPersistence(provider, saveEvery: 2.Minutes());
-        
-        client.MessageReceived += socketMessage =>
-        {
-            if (!socketMessage.ShouldHandle(out var msg)) return Task.CompletedTask;
-            
-            if (msg.Channel is IDMChannel dm)
-                return dm.SendMessageAsync("Currently, I do not support commands via DM.");
-                
-            return provider.Get<MessageService>().HandleMessageAsync(new MessageReceivedEventArgs(socketMessage, provider));
-        };
 
         client.Ready += async () =>
         {

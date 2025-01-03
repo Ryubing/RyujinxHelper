@@ -36,13 +36,24 @@ public static partial class Logger
     {
         if (!RyujinxBot.IsHeadless) return;
         
-        Info(LogSource.Volte, CommandEventArgs.Separator.Trim());
+        Info(LogSource.Volte, Separator.Trim());
         VolteAscii.ForEach(static ln => Info(LogSource.Volte, ln));
-        Info(LogSource.Volte, CommandEventArgs.Separator.Trim());
+        Info(LogSource.Volte, Separator.Trim());
     }
 
     private const string Side = "----------------------------------------------------------";
     private static bool _logFileNoticePrinted;
+    
+    private const int SpaceCount = 20;
+    private const int HyphenCount = 49;
+    
+    public static readonly string Whitespace = string.Intern(new string(' ', SpaceCount));
+
+    public static readonly string Separator = string.Intern(
+        new StringBuilder(Whitespace)
+            .Append(new string('-', HyphenCount))
+            .ToString()
+    );
 
     internal static void LogFileRestartNotice()
     {

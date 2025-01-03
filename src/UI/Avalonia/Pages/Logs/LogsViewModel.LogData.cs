@@ -36,7 +36,7 @@ public record struct VolteLog
 
     private StringBuilder? _formatted = null;
 
-    public string? StrippedMessage => Message?.Replace(CommandEventArgs.Whitespace, string.Empty);
+    public string? StrippedMessage => Message?.Replace(Logger.Whitespace, string.Empty);
     public string SeverityName => Enum.GetName(Severity)!.ToUpper();
     public string SourceName => Enum.GetName(Source)!.ToUpper();
 

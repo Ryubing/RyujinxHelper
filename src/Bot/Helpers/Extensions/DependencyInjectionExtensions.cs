@@ -11,15 +11,6 @@ public static partial class Extensions
             {
                 Timeout = 10.Seconds()
             })
-            .AddSingleton(new CommandService(new CommandServiceConfiguration
-            {
-                IgnoresExtraArguments = true,
-                StringComparison = StringComparison.OrdinalIgnoreCase,
-                DefaultRunMode = RunMode.Sequential,
-                SeparatorRequirement = SeparatorRequirement.SeparatorOrWhitespace,
-                Separator = " ",
-                NullableNouns = null
-            }))
             .AddSingleton(new DiscordSocketClient(new DiscordSocketConfig
             {
                 LogLevel = Config.DebugEnabled || Version.IsDevelopment 

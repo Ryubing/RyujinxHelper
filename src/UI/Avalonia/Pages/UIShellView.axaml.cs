@@ -17,7 +17,7 @@ public partial class UIShellView : AppWindow
         TitleBar.TitleBarHitTestType = TitleBarHitTestType.Complex;
 
         using var bitmap = new Bitmap(AssetLoader.Open(AvaloniaHelper.GetResourceUri("icon.ico")));
-        VolteLogo.Source = Icon = bitmap.CreateScaledBitmap(new PixelSize(48, 48));
+        Logo.Source = Icon = bitmap.CreateScaledBitmap(new PixelSize(48, 48));
         
         DataContext = new UIShellViewModel { View = this };
         

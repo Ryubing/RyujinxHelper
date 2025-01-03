@@ -15,7 +15,6 @@ public sealed class RyujinxBotContext : CommandContext
         Channel = msg.Channel.Cast<SocketTextChannel>();
         User = msg.Author.Cast<SocketGuildUser>();
         Message = msg.Cast<SocketUserMessage>();
-        GuildData = provider.Get<DatabaseService>().GetData(Guild);
         Now = DateTime.Now;
     }
 
@@ -26,7 +25,6 @@ public sealed class RyujinxBotContext : CommandContext
     public SocketTextChannel Channel { get; }
     public SocketGuildUser User { get; }
     public SocketUserMessage Message { get; }
-    public GuildData GuildData { get; }
     public DateTime Now { get; }
         
     public Embed CreateEmbed(StringBuilder content) => CreateEmbed(content.ToString());
@@ -70,13 +68,5 @@ public sealed class RyujinxBotContext : CommandContext
     }
 
     public string FormatUsageFor(string commandName) => 
-        TextCommandHelper.FormatUsage(this, Services.Get<CommandService>().GetCommand(commandName));
-        
-
-    public void Modify(DataEditor modifier)
-    {
-        modifier(GuildData);
-        if (Services.TryGet<DatabaseService>(out var db))
-            db.Save(GuildData);
-    }
+        TextCommandHelper.FormatUsage(Services.Get<CommandService>().GetCommand(commandName));
 }

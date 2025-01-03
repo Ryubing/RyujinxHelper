@@ -119,28 +119,6 @@ public sealed class InteractiveService : BotService, IDisposable
         return message;
     }
 
-    /// <summary>
-    ///     Starts a poll in the contextual channel using the specified <see cref="PollInfo"/> applied to the embed.
-    ///     This method does not start or in any way support reaction tracking.
-    ///     This message will have its poll emojis added in the background so it's not a long-running <see cref="Task"/>.
-    /// </summary>
-    /// <param name="context">The context to use</param>
-    /// <param name="pollInfo">The <see cref="PollInfo"/> to apply</param>
-    /// <returns>The sent poll message.</returns>
-    public static async ValueTask<IUserMessage> StartPollAsync(RyujinxBotContext context,
-        PollInfo pollInfo)
-    {
-        var m = await context.CreateEmbedBuilder().Apply(pollInfo).SendToAsync(context.Channel);
-
-        _ = Task.Run(async () =>
-        {
-            _ = await context.Message.TryDeleteAsync("Poll invocation message.");
-            await DiscordHelper.GetPollEmojis().Take(pollInfo.Fields.Count)
-                .ForEachAsync(emoji => m.AddReactionAsync(emoji));
-        });
-        return m;
-    }
-
     public async ValueTask<IUserMessage> SendReactionPaginatedMessageAsync(RyujinxBotContext context,
         PaginatedMessage pager,
         ICriterion<SocketReaction> criterion = null)

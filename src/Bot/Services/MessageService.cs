@@ -32,7 +32,7 @@ public sealed class MessageService : BotService
     public async Task HandleMessageAsync(MessageReceivedEventArgs args)
     {
         List<string> prefixes = [
-            args.Data.Configuration.CommandPrefix, 
+            Config.CommandPrefix, 
             $"<@{args.Context.Client.CurrentUser.Id}> ",
             $"<@!{args.Context.Client.CurrentUser.Id}> "
         ];
@@ -52,7 +52,7 @@ public sealed class MessageService : BotService
                     $"<@!{args.Context.Client.CurrentUser.Id}>"))
             {
                 await args.Context.CreateEmbed(
-                        $"The prefix for this guild is **{args.Data.Configuration.CommandPrefix}**; " +
+                        $"The prefix for this guild is **{Config.CommandPrefix}**; " +
                         $"alternatively you can just mention me as a prefix, i.e. `@{args.Context.Guild.CurrentUser} help`.")
                     .ReplyToAsync(args.Message);
             }
@@ -138,7 +138,7 @@ public sealed class MessageService : BotService
             await args.Context.CreateEmbedBuilder()
                 .AddField("Error in Command", args.Context.Command.Name)
                 .AddField("Error Reason", reason)
-                .AddField("Usage", TextCommandHelper.FormatUsage(args.Context, args.Context.Command))
+                .AddField("Usage", TextCommandHelper.FormatUsage(args.Context.Command))
                 .SendToAsync(args.Context.Channel);
 
             if (!Config.LogAllCommands) return;

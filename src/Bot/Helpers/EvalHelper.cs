@@ -1,4 +1,4 @@
-using System.Collections;
+﻿using System.Collections;
 using System.Text.RegularExpressions;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Scripting;
@@ -56,9 +56,7 @@ public static partial class EvalHelper
         new()
         {
             Context = ctx,
-            Database = ctx.Services.Get<DatabaseService>(),
             Client = ctx.Client,
-            Data = ctx.Services.Get<DatabaseService>().GetData(ctx.Guild),
             Commands = ctx.Services.Get<CommandService>()
         };
 

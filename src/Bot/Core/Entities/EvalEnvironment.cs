@@ -15,9 +15,7 @@ public sealed class EvalEnvironment
 
     public required RyujinxBotContext Context { get; init; }
     public required DiscordSocketClient Client { get; init; }
-    public required GuildData Data { get; init; }
     public required CommandService Commands { get; init; }
-    public required DatabaseService Database { get; init; }
     public EvalEnvironment Environment { get; }
 
     public SocketGuildUser Member(ulong id) => Context.Guild.GetUser(id);

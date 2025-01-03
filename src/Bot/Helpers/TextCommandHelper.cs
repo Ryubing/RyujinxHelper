@@ -63,13 +63,7 @@ public static class TextCommandHelper
             embed.AddField("Parameters", command.Parameters.Select(FormatParameter).JoinToString("\n"));
 
         if (command.CustomArgumentParserType is null)
-            embed.AddField("Usage", FormatUsage(ctx, command));
-
-        if (command.Attributes.Any(x => x is ShowPlaceholdersInHelpAttribute))
-            embed.AddField("Placeholders",
-                WelcomeOptions.ValidPlaceholders
-                    .Select(x => $"{Format.Code($"{{{x.Key}}}")}: {Format.Italics(x.Value)}")
-                    .JoinToString("\n"));
+            embed.AddField("Usage", FormatUsage(command));
 
         if (command.Attributes.Any(x => x is ShowTimeFormatInHelpAttribute))
             embed.AddField("Example Valid Time",
@@ -107,8 +101,8 @@ public static class TextCommandHelper
         };
     }
 
-    public static string FormatUsage(RyujinxBotContext ctx, Command cmd)
-        => FormatUsage(ctx.GuildData.Configuration.CommandPrefix, cmd);
+    public static string FormatUsage(Command cmd)
+        => FormatUsage(Config.CommandPrefix, cmd);
     
     public static string FormatUsage(string commandPrefix, Command cmd)
     {
@@ -134,8 +128,6 @@ public static class TextCommandHelper
     private static string GetCheckFriendlyMessage(RyujinxBotContext ctx, CheckAttribute cba)
         => cba switch
         {
-            RequireGuildAdminAttribute => "You need to have the Admin role.",
-            RequireGuildModeratorAttribute => "You need to have the Moderator role.",
             RequireBotOwnerAttribute => $"Only usable by **{ctx.Client.GetOwner()}** (bot owner).",
             _ => $"Unimplemented check: {cba.GetType().AsPrettyString()}. Please report this to my developers :)"
         };

@@ -25,7 +25,6 @@
       <None Include="..\..\build.sh" Link="Build Script" />
     </ItemGroup>
     <ItemGroup>
-        <EmbeddedResource Include="Resources/VolteIcon.png" LogicalName="VolteIcon" />
         <EmbeddedResource Include="Resources/Mono/JetBrainsMonoNL-Regular.ttf" LogicalName="Regular" />
         <EmbeddedResource Include="Resources/Mono/JetBrainsMonoNL-Bold.ttf" LogicalName="Bold" />
         <EmbeddedResource Include="Resources/Mono/JetBrainsMonoNL-BoldItalic.ttf" LogicalName="BoldItalic" />
@@ -46,6 +45,7 @@
     </ItemGroup>
     <ItemGroup>
       <Folder Include="Commands\Modules\" />
+      <Folder Include="Interactions\Commands\Modules\" />
       <Folder Include="Resources\" />
     </ItemGroup>
 </Project>

@@ -6,7 +6,6 @@ namespace RyuBot.Commands.Text;
 
 public abstract class RyujinxBotModule : ModuleBase<RyujinxBotContext>
 {
-    public DatabaseService Db { get; set; }
     public CommandService CommandService { get; set; }
         
     protected ActionResult Ok(
@@ -28,8 +27,6 @@ public abstract class RyujinxBotModule : ModuleBase<RyujinxBotContext>
         => Ok(text.ToString(), messageCallback, shouldEmbed);
     protected ActionResult Ok(PaginatedMessage.Builder pager) => new OkResult(pager);
     protected ActionResult Ok(IEnumerable<EmbedBuilder> embeds) => new OkResult(embeds);
-
-    protected ActionResult Ok(PollInfo pollInfo) => new OkResult(pollInfo);
 
     protected ActionResult Ok(
         EmbedBuilder embed, 

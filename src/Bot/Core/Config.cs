@@ -50,6 +50,7 @@ public static class Config
         _configuration = new TConfig
         {
             Token = "token here",
+            WhitelistGuild = 0,
             SentryDsn = "",
             CommandPrefix = "$",
             Owner = 0,
@@ -59,7 +60,7 @@ public static class Config
             SuccessEmbedColor = 0x7000FB,
             ErrorEmbedColor = 0xFF0000,
             LogAllCommands = true,
-            BlacklistedGuildOwners = [],
+            ReplyCommandsInline = false,
             EnabledFeatures = new()
         };
         
@@ -134,6 +135,8 @@ public static class Config
 
     public static string CommandPrefix => _configuration.CommandPrefix;
 
+    public static ulong WhitelistGuild => _configuration.WhitelistGuild;
+
     public static string SentryDsn => _configuration.SentryDsn;
 
     public static ulong Owner => _configuration.Owner;
@@ -142,7 +145,7 @@ public static class Config
 
     public static string Streamer => _configuration.Streamer;
 
-    public static bool DebugEnabled => _configuration.EnableDebug;
+    public static bool DebugEnabled => _configuration?.EnableDebug ?? false;
 
     public static string FormattedStreamUrl => $"https://twitch.tv/{Streamer}";
 
@@ -152,9 +155,9 @@ public static class Config
 
     public static bool LogAllCommands => _configuration.LogAllCommands;
 
-    public static HashSet<ulong> BlacklistedOwners => _configuration.BlacklistedGuildOwners;
+    public static bool ReplyCommandsInline => _configuration.ReplyCommandsInline;
 
-    public static EnabledFeatures EnabledFeatures => _configuration.EnabledFeatures;
+    public static EnabledFeatures EnabledFeatures => _configuration?.EnabledFeatures;
 }
 
 public struct HeadlessBotConfig : IVolteConfig
@@ -164,6 +167,9 @@ public struct HeadlessBotConfig : IVolteConfig
             
     [JsonPropertyName("sentry_dsn")]
     public string SentryDsn { get; set; }
+    
+    [JsonPropertyName("only_works_in_guild")]
+    public ulong WhitelistGuild { get; set; }
 
     [JsonPropertyName("command_prefix")]
     public string CommandPrefix { get; set; }
@@ -188,9 +194,9 @@ public struct HeadlessBotConfig : IVolteConfig
 
     [JsonPropertyName("log_all_commands")]
     public bool LogAllCommands { get; set; }
-
-    [JsonPropertyName("blacklisted_guild_owners")]
-    public HashSet<ulong> BlacklistedGuildOwners { get; set; }
+    
+    [JsonPropertyName("reply_commands")]
+    public bool ReplyCommandsInline { get; set; }
 
     [JsonPropertyName("enabled_features")]
     public EnabledFeatures EnabledFeatures { get; set; }
@@ -200,37 +206,40 @@ public interface IVolteConfig
 {
     [JsonPropertyName("discord_token")]
     public string Token { get; set; }
-            
+    
     [JsonPropertyName("sentry_dsn")]
     public string SentryDsn { get; set; }
-
+    
+    [JsonPropertyName("only_works_in_guild")]
+    public ulong WhitelistGuild { get; set; }
+    
     [JsonPropertyName("command_prefix")]
     public string CommandPrefix { get; set; }
-
+    
     [JsonPropertyName("bot_owner")]
     public ulong Owner { get; set; }
-
+    
     [JsonPropertyName("status_game")]
     public string Game { get; set; }
-
+    
     [JsonPropertyName("status_twitch_streamer")]
     public string Streamer { get; set; }
-
+    
     [JsonPropertyName("enable_debug_logging")]
     public bool EnableDebug { get; set; }
-
+    
     [JsonPropertyName("color_success")]
     public uint SuccessEmbedColor { get; set; }
-
+    
     [JsonPropertyName("color_error")]
     public uint ErrorEmbedColor { get; set; }
-
+    
     [JsonPropertyName("log_all_commands")]
     public bool LogAllCommands { get; set; }
-
-    [JsonPropertyName("blacklisted_guild_owners")]
-    public HashSet<ulong> BlacklistedGuildOwners { get; set; }
-
+    
+    [JsonPropertyName("reply_commands")]
+    public bool ReplyCommandsInline { get; set; }
+    
     [JsonPropertyName("enabled_features")]
     public EnabledFeatures EnabledFeatures { get; set; }
 }

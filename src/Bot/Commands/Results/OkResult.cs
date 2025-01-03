@@ -38,8 +38,6 @@ public class OkResult : ActionResult
         _runFuncAsync = awaitFunc;
     }
 
-    public OkResult(PollInfo poll) => _poll = poll;
-
     private readonly bool _runFuncAsync;
 
     private readonly string _message;
@@ -48,14 +46,10 @@ public class OkResult : ActionResult
     private readonly MessageCallback _messageCallback;
     private readonly AsyncFunction _separateLogic;
     private readonly EmbedBuilder _embed;
-    private readonly PollInfo _poll;
-
+    
     public override async ValueTask<Gommon.Optional<ResultCompletionData>> ExecuteResultAsync(RyujinxBotContext ctx)
     {
         if (!ctx.Guild.CurrentUser.GetPermissions(ctx.Channel).SendMessages) return default;
-
-        if (_poll != null)
-            return new ResultCompletionData(await InteractiveService.StartPollAsync(ctx, _poll));
             
         if (_pager != null)
             return new ResultCompletionData(
@@ -73,39 +67,18 @@ public class OkResult : ActionResult
 
             return default;
         }
-
-        var data = ctx.Services.Get<DatabaseService>().GetData(ctx.Guild);
-
+        
         var message = _embed is null
             ? _shouldEmbed
-                ? data.Configuration.ReplyInline
+                ? Config.ReplyCommandsInline
                     ? await ctx.CreateEmbed(_message).ReplyToAsync(ctx.Message)
                     : await ctx.CreateEmbed(_message).SendToAsync(ctx.Channel)
-                : data.Configuration.ReplyInline
+                : Config.ReplyCommandsInline
                     ? await ctx.Message.ReplyAsync(_message, allowedMentions: AllowedMentions.None)
                     : await ctx.Channel.SendMessageAsync(_message, allowedMentions: AllowedMentions.None)
-            : data.Configuration.ReplyInline
+            : Config.ReplyCommandsInline
                 ? await _embed.ReplyToAsync(ctx.Message)
                 : await _embed.SendToAsync(ctx.Channel);
-
-
-        /*IUserMessage message;
-        if (_embed is null)
-        {
-            if (_shouldEmbed)
-                if (data.Configuration.ReplyInline)
-                    message = await ctx.CreateEmbed(_message).ReplyToAsync(ctx.Message);
-                else
-                    message = await ctx.CreateEmbed(_message).SendToAsync(ctx.Channel);
-            else if (data.Configuration.ReplyInline)
-                message = await ctx.Message.ReplyAsync(_message);
-            else
-                message = await ctx.Channel.SendMessageAsync(_message);
-        }
-        else if (ctx.GuildData.Configuration.ReplyInline)
-            message = await _embed.ReplyToAsync(ctx.Message);
-        else
-            message = await _embed.SendToAsync(ctx.Channel);*/
 
 
         if (_messageCallback != null)

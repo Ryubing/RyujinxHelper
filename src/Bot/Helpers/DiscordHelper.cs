@@ -8,12 +8,6 @@ public static class DiscordHelper
     
     public static string Zws => "\u200B";
 
-    public static List<Emoji> GetPollEmojis()
-        => [
-            Emojis.One, Emojis.Two, Emojis.Three, Emojis.Four, Emojis.Five,
-            Emojis.Six, Emojis.Seven, Emojis.Eight, Emojis.Nine
-        ];
-
     public static RequestOptions RequestOptions(Action<RequestOptions> initializer) 
         => new RequestOptions().Apply(initializer);
 
@@ -28,15 +22,6 @@ public static class DiscordHelper
 
     private static bool IsGuildOwner(this IGuildUser user)
         => user.Guild.OwnerId == user.Id || IsBotOwner(user);
-    
-    public static bool IsAdmin(this RyujinxBotContext ctx, SocketGuildUser user)
-        => HasRole(user, ctx.GuildData.Configuration.Moderation.AdminRole) 
-           || IsGuildOwner(user);
-
-    public static bool IsModerator(this RyujinxBotContext ctx, SocketGuildUser user)
-        => user.HasRole(ctx.GuildData.Configuration.Moderation.ModRole) 
-           || ctx.IsAdmin(user) 
-           || IsGuildOwner(user);
 
     public static bool HasRole(this SocketGuildUser user, ulong roleId)
         => user.Roles.Select(x => x.Id).Contains(roleId);
@@ -148,17 +133,6 @@ public static class DiscordHelper
                 Info(LogSource.Volte,
                     $"Set {client.CurrentUser.Username}'s activity to \"{type}: {name}\", at Twitch user {Config.Streamer}.");
             }
-
-            ExecuteBackgroundAsync(async () =>
-            {
-                foreach (var g in client.Guilds)
-                {
-                    if (Config.BlacklistedOwners.Contains(g.OwnerId))
-                        await g.LeaveAsync().Then(async () => Warn(LogSource.Volte,
-                            $"Left guild \"{g.Name}\" owned by blacklisted owner {await client.Rest.GetUserAsync(g.OwnerId)}."));
-                    else provider.Get<DatabaseService>().GetData(g); //ensuring all guilds have data available to prevent exceptions later on 
-                }
-            });
             
             await provider.Get<RyujinxBotInteractionService>().InitAsync();
         };

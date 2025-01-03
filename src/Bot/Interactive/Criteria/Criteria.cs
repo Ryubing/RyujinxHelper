@@ -4,7 +4,7 @@ namespace RyuBot.Interactive;
 
 public class Criteria<T> : ICriterion<T>
 {
-    public delegate ValueTask<bool> LocalCriteria(VolteContext ctx, T value);
+    public delegate ValueTask<bool> LocalCriteria(RyujinxBotContext ctx, T value);
         
     private readonly HashSet<ICriterion<T>> _critiera = [];
     private readonly HashSet<LocalCriteria> _localCriteria = [];
@@ -21,7 +21,7 @@ public class Criteria<T> : ICriterion<T>
         return this;
     }
 
-    public async ValueTask<bool> JudgeAsync(VolteContext sourceContext, T parameter)
+    public async ValueTask<bool> JudgeAsync(RyujinxBotContext sourceContext, T parameter)
     {
         foreach (var criterion in _critiera)
         {

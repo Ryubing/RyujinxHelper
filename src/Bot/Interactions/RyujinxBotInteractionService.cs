@@ -7,14 +7,14 @@ using IResult = Discord.Interactions.IResult;
 
 namespace RyuBot.Interactions;
 
-public class VolteInteractionService : VolteService
+public class RyujinxBotInteractionService : BotService
 {
     private static bool _commandsRegistered;
     
     private readonly IServiceProvider _provider;
     private readonly InteractionService _backing;
 
-    public VolteInteractionService(IServiceProvider provider, DiscordSocketClient client)
+    public RyujinxBotInteractionService(IServiceProvider provider, DiscordSocketClient client)
     {
         _provider = provider;
         _backing = new(client.Rest, new()

@@ -4,10 +4,9 @@ using RyuBot.Services;
 
 namespace RyuBot.Commands.Text;
 
-public abstract class VolteModule : ModuleBase<VolteContext>
+public abstract class RyujinxBotModule : ModuleBase<RyujinxBotContext>
 {
     public DatabaseService Db { get; set; }
-    public ModerationService ModerationService { get; set; }
     public CommandService CommandService { get; set; }
         
     protected ActionResult Ok(

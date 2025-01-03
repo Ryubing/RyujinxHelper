@@ -1,14 +1,10 @@
-using RyuBot.Commands.Text;
-using RyuBot.Commands.Text.Modules;
-using RyuBot.Entities;
 using RyuBot.Interactions;
-using RyuBot.Services;
 
 namespace RyuBot.Helpers;
 
 public static class DiscordHelper
 {
-    public static ulong DevGuildId = 405806471578648588;
+    public static ulong DevGuildId = 1294443224030511104;
     
     public static string Zws => "\u200B";
 
@@ -33,21 +29,17 @@ public static class DiscordHelper
     private static bool IsGuildOwner(this IGuildUser user)
         => user.Guild.OwnerId == user.Id || IsBotOwner(user);
     
-    public static bool IsAdmin(this VolteContext ctx, SocketGuildUser user)
+    public static bool IsAdmin(this RyujinxBotContext ctx, SocketGuildUser user)
         => HasRole(user, ctx.GuildData.Configuration.Moderation.AdminRole) 
            || IsGuildOwner(user);
 
-    public static bool IsModerator(this VolteContext ctx, SocketGuildUser user)
+    public static bool IsModerator(this RyujinxBotContext ctx, SocketGuildUser user)
         => user.HasRole(ctx.GuildData.Configuration.Moderation.ModRole) 
            || ctx.IsAdmin(user) 
            || IsGuildOwner(user);
 
     public static bool HasRole(this SocketGuildUser user, ulong roleId)
         => user.Roles.Select(x => x.Id).Contains(roleId);
-    
-    public static Task WarnAsync(this SocketGuildUser member, VolteContext ctx, string reason)
-        => ModerationModule.WarnAsync(ctx.User, ctx.GuildData, member,
-            ctx.Services.GetRequiredService<DatabaseService>(), reason);
 
     public static async Task<bool> TrySendMessageAsync(this SocketGuildUser user, string text = null,
         bool isTts = false, Embed embed = null, RequestOptions options = null)
@@ -168,7 +160,7 @@ public static class DiscordHelper
                 }
             });
             
-            await provider.Get<VolteInteractionService>().InitAsync();
+            await provider.Get<RyujinxBotInteractionService>().InitAsync();
         };
     }
 

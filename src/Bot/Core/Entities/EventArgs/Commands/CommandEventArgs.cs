@@ -12,7 +12,7 @@ public abstract class CommandEventArgs : EventArgs
     public string Command { get; protected init; }
     public string Arguments { get; protected init; }
     public Stopwatch Stopwatch { get; protected init; }
-    public VolteContext Context { get; protected init; }
+    public RyujinxBotContext Context { get; protected init; }
 
     public string FormatInvocator(bool whitespace = false) 
         => Fmt(CommandFrom, $"{Context.User} ({Context.User.Id})", whitespace);

@@ -6,7 +6,7 @@ public interface IReactionCallback
 {
     RunMode RunMode { get; }
     ICriterion<SocketReaction> Criterion { get; }
-    VolteContext Context { get; }
+    RyujinxBotContext Context { get; }
 
     ValueTask<bool> HandleAsync(SocketReaction reaction);
 }

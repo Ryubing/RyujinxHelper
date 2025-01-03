@@ -6,7 +6,7 @@ public class BotManager
 {
     static BotManager()
     {
-        Console.Title = $"RyuBot {Version.InformationVersion}";
+        Console.Title = $"Ryujinx Bot {Version.InformationVersion}";
         Console.CursorVisible = false;
     }
     

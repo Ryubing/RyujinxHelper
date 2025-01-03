@@ -8,7 +8,7 @@ public class DeleteMessageReactionCallback : IReactionCallback
     public RunMode RunMode { get; } = RunMode.Parallel;
     public ICriterion<SocketReaction> Criterion { get; } = new EnsureReactionFromSourceUserCriterion();
     public TimeSpan? Timeout { get; } = 10.Seconds();
-    public VolteContext Context { get; }
+    public RyujinxBotContext Context { get; }
     public RestUserMessage Message { get; private set; }
     public async ValueTask<bool> HandleAsync(SocketReaction reaction)
     {
@@ -21,7 +21,7 @@ public class DeleteMessageReactionCallback : IReactionCallback
 
     }
 
-    public DeleteMessageReactionCallback(VolteContext ctx, Embed embed)
+    public DeleteMessageReactionCallback(RyujinxBotContext ctx, Embed embed)
     {
         Context = ctx;
         _ = Task.Run(async () => await (Message = await Context.Channel.SendMessageAsync(embed: embed)).AddReactionAsync(Emojis.X));

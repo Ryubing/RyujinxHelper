@@ -3,10 +3,10 @@ namespace RyuBot.Commands.Text;
 [InjectTypeParser]
 public sealed class ChannelParser : VolteTypeParser<SocketTextChannel>
 {
-    public override ValueTask<TypeParserResult<SocketTextChannel>> ParseAsync(string value, VolteContext ctx) =>
+    public override ValueTask<TypeParserResult<SocketTextChannel>> ParseAsync(string value, RyujinxBotContext ctx) =>
         Parse(value, ctx);
         
-    public static TypeParserResult<SocketTextChannel> Parse(string value, VolteContext ctx)
+    public static TypeParserResult<SocketTextChannel> Parse(string value, RyujinxBotContext ctx)
     {
         SocketTextChannel channel = default;
 

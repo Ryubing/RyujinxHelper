@@ -6,7 +6,7 @@ namespace RyuBot.Interactive;
 // ReSharper disable SuspiciousTypeConversion.Global
 public sealed class PaginatedMessageCallback : IReactionCallback, IAsyncDisposable
 {
-    public VolteContext Context { get; }
+    public RyujinxBotContext Context { get; }
     public InteractiveService Interactive { get; }
     public IUserMessage Message { get; private set; }
 
@@ -20,7 +20,7 @@ public sealed class PaginatedMessageCallback : IReactionCallback, IAsyncDisposab
 
 
     public PaginatedMessageCallback(InteractiveService interactive,
-        VolteContext sourceContext,
+        RyujinxBotContext sourceContext,
         PaginatedMessage pager,
         ICriterion<SocketReaction> criterion = null)
     {

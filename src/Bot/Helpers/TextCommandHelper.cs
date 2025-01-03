@@ -1,17 +1,14 @@
 using System.Collections;
-using RyuBot.Commands.Text;
-using RyuBot.Commands.Text.Modules;
-using RyuBot.Entities;
 using Module = Qmmands.Module;
 
 namespace RyuBot.Helpers;
 
 public static class TextCommandHelper
 {
-    public static async ValueTask<bool> CanShowCommandAsync(VolteContext ctx, Command command) =>
+    public static async ValueTask<bool> CanShowCommandAsync(RyujinxBotContext ctx, Command command) =>
         await command.RunChecksAsync(ctx) is SuccessfulResult;
 
-    public static async ValueTask<bool> CanShowModuleAsync(VolteContext ctx, Module module) =>
+    public static async ValueTask<bool> CanShowModuleAsync(RyujinxBotContext ctx, Module module) =>
         await module.RunChecksAsync(ctx) is SuccessfulResult;
 
     public static string FormatCommandShort(Command command, bool includeGroup = true)
@@ -33,14 +30,14 @@ public static class TextCommandHelper
         
 
     public static async IAsyncEnumerable<Command> WhereAccessibleAsync(this IEnumerable<Command> commands,
-        VolteContext ctx)
+        RyujinxBotContext ctx)
     {
         foreach (var cmd in commands)
             if (await CanShowCommandAsync(ctx, cmd))
                 yield return cmd;
     }
 
-    public static async ValueTask<EmbedBuilder> CreateCommandEmbedAsync(Command command, VolteContext ctx)
+    public static async ValueTask<EmbedBuilder> CreateCommandEmbedAsync(Command command, RyujinxBotContext ctx)
     {
         var embed = ctx.CreateEmbedBuilder()
             .WithTitle(command.Name)
@@ -106,16 +103,11 @@ public static class TextCommandHelper
 
         static string getArgs(VolteUnixCommand unixCommand) => unixCommand switch
         {
-            VolteUnixCommand.Announce => AdminUtilityModule.AnnounceNamedArguments.Select(formatUnixArgs)
-                .JoinToString("\n"),
-            VolteUnixCommand.Zalgo => UtilityModule.ZalgoNamedArguments.Select(formatUnixArgs).JoinToString("\n"),
-            VolteUnixCommand.UnixBan => ModerationModule.UnixBanNamedArguments.Select(formatUnixArgs)
-                .JoinToString("\n"),
             _ => throw new ArgumentOutOfRangeException(nameof(unixCommand))
         };
     }
 
-    public static string FormatUsage(VolteContext ctx, Command cmd)
+    public static string FormatUsage(RyujinxBotContext ctx, Command cmd)
         => FormatUsage(ctx.GuildData.Configuration.CommandPrefix, cmd);
     
     public static string FormatUsage(string commandPrefix, Command cmd)
@@ -132,14 +124,14 @@ public static class TextCommandHelper
             );
     }
 
-    private static async Task<string> FormatCheckAsync(CheckAttribute cba, VolteContext context)
+    private static async Task<string> FormatCheckAsync(CheckAttribute cba, RyujinxBotContext context)
     {
         var result = await cba.CheckAsync(context);
         var message = GetCheckFriendlyMessage(context, cba);
         return $"- {(result.IsSuccessful ? Emojis.BallotBoxWithCheck : Emojis.X)} {message}";
     }
 
-    private static string GetCheckFriendlyMessage(VolteContext ctx, CheckAttribute cba)
+    private static string GetCheckFriendlyMessage(RyujinxBotContext ctx, CheckAttribute cba)
         => cba switch
         {
             RequireGuildAdminAttribute => "You need to have the Admin role.",

@@ -4,5 +4,5 @@ namespace RyuBot.Interactive;
 
 public interface ICriterion<in T>
 {
-    ValueTask<bool> JudgeAsync(VolteContext sourceContext, T parameter);
+    ValueTask<bool> JudgeAsync(RyujinxBotContext sourceContext, T parameter);
 }

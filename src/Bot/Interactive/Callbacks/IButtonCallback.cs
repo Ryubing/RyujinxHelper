@@ -6,7 +6,7 @@ namespace RyuBot.Interactive;
 
 public interface IButtonCallback
 {
-    VolteContext MessageContext { get; }
+    RyujinxBotContext MessageContext { get; }
     IUserMessage PagerMessage { get; }
     RunMode RunMode { get; }
     ICriterion<SocketInteractionContext<SocketMessageComponent>> Criterion { get; }

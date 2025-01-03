@@ -5,7 +5,7 @@ using RyuBot.Entities;
 
 namespace RyuBot.Services;
 
-public sealed class DatabaseService : VolteService, IDisposable
+public sealed class DatabaseService : BotService, IDisposable
 {
     public static readonly LiteDatabase Database =
         new($"filename={FilePath.Data / "RyuBot.db"};upgrade=true;connection=direct");

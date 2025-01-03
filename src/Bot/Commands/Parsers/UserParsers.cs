@@ -3,10 +3,10 @@ namespace RyuBot.Commands.Text;
 [InjectTypeParser]
 public sealed class SocketGuildUserParser : VolteTypeParser<SocketGuildUser>
 {
-    public override ValueTask<TypeParserResult<SocketGuildUser>> ParseAsync(string value, VolteContext ctx) =>
+    public override ValueTask<TypeParserResult<SocketGuildUser>> ParseAsync(string value, RyujinxBotContext ctx) =>
         Parse(value, ctx);
     
-    public static TypeParserResult<SocketGuildUser> Parse(string value, VolteContext ctx)
+    public static TypeParserResult<SocketGuildUser> Parse(string value, RyujinxBotContext ctx)
     {
         var users = ctx.Guild.Users.ToList();
 
@@ -38,7 +38,7 @@ public sealed class SocketGuildUserParser : VolteTypeParser<SocketGuildUser>
 [InjectTypeParser]
 public sealed class RestUserParser : VolteTypeParser<RestUser>
 {
-    public override async ValueTask<TypeParserResult<RestUser>> ParseAsync(string value, VolteContext ctx)
+    public override async ValueTask<TypeParserResult<RestUser>> ParseAsync(string value, RyujinxBotContext ctx)
     {
         RestUser user = null;
 
@@ -54,10 +54,10 @@ public sealed class RestUserParser : VolteTypeParser<RestUser>
 [InjectTypeParser]
 public sealed class RestGuildUserParser : VolteTypeParser<RestGuildUser>
 {
-    public override ValueTask<TypeParserResult<RestGuildUser>> ParseAsync(string value, VolteContext ctx) =>
+    public override ValueTask<TypeParserResult<RestGuildUser>> ParseAsync(string value, RyujinxBotContext ctx) =>
         Parse(value, ctx);
     
-    public static async ValueTask<TypeParserResult<RestGuildUser>> Parse(string value, VolteContext ctx)
+    public static async ValueTask<TypeParserResult<RestGuildUser>> Parse(string value, RyujinxBotContext ctx)
     {
         RestGuildUser user = null;
 

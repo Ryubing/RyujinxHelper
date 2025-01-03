@@ -5,7 +5,7 @@ namespace RyuBot.Commands.Text;
 [InjectTypeParser]
 public sealed class ColorParser : VolteTypeParser<Color>
 {
-    public override ValueTask<TypeParserResult<Color>> ParseAsync(string value, VolteContext _) => Parse(value);
+    public override ValueTask<TypeParserResult<Color>> ParseAsync(string value, RyujinxBotContext _) => Parse(value);
         
     public static TypeParserResult<Color> Parse(string value)
     {

@@ -30,7 +30,7 @@ public static partial class EvalHelper
                 .Where(static x => !x.IsDynamic && !x.Location.IsNullOrWhitespace())
         );
 
-    public static Task EvaluateAsync(VolteContext ctx, string code)
+    public static Task EvaluateAsync(RyujinxBotContext ctx, string code)
     {
         try
         {
@@ -52,7 +52,7 @@ public static partial class EvalHelper
         return Task.CompletedTask;
     }
 
-    private static EvalEnvironment CreateEvalEnvironment(VolteContext ctx) =>
+    private static EvalEnvironment CreateEvalEnvironment(RyujinxBotContext ctx) =>
         new()
         {
             Context = ctx,
@@ -62,7 +62,7 @@ public static partial class EvalHelper
             Commands = ctx.Services.Get<CommandService>()
         };
 
-    private static async Task ExecuteScriptAsync(string code, VolteContext ctx)
+    private static async Task ExecuteScriptAsync(string code, RyujinxBotContext ctx)
     {
         var embed = ctx.CreateEmbedBuilder();
         var msg = await embed.WithTitle("Evaluating")

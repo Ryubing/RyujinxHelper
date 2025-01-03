@@ -27,7 +27,7 @@ public sealed class BooleanParser : VolteTypeParser<bool>
         "negative", "0"
     ];
 
-    public override ValueTask<TypeParserResult<bool>> ParseAsync(string value, VolteContext _) => Parse(value);
+    public override ValueTask<TypeParserResult<bool>> ParseAsync(string value, RyujinxBotContext _) => Parse(value);
     
     public static TypeParserResult<bool> Parse(string value)
     {

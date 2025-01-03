@@ -8,7 +8,7 @@ namespace RyuBot.Interactive;
 
 public class ButtonPaginatorCallback : IButtonCallback
 {
-    public VolteContext MessageContext { get; }
+    public RyujinxBotContext MessageContext { get; }
     public InteractiveService Interactive { get; }
     public IUserMessage PagerMessage { get; private set; }
 
@@ -27,13 +27,13 @@ public class ButtonPaginatorCallback : IButtonCallback
         IServiceProvider provider,
         ICriterion<SocketInteractionContext<SocketMessageComponent>> criterion = null,
         RunMode runMode = RunMode.Sequential)
-        : this(interactive, new VolteContext(sourceMessage, provider), pager, criterion, runMode)
+        : this(interactive, new RyujinxBotContext(sourceMessage, provider), pager, criterion, runMode)
     {
     }
 
     public ButtonPaginatorCallback(
         InteractiveService interactive,
-        VolteContext sourceContext,
+        RyujinxBotContext sourceContext,
         PaginatedMessage pager,
         ICriterion<SocketInteractionContext<SocketMessageComponent>> criterion = null,
         RunMode runMode = RunMode.Sequential)

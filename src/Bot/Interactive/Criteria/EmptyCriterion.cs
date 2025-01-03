@@ -4,6 +4,6 @@ namespace RyuBot.Interactive;
 
 public class EmptyCriterion<T> : ICriterion<T>
 {
-    public ValueTask<bool> JudgeAsync(VolteContext sourceData, T parameter)
+    public ValueTask<bool> JudgeAsync(RyujinxBotContext sourceData, T parameter)
         => new(true);
 }

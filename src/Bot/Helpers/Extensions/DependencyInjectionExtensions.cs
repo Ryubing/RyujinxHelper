@@ -40,7 +40,7 @@ public static partial class Extensions
                         opts.DiagnosticLogger = new SentryTranslator();
                     }));
                 
-                //get all the classes that inherit VolteService, and aren't abstract; add them to the service provider
+                //get all the classes that inherit BotService, and aren't abstract; add them to the service provider
                 var l = Assembly.GetExecutingAssembly().GetTypes()
                     .Where(IsEligibleService)
                     .Apply(ls => ls.ForEach(coll.TryAddSingleton));
@@ -51,5 +51,5 @@ public static partial class Extensions
         = GatewayIntents.Guilds | GatewayIntents.GuildMessageReactions | GatewayIntents.GuildMembers |
            GatewayIntents.GuildMessages | GatewayIntents.GuildPresences | GatewayIntents.MessageContent;
 
-    private static bool IsEligibleService(Type type) => type.Inherits<VolteService>() && !type.IsAbstract;
+    private static bool IsEligibleService(Type type) => type.Inherits<BotService>() && !type.IsAbstract;
 }

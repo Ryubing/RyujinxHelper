@@ -8,7 +8,7 @@ using RunMode = Qmmands.RunMode;
 
 namespace RyuBot.Services;
 
-public sealed class InteractiveService : VolteService, IDisposable
+public sealed class InteractiveService : BotService, IDisposable
 {
     private readonly DiscordSocketClient _client;
     
@@ -39,7 +39,7 @@ public sealed class InteractiveService : VolteService, IDisposable
     /// <param name="timeout">The timeout to abort the waiting after.</param>
     /// <param name="token">The cancellation token to observe.</param>
     /// <returns>The waited message; or null if no message was received.</returns>
-    public ValueTask<SocketUserMessage> NextMessageAsync(VolteContext context,
+    public ValueTask<SocketUserMessage> NextMessageAsync(RyujinxBotContext context,
         bool fromSourceUser = true,
         bool inSourceChannel = true,
         TimeSpan? timeout = null,
@@ -62,7 +62,7 @@ public sealed class InteractiveService : VolteService, IDisposable
     /// <param name="timeout">The timeout to abort the waiting after.</param>
     /// <param name="token">The cancellation token to observe.</param>
     /// <returns>The waited message; or null if no message was received.</returns>
-    public async ValueTask<SocketUserMessage> NextMessageAsync(VolteContext context,
+    public async ValueTask<SocketUserMessage> NextMessageAsync(RyujinxBotContext context,
         ICriterion<SocketUserMessage> criterion,
         TimeSpan? timeout = null,
         CancellationToken token = default)
@@ -107,7 +107,7 @@ public sealed class InteractiveService : VolteService, IDisposable
     /// <param name="timeout">The time elapsed after the message is sent for it to be deleted.</param>
     /// <param name="options">The Discord.Net <see cref="RequestOptions"/> for the SendMessageAsync method.</param>
     /// <returns>The message that will be deleted.</returns>
-    public async ValueTask<IUserMessage> ReplyAndDeleteAsync(VolteContext context,
+    public async ValueTask<IUserMessage> ReplyAndDeleteAsync(RyujinxBotContext context,
         string content, bool isTts = false,
         Embed embed = null,
         TimeSpan? timeout = null,
@@ -127,7 +127,7 @@ public sealed class InteractiveService : VolteService, IDisposable
     /// <param name="context">The context to use</param>
     /// <param name="pollInfo">The <see cref="PollInfo"/> to apply</param>
     /// <returns>The sent poll message.</returns>
-    public static async ValueTask<IUserMessage> StartPollAsync(VolteContext context,
+    public static async ValueTask<IUserMessage> StartPollAsync(RyujinxBotContext context,
         PollInfo pollInfo)
     {
         var m = await context.CreateEmbedBuilder().Apply(pollInfo).SendToAsync(context.Channel);
@@ -141,7 +141,7 @@ public sealed class InteractiveService : VolteService, IDisposable
         return m;
     }
 
-    public async ValueTask<IUserMessage> SendReactionPaginatedMessageAsync(VolteContext context,
+    public async ValueTask<IUserMessage> SendReactionPaginatedMessageAsync(RyujinxBotContext context,
         PaginatedMessage pager,
         ICriterion<SocketReaction> criterion = null)
     {
@@ -160,7 +160,7 @@ public sealed class InteractiveService : VolteService, IDisposable
         return callback.PagerMessage;
     }
     
-    public async ValueTask<IUserMessage> SendButtonPaginatedMessageAsync(VolteContext context,
+    public async ValueTask<IUserMessage> SendButtonPaginatedMessageAsync(RyujinxBotContext context,
         PaginatedMessage pager,
         ICriterion<SocketInteractionContext<SocketMessageComponent>> criterion = null)
     {

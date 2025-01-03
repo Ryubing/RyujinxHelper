@@ -7,7 +7,7 @@ public sealed class CheckHierarchyAttribute : ParameterCheckAttribute
     {
         var u = argument.Cast<SocketGuildUser>() ?? throw new ArgumentException(
             $"Cannot use the CheckHierarchy attribute on a type that isn't {typeof(SocketGuildUser)}.");
-        var ctx = context.Cast<VolteContext>();
+        var ctx = context.Cast<RyujinxBotContext>();
 
         return ctx.IsAdmin(u)
             ? CheckResult.Failed("Cannot ban someone with the configured Admin role.")

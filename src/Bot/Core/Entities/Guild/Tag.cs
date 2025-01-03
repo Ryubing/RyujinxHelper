@@ -26,7 +26,7 @@ public sealed class Tag
             .Replace("@everyone", $"@{DiscordHelper.Zws}everyone")
             .Replace("@here", $"@{DiscordHelper.Zws}here");
 
-    public string FormatContent(VolteContext ctx)
+    public string FormatContent(RyujinxBotContext ctx)
         => SanitizeContent()
             .Replace("{ServerName}", ctx.Guild.Name)
             .Replace("{GuildName}", ctx.Guild.Name)
@@ -35,7 +35,7 @@ public sealed class Tag
             .Replace("{OwnerMention}", ctx.Guild.Owner.Mention)
             .Replace("{UserTag}", ctx.User.Discriminator);
 
-    public EmbedBuilder AsEmbed(VolteContext ctx) => ctx.CreateEmbedBuilder(FormatContent(ctx))
+    public EmbedBuilder AsEmbed(RyujinxBotContext ctx) => ctx.CreateEmbedBuilder(FormatContent(ctx))
         .WithAuthor(author: null)
         .WithFooter($"Requested by {ctx.User}.", ctx.User.GetEffectiveAvatarUrl());
 

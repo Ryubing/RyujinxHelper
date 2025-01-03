@@ -5,7 +5,7 @@ namespace RyuBot.Entities;
 public class ModActionEventArgs
 {
     public SocketGuildUser Moderator { get; private set; }
-    public VolteContext Context { get; private set; }
+    public RyujinxBotContext Context { get; private set; }
     public ModActionType ActionType { get; private set; }
     public string Reason { get; private set; }
     public ulong? TargetId { get; private set; }
@@ -14,9 +14,9 @@ public class ModActionEventArgs
     public DateTimeOffset Time { get; private set; }
     public SocketGuild Guild { get; private set; }
 
-    public static ModActionEventArgs InContext(VolteContext ctx) => new ModActionEventArgs().WithDefaultsFromContext(ctx);
+    public static ModActionEventArgs InContext(RyujinxBotContext ctx) => new ModActionEventArgs().WithDefaultsFromContext(ctx);
 
-    public ModActionEventArgs WithContext(VolteContext ctx)
+    public ModActionEventArgs WithContext(RyujinxBotContext ctx)
     {
         Context = ctx;
         return this;
@@ -70,7 +70,7 @@ public class ModActionEventArgs
         return this;
     }
 
-    public ModActionEventArgs WithDefaultsFromContext(VolteContext ctx)
+    public ModActionEventArgs WithDefaultsFromContext(RyujinxBotContext ctx)
     {
         return WithContext(ctx)
             .WithTime(ctx.Now)

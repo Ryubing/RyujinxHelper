@@ -5,7 +5,7 @@ namespace RyuBot.Commands.Text;
 [InjectTypeParser]
 public partial class TimeSpanParser : VolteTypeParser<TimeSpan>
 {
-    public override ValueTask<TypeParserResult<TimeSpan>> ParseAsync(string value, VolteContext _) => Parse(value);
+    public override ValueTask<TypeParserResult<TimeSpan>> ParseAsync(string value, RyujinxBotContext _) => Parse(value);
         
     public static TypeParserResult<TimeSpan> Parse(string value)
     {

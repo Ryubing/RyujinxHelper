@@ -3,10 +3,10 @@
 [InjectTypeParser]
 public sealed class GuildParser : VolteTypeParser<SocketGuild>
 {
-    public override ValueTask<TypeParserResult<SocketGuild>> ParseAsync(string value, VolteContext ctx) =>
+    public override ValueTask<TypeParserResult<SocketGuild>> ParseAsync(string value, RyujinxBotContext ctx) =>
         Parse(value, ctx);
         
-    public static TypeParserResult<SocketGuild> Parse(string value, VolteContext ctx)
+    public static TypeParserResult<SocketGuild> Parse(string value, RyujinxBotContext ctx)
     {
         SocketGuild guild = default;
 

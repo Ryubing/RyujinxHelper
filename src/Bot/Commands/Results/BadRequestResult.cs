@@ -9,7 +9,7 @@ public class BadRequestResult : ActionResult
 
     public override bool IsSuccessful => false;
 
-    public override async ValueTask<Gommon.Optional<ResultCompletionData>> ExecuteResultAsync(VolteContext ctx)
+    public override async ValueTask<Gommon.Optional<ResultCompletionData>> ExecuteResultAsync(RyujinxBotContext ctx)
     {
         var e = ctx.CreateEmbedBuilder()
             .WithTitle("No can do, partner.")

@@ -56,7 +56,7 @@ public class PaginatedMessage
             return this;
         }
 
-        public Builder WithDefaults(VolteContext ctx)
+        public Builder WithDefaults(RyujinxBotContext ctx)
         {
             return WithColor(ctx.User.GetHighestRole()?.Color ?? new Color(Config.SuccessColor))
                 .WithAuthor(ctx.User);

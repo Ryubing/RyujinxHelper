@@ -6,7 +6,7 @@ namespace RyuBot.Entities;
 public sealed class MessageReceivedEventArgs : EventArgs
 {
     public SocketUserMessage Message { get; }
-    public VolteContext Context { get; }
+    public RyujinxBotContext Context { get; }
     public GuildData Data { get; }
 
     public MessageReceivedEventArgs(SocketMessage s, IServiceProvider provider)

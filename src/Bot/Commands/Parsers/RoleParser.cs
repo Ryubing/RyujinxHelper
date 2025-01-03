@@ -3,10 +3,10 @@ namespace RyuBot.Commands.Text;
 [InjectTypeParser]
 public sealed class RoleParser : VolteTypeParser<SocketRole>
 {
-    public override ValueTask<TypeParserResult<SocketRole>> ParseAsync(string value, VolteContext ctx) =>
+    public override ValueTask<TypeParserResult<SocketRole>> ParseAsync(string value, RyujinxBotContext ctx) =>
         Parse(value, ctx);
     
-    public static TypeParserResult<SocketRole> Parse(string value, VolteContext ctx)
+    public static TypeParserResult<SocketRole> Parse(string value, RyujinxBotContext ctx)
     {
         SocketRole role = default;
         if (value.TryParse<ulong>(out var id) || MentionUtils.TryParseRole(value, out id))

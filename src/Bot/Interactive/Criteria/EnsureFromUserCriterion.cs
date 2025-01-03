@@ -14,7 +14,7 @@ public class EnsureFromUserCriterion : ICriterion<IMessage>
     public EnsureFromUserCriterion(ulong id)
         => _id = id;
 
-    public ValueTask<bool> JudgeAsync(VolteContext sourceContext, IMessage parameter) 
+    public ValueTask<bool> JudgeAsync(RyujinxBotContext sourceContext, IMessage parameter) 
         => new(_id == parameter.Author.Id);
 
 }

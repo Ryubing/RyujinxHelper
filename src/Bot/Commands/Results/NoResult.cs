@@ -13,7 +13,7 @@ public class NoResult : ActionResult
     private readonly AsyncFunction _after;
     private readonly bool _awaitCallback;
 
-    public override async ValueTask<Gommon.Optional<ResultCompletionData>> ExecuteResultAsync(VolteContext ctx)
+    public override async ValueTask<Gommon.Optional<ResultCompletionData>> ExecuteResultAsync(RyujinxBotContext ctx)
     {
         if (_after is null)
             return default;

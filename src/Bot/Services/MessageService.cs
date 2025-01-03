@@ -4,17 +4,14 @@ using RyuBot.Helpers;
 
 namespace RyuBot.Services;
 
-public sealed class MessageService : VolteService
+public sealed class MessageService : BotService
 {
     private readonly CommandService _commandService;
-    private readonly QuoteService _quoteService;
         
     public MessageService(
-        CommandService commandService,
-        QuoteService quoteService)
+        CommandService commandService)
     {
         _commandService = commandService;
-        _quoteService = quoteService;
     }
     
     public ulong AllTimeCommandCalls => CalledCommandsInfo.Sum + 
@@ -59,20 +56,6 @@ public sealed class MessageService : VolteService
                         $"alternatively you can just mention me as a prefix, i.e. `@{args.Context.Guild.CurrentUser} help`.")
                     .ReplyToAsync(args.Message);
             }
-            else if (!await _quoteService.CheckMessageAsync(args))
-                if (CommandUtilities.HasPrefix(args.Message.Content, '%', out var tagName))
-                {
-                    await args.Context.GuildData.Extras.Tags
-                        .FindFirst(t => t.Name.EqualsIgnoreCase(tagName))
-                        .IfPresent(async tag => 
-                        { 
-                            if (args.Context.GuildData.Configuration.EmbedTagsAndShowAuthor) 
-                                await tag.AsEmbed(args.Context).SendToAsync(args.Message.Channel);
-                            else 
-                                await args.Message.Channel.SendMessageAsync(tag.FormatContent(args.Context)); 
-                        });
-                }
-                
         }
     }
 

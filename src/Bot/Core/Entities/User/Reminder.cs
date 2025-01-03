@@ -7,7 +7,7 @@ namespace RyuBot.Entities;
 
 public sealed class Reminder
 {
-    public static Reminder CreateFrom(VolteContext ctx, DateTime end, string reminder) => new()
+    public static Reminder CreateFrom(RyujinxBotContext ctx, DateTime end, string reminder) => new()
     {
         TargetTime = end,
         CreationTime = ctx.Now,

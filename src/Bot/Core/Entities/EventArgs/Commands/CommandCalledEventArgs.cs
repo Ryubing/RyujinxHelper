@@ -9,7 +9,7 @@ public sealed class CommandCalledEventArgs : CommandEventArgs
     public CommandCalledEventArgs(IResult res, CommandContext context, Stopwatch sw)
     {
         Result = res;
-        Context = context.Cast<VolteContext>();
+        Context = context.Cast<RyujinxBotContext>();
         Stopwatch = sw;
         Command = Context.Message.Content.Split(" ")[0];
         Arguments = Context.Message.Content.Replace($"{Command}", string.Empty).Trim();

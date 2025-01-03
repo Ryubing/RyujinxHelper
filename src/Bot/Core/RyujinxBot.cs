@@ -1,8 +1,3 @@
-using RyuBot.Commands.Text.Modules;
-using RyuBot.Entities;
-using RyuBot.Helpers;
-using RyuBot.Services;
-
 namespace RyuBot;
 
 public class RyujinxBot
@@ -41,8 +36,6 @@ public class RyujinxBot
         Client = Services.Get<DiscordSocketClient>();
         Cts = Services.Get<CancellationTokenSource>();
 
-        AdminUtilityModule.AllowedPasteSites = await HttpHelper.GetAllowedPasteSitesAsync(Services);
-
         SetAppStatus("Logging in", FontAwesome.RightToBracket);
         var sw = Stopwatch.StartNew();
         await Client.LoginAsync(TokenType.Bot, Config.Token);
@@ -65,7 +58,6 @@ public class RyujinxBot
         Client.RegisterVolteEventHandlers(Services);
 
         ExecuteBackgroundAsync(async () => await Services.Get<AddonService>().InitAsync());
-        Services.Get<ReminderService>().Initialize();
 
         try
         {

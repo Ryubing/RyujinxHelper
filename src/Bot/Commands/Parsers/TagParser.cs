@@ -5,7 +5,7 @@ namespace RyuBot.Commands.Text;
 [InjectTypeParser]
 public sealed class TagParser : VolteTypeParser<Tag>
 {
-    public override ValueTask<TypeParserResult<Tag>> ParseAsync(string value, VolteContext ctx)
+    public override ValueTask<TypeParserResult<Tag>> ParseAsync(string value, RyujinxBotContext ctx)
     {
         if (ctx.GuildData.Extras.Tags.TryGetFirst(x => x.Name.EqualsIgnoreCase(value), out var tag))
             return Success(tag);

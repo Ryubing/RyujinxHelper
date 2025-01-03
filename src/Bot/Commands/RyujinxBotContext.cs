@@ -4,10 +4,10 @@ using RyuBot.Services;
 
 namespace RyuBot.Commands.Text;
 
-public sealed class VolteContext : CommandContext
+public sealed class RyujinxBotContext : CommandContext
 {
     // ReSharper disable once SuggestBaseTypeForParameter
-    public VolteContext(SocketMessage msg, IServiceProvider provider) : base(provider)
+    public RyujinxBotContext(SocketMessage msg, IServiceProvider provider) : base(provider)
     {
         Client = provider.Get<DiscordSocketClient>();
         Guild = msg.Channel.Cast<SocketTextChannel>()?.Guild;

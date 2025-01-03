@@ -5,7 +5,7 @@ using RyuBot.Helpers;
 
 namespace RyuBot.Services;
 
-public sealed class AddonService : VolteService
+public sealed class AddonService : BotService
 {
     public static FilePath AddonsDir = new("addons", true);
         

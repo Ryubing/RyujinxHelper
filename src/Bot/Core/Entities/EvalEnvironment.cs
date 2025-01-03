@@ -13,7 +13,7 @@ public sealed class EvalEnvironment
         Environment = this;
     }
 
-    public required VolteContext Context { get; init; }
+    public required RyujinxBotContext Context { get; init; }
     public required DiscordSocketClient Client { get; init; }
     public required GuildData Data { get; init; }
     public required CommandService Commands { get; init; }

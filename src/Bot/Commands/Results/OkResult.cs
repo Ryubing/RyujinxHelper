@@ -17,7 +17,7 @@ public class OkResult : ActionResult
     }
 
     public OkResult(IEnumerable<EmbedBuilder> pages, uint pageSplit = 0, Color? color = null, IGuildUser author = null,
-        VolteContext ctx = null, string title = null, PaginatedAppearanceOptions options = null)
+        RyujinxBotContext ctx = null, string title = null, PaginatedAppearanceOptions options = null)
     {
         _pager = PaginatedMessage.Builder.New()
             .WithPages(pages);
@@ -50,7 +50,7 @@ public class OkResult : ActionResult
     private readonly EmbedBuilder _embed;
     private readonly PollInfo _poll;
 
-    public override async ValueTask<Gommon.Optional<ResultCompletionData>> ExecuteResultAsync(VolteContext ctx)
+    public override async ValueTask<Gommon.Optional<ResultCompletionData>> ExecuteResultAsync(RyujinxBotContext ctx)
     {
         if (!ctx.Guild.CurrentUser.GetPermissions(ctx.Channel).SendMessages) return default;
 

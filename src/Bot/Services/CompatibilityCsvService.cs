@@ -9,30 +9,35 @@ public class CompatibilityCsvService : BotService
         _client = httpClient;
     }
     
-    private static readonly FilePath _csvPath = FilePath.Data / "compatibility.csv";
-    
-    private static readonly string _downloadUrl =
-        "https://gist.githubusercontent.com/ezhevita/b41ed3bf64d0cc01269cab036e884f3d/raw/002b1a1c1a5f7a83276625e8c479c987a5f5b722/Ryujinx%2520Games%2520List%2520Compatibility.csv";
+    private static readonly FilePath CsvPath = FilePath.Data / "compatibility.csv";
+
+    private const string DownloadUrl = 
+        "https://gist.githubusercontent.com/ezhevita/" +
+        "b41ed3bf64d0cc01269cab036e884f3d/raw/002b1a1c1a5f7a83276625e8c479c987a5f5b722/" +
+        "Ryujinx%2520Games%2520List%2520Compatibility.csv";
 
     public CompatibilityCsv Csv { get; private set; }
-    
-    
+
+    public CompatibilityCsv.Entry GetByGameName(string name) 
+        => Csv.Entries.First(x => x.GameName.EqualsIgnoreCase(name));
+
+
     public async Task InitAsync()
     {
         try
         {
-            var text = await _client.GetStringAsync(_downloadUrl);
+            var text = await _client.GetStringAsync(DownloadUrl);
             Info(LogSource.Service, "Compatibility CSV downloaded.");
 
             Csv = new CompatibilityCsv(text);
-            _csvPath.WriteAllText(text);
+            CsvPath.WriteAllText(text);
         }
         catch
         {
-            if (_csvPath.ExistsAsFile)
+            if (CsvPath.ExistsAsFile)
             {
                 Info(LogSource.Service, "Request to get compatibility CSV failed; using previous version.");
-                var existingCsv = _csvPath.ReadAllText();
+                var existingCsv = CsvPath.ReadAllText();
                 Csv = new CompatibilityCsv(existingCsv);
             }
         }

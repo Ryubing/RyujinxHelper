@@ -170,14 +170,4 @@ public static class TextCommandHelper
 
     public static Command GetCommand(this CommandService service, string name)
         => service.FindCommands(name).FirstOrDefault()?.Command;
-
-    public static int GetTotalTypeParsers(this CommandService cs)
-    {
-        var customParsers = Assembly.GetExecutingAssembly().GetTypes()
-            .Count(x => x.HasAttribute<InjectTypeParserAttribute>());
-
-        var primitiveParsers = Mirror.ReflectUnsafe(cs).Get<IDictionary>("_primitiveTypeParsers").Count;
-            
-        return customParsers + primitiveParsers;
-    }
 }

@@ -4,7 +4,7 @@ using Discord.Interactions;
 
 namespace RyuBot.Interactions.Commands;
 
-public class TestModule : VolteSlashCommandModule
+public class TestModule : RyujinxBotSlashCommandModule
 {
     [SlashCommand("test", "slash command api test")]
     public async Task<RuntimeResult> TestAsync(string parameter1)

@@ -6,50 +6,58 @@ public class CompatibilityCsv
     {
         Entries = entireCsv.Split('\n')
             .Skip(1) //CSV format
-            .Select(it => new CsvEntry(it.Split(',')))
+            .Select(it => new Entry(it.Split(',')))
             .ToArray();
     }
     
-    public CsvEntry[] Entries { get; set; }
-}
-
-public class CsvEntry
-{
-    // issue_number,issue_title,extracted_game_id,issue_labels,extracted_status,last_event_date,events_count
-
-    public CsvEntry(string[] rawCsvEntry)
-    {
-        _raw = rawCsvEntry;
-    }
+    public Entry[] Entries { get; set; }
     
-    private readonly string[] _raw;
-
-    public int IssueNumber => int.Parse(_raw[0]);
-    public string GameName => _raw[1]?.Split("-")?.FirstOrDefault()?.Trim();
-    public string TitleId => _raw[2];
-    public string IssueLabels => _raw[3];
-    public string PlayabilityStatus => _raw[4];
-    public string LastEvent => _raw[5];
-    public int EventCount => int.Parse(_raw[6]);
-
-    public override string ToString()
+    public class Entry
     {
-        var sb = new StringBuilder("CompatibilityCsvEntry: {");
-        sb.Append($"{nameof(IssueNumber)}={IssueNumber}");
-        sb.Append(',');
-        sb.Append($"{nameof(GameName)}=\"{GameName}\"");
-        sb.Append(',');
-        sb.Append($"{nameof(TitleId)}={TitleId}");
-        sb.Append(',');
-        sb.Append($"{nameof(IssueLabels)}=\"{IssueLabels}\"");
-        sb.Append(',');
-        sb.Append($"{nameof(PlayabilityStatus)}=\"{PlayabilityStatus}\"");
-        sb.Append(',');
-        sb.Append($"{nameof(LastEvent)}=\"{LastEvent}\"");
-        sb.Append(',');
-        sb.Append($"{nameof(EventCount)}={EventCount}");
-        sb.Append('}');
-
-        return sb.ToString();
+        // ReSharper disable InconsistentNaming
+        private const int issue_number = 0;
+        private const int issue_title = 1;
+        private const int extracted_game_id = 2;
+        private const int issue_labels = 3;
+        private const int extracted_status = 4;
+        private const int last_event_date = 5;
+        private const int events_count = 6;
+        // ReSharper restore InconsistentNaming
+    
+        private readonly string[] _raw;
+        
+        public Entry(string[] rawCsvEntry)
+        {
+            _raw = rawCsvEntry;
+        }
+        
+        public int IssueNumber => int.Parse(_raw[issue_number]);
+        public string GameName => _raw[issue_title]?.Split("-")?.FirstOrDefault()?.Trim();
+        public string TitleId => _raw[extracted_game_id];
+        public string IssueLabels => _raw[issue_labels];
+        public string PlayabilityStatus => _raw[extracted_status];
+        public DateTime LastEvent => DateTime.Parse(_raw[last_event_date]);
+        public int EventCount => int.Parse(_raw[events_count]);
+    
+        public override string ToString()
+        {
+            var sb = new StringBuilder("CompatibilityCsv.Entry: {");
+            sb.Append($"{nameof(IssueNumber)}={IssueNumber}");
+            sb.Append(',');
+            sb.Append($"{nameof(GameName)}=\"{GameName}\"");
+            sb.Append(',');
+            sb.Append($"{nameof(TitleId)}={TitleId}");
+            sb.Append(',');
+            sb.Append($"{nameof(IssueLabels)}=\"{IssueLabels}\"");
+            sb.Append(',');
+            sb.Append($"{nameof(PlayabilityStatus)}=\"{PlayabilityStatus}\"");
+            sb.Append(',');
+            sb.Append($"{nameof(LastEvent)}=\"{LastEvent}\"");
+            sb.Append(',');
+            sb.Append($"{nameof(EventCount)}={EventCount}");
+            sb.Append('}');
+    
+            return sb.ToString();
+        }
     }
 }

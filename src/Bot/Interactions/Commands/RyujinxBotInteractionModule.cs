@@ -5,7 +5,7 @@ using RyuBot.Services;
 
 namespace RyuBot.Interactions.Commands;
 
-public class VolteInteractionModule<T> : InteractionModuleBase<SocketInteractionContext<T>> where T : SocketInteraction
+public class RyujinxBotInteractionModule<T> : InteractionModuleBase<SocketInteractionContext<T>> where T : SocketInteraction
 {
     public bool IsInGuild() => Context.Guild != null;
 
@@ -20,8 +20,8 @@ public class VolteInteractionModule<T> : InteractionModuleBase<SocketInteraction
         => new(Context.CreateReplyBuilder(ephemeral).WithEmbeds(embed));
 }
 
-public class VolteSlashCommandModule : VolteInteractionModule<SocketSlashCommand>;
-public class VolteMessageCommandModule : VolteInteractionModule<SocketMessageCommand>;
-public class VolteUserCommandModule : VolteInteractionModule<SocketUserCommand>;
-public class VolteMessageComponentModule : VolteInteractionModule<SocketMessageComponent>;
-public class VolteModalModule : VolteInteractionModule<SocketModal>;
+public class RyujinxBotSlashCommandModule : RyujinxBotInteractionModule<SocketSlashCommand>;
+public class RyujinxBotMessageCommandModule : RyujinxBotInteractionModule<SocketMessageCommand>;
+public class RyujinxBotUserCommandModule : RyujinxBotInteractionModule<SocketUserCommand>;
+public class RyujinxBotMessageComponentModule : RyujinxBotInteractionModule<SocketMessageComponent>;
+public class RyujinxBotModalModule : RyujinxBotInteractionModule<SocketModal>;

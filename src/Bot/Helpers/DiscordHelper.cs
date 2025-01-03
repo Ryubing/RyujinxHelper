@@ -94,19 +94,13 @@ public static class DiscordHelper
         client.Ready += async () =>
         {
             var guilds = client.Guilds.Count;
-            var users = client.Guilds.SelectMany(x => x.Users).DistinctBy(x => x.Id).Count();
-            var channels = client.Guilds.SelectMany(x => x.Channels).DistinctBy(x => x.Id).Count();
 
             PrintHeader();
             Info(LogSource.Volte, $"Currently running RyuBot V{Version.InformationVersion}.");
             Info(LogSource.Volte, "Use this URL to invite me to your guilds:");
             Info(LogSource.Volte, client.GetInviteUrl());
             Info(LogSource.Volte, $"Logged in as {client.CurrentUser.Username}#{client.CurrentUser.Discriminator}");
-            Info(LogSource.Volte, $"Default command prefix is: \"{Config.CommandPrefix}\"");
-            Info(LogSource.Volte, "Connected to:");
-            Info(LogSource.Volte, $"     {"guild".ToQuantity(guilds)}");
-            Info(LogSource.Volte, $"     {"user".ToQuantity(users)}");
-            Info(LogSource.Volte, $"     {"channel".ToQuantity(channels)}");
+            Info(LogSource.Volte, $"Connected to {"guild".ToQuantity(guilds)}");
 
             var (type, name, streamer) = Config.ParseActivity();
 

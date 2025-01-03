@@ -50,17 +50,14 @@ public static class Config
         _configuration = new TConfig
         {
             Token = "token here",
-            WhitelistGuild = 0,
+            WhitelistGuilds = [],
             SentryDsn = "",
-            CommandPrefix = "$",
             Owner = 0,
             Game = "game here",
             Streamer = "streamer here",
             EnableDebug = false,
             SuccessEmbedColor = 0x7000FB,
             ErrorEmbedColor = 0xFF0000,
-            LogAllCommands = true,
-            ReplyCommandsInline = false,
             EnabledFeatures = new()
         };
         
@@ -133,9 +130,7 @@ public static class Config
 
     public static string Token => _configuration.Token;
 
-    public static string CommandPrefix => _configuration.CommandPrefix;
-
-    public static ulong WhitelistGuild => _configuration.WhitelistGuild;
+    public static ulong[] WhitelistGuilds => _configuration.WhitelistGuilds;
 
     public static string SentryDsn => _configuration.SentryDsn;
 
@@ -151,12 +146,6 @@ public static class Config
 
     public static uint SuccessColor => _configuration.SuccessEmbedColor;
 
-    public static uint ErrorColor => _configuration.ErrorEmbedColor;
-
-    public static bool LogAllCommands => _configuration.LogAllCommands;
-
-    public static bool ReplyCommandsInline => _configuration.ReplyCommandsInline;
-
     public static EnabledFeatures EnabledFeatures => _configuration?.EnabledFeatures;
 }
 
@@ -168,11 +157,8 @@ public struct HeadlessBotConfig : IVolteConfig
     [JsonPropertyName("sentry_dsn")]
     public string SentryDsn { get; set; }
     
-    [JsonPropertyName("only_works_in_guild")]
-    public ulong WhitelistGuild { get; set; }
-
-    [JsonPropertyName("command_prefix")]
-    public string CommandPrefix { get; set; }
+    [JsonPropertyName("only_works_in_guilds")]
+    public ulong[] WhitelistGuilds { get; set; }
 
     [JsonPropertyName("bot_owner")]
     public ulong Owner { get; set; }
@@ -194,9 +180,6 @@ public struct HeadlessBotConfig : IVolteConfig
 
     [JsonPropertyName("log_all_commands")]
     public bool LogAllCommands { get; set; }
-    
-    [JsonPropertyName("reply_commands")]
-    public bool ReplyCommandsInline { get; set; }
 
     [JsonPropertyName("enabled_features")]
     public EnabledFeatures EnabledFeatures { get; set; }
@@ -211,10 +194,7 @@ public interface IVolteConfig
     public string SentryDsn { get; set; }
     
     [JsonPropertyName("only_works_in_guild")]
-    public ulong WhitelistGuild { get; set; }
-    
-    [JsonPropertyName("command_prefix")]
-    public string CommandPrefix { get; set; }
+    public ulong[] WhitelistGuilds { get; set; }
     
     [JsonPropertyName("bot_owner")]
     public ulong Owner { get; set; }
@@ -233,12 +213,6 @@ public interface IVolteConfig
     
     [JsonPropertyName("color_error")]
     public uint ErrorEmbedColor { get; set; }
-    
-    [JsonPropertyName("log_all_commands")]
-    public bool LogAllCommands { get; set; }
-    
-    [JsonPropertyName("reply_commands")]
-    public bool ReplyCommandsInline { get; set; }
     
     [JsonPropertyName("enabled_features")]
     public EnabledFeatures EnabledFeatures { get; set; }

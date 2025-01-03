@@ -14,6 +14,8 @@ public class RyujinxBotInteractionService : BotService
     private readonly IServiceProvider _provider;
     private readonly InteractionService _backing;
 
+
+
     public RyujinxBotInteractionService(IServiceProvider provider, DiscordSocketClient client)
     {
         _provider = provider;
@@ -29,24 +31,28 @@ public class RyujinxBotInteractionService : BotService
             client.SlashCommandExecuted += async interaction =>
             {
                 var ctx = new SocketInteractionContext<SocketSlashCommand>(client, interaction);
+                if (!IsInAllowedGuild(interaction)) return;
                 await _backing.ExecuteCommandAsync(ctx, provider);
             };
 
             client.MessageCommandExecuted += async interaction =>
             {
                 var ctx = new SocketInteractionContext<SocketMessageCommand>(client, interaction);
+                if (!IsInAllowedGuild(interaction)) return;
                 await _backing.ExecuteCommandAsync(ctx, provider);
             };
 
             client.UserCommandExecuted += async interaction =>
             {
                 var ctx = new SocketInteractionContext<SocketUserCommand>(client, interaction);
+                if (!IsInAllowedGuild(interaction)) return;
                 await _backing.ExecuteCommandAsync(ctx, provider);
             };
             
             client.AutocompleteExecuted += async interaction =>
             {
                 var ctx = new SocketInteractionContext<SocketAutocompleteInteraction>(client, interaction);
+                if (!IsInAllowedGuild(interaction)) return;
                 await _backing.ExecuteCommandAsync(ctx, _provider);
             };
         }
@@ -69,6 +75,9 @@ public class RyujinxBotInteractionService : BotService
                     result);
         };
     }
+    
+    private static bool IsInAllowedGuild(SocketInteraction interaction) 
+        => Config.WhitelistGuilds.Contains(interaction.GuildId ?? ulong.MaxValue);
 
     public async Task InitAsync()
     {
@@ -76,11 +85,9 @@ public class RyujinxBotInteractionService : BotService
         {
             await _backing.AddModulesAsync(Assembly.GetExecutingAssembly(), _provider);
 
-#if DEBUG
-            await _backing.RegisterCommandsToGuildAsync(DiscordHelper.DevGuildId);
-#else
-            await _backing.RegisterCommandsGloballyAsync();
-#endif
+            await Config.WhitelistGuilds
+                .ForEachAsync(async id => await _backing.RegisterCommandsToGuildAsync(id));
+            
             _commandsRegistered = true;
         }
     }

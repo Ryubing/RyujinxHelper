@@ -4,13 +4,13 @@
                xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
                xmlns:fac="using:FluentAvalonia.UI.Controls"
                xmlns:faw="using:FluentAvalonia.UI.Windowing"
-               xmlns:v="using:Volte"
-               xmlns:local="using:Volte.UI.Avalonia.Pages"
-               xmlns:h="using:Volte.UI.Helpers"
+               xmlns:v="using:RyuBot"
+               xmlns:local="using:RyuBot.UI.Avalonia.Pages"
+               xmlns:h="using:RyuBot.UI.Helpers"
                xmlns:pi="using:Projektanker.Icons.Avalonia"
                mc:Ignorable="d" d:DesignWidth="500" d:DesignHeight="450"
-               x:Class="Volte.UI.Avalonia.Pages.UIShellView"
-               Title="Volte">
+               x:Class="RyuBot.UI.Avalonia.Pages.UIShellView"
+               Title="RyuBot">
     <faw:AppWindow.DataContext>
         <local:UIShellViewModel />
     </faw:AppWindow.DataContext>
@@ -44,7 +44,7 @@
                            IsSettingsVisible="False"
                            MenuItemsSource="{Binding Pages, Source={x:Static h:PageManager.Shared}}"
                            PaneDisplayMode="LeftCompact"
-                           PaneTitle="Volte"
+                           PaneTitle="RyuBot"
                            SelectedItem="{Binding Current, Mode=TwoWay, Source={x:Static h:PageManager.Shared}}">
             <fac:NavigationView.MenuItemTemplate>
                 <DataTemplate x:DataType="h:Page">
@@ -70,7 +70,7 @@
                        VerticalAlignment="Center"
                        FontSize="12">
                 <Run Text="{Binding Connection}" />
-                <Run Text=" | Volte |" />
+                <Run Text=" | RyuBot |" />
                 <Run Text="{Binding Source={x:Static v:Version.InformationVersion}}" />
             </TextBlock>
         </Grid>

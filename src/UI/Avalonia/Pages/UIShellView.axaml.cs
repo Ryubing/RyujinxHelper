@@ -2,10 +2,11 @@
 using Avalonia.Media.Imaging;
 using Avalonia.Platform;
 using FluentAvalonia.UI.Windowing;
-using Volte.UI.Helpers;
+using RyuBot.UI.Helpers;
+
 // ReSharper disable InconsistentNaming
 
-namespace Volte.UI.Avalonia.Pages;
+namespace RyuBot.UI.Avalonia.Pages;
 
 public partial class UIShellView : AppWindow
 {

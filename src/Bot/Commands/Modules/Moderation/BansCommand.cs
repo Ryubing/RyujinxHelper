@@ -1,6 +1,6 @@
-﻿using Volte.Interactive;
+﻿using RyuBot.Interactive;
 
-namespace Volte.Commands.Text.Modules;
+namespace RyuBot.Commands.Text.Modules;
 
 public sealed partial class ModerationModule
 {

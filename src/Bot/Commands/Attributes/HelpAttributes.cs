@@ -1,4 +1,6 @@
-namespace Volte.Commands.Text;
+using RyuBot.Entities;
+
+namespace RyuBot.Commands.Text;
 
 public enum VolteUnixCommand
 {

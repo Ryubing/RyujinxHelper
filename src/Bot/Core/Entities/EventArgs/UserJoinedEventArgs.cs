@@ -1,4 +1,4 @@
-namespace Volte.Entities;
+namespace RyuBot.Entities;
 
 public sealed class UserJoinedEventArgs : EventArgs
 {

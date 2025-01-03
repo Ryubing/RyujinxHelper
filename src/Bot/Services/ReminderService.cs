@@ -1,6 +1,8 @@
 using System.Text.RegularExpressions;
+using RyuBot.Entities;
+using RyuBot.Helpers;
 
-namespace Volte.Services;
+namespace RyuBot.Services;
 
 public sealed partial class ReminderService(
     DatabaseService _db,
@@ -37,7 +39,7 @@ public sealed partial class ReminderService(
         {
             if (_db.TryDeleteReminder(reminder))
                 Debug(LogSource.Service,
-                    "Reminder deleted from the database as Volte no longer has access to the channel it was created in.");
+                    "Reminder deleted from the database as RyuBot no longer has access to the channel it was created in.");
             Debug(LogSource.Service,
                 "Reminder's target channel was no longer accessible in the guild; aborting.");
             return;

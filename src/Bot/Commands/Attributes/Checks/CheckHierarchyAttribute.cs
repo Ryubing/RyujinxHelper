@@ -1,4 +1,4 @@
-﻿namespace Volte.Commands.Text;
+﻿namespace RyuBot.Commands.Text;
 
 [AttributeUsage(AttributeTargets.Parameter)]
 public sealed class CheckHierarchyAttribute : ParameterCheckAttribute

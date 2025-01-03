@@ -1,7 +1,9 @@
 // ReSharper disable UnusedMember.Global
 // ReSharper disable MemberCanBePrivate.Global
 
-namespace Volte.Entities;
+using RyuBot.Services;
+
+namespace RyuBot.Entities;
 
 public class AddonEnvironment
 {

@@ -1,4 +1,6 @@
-﻿namespace Volte.Entities;
+﻿using RyuBot.Helpers;
+
+namespace RyuBot.Entities;
 
 #nullable enable
 

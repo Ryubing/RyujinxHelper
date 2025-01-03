@@ -1,11 +1,11 @@
 ﻿using Avalonia;
 using Projektanker.Icons.Avalonia;
 using Projektanker.Icons.Avalonia.FontAwesome;
-using Volte.Helpers;
-using Volte.UI.Avalonia;
-using Logger = Volte.Helpers.Logger;
+using RyuBot.Helpers;
+using RyuBot.UI.Avalonia;
+using Logger = RyuBot.Helpers.Logger;
 
-namespace Volte.UI;
+namespace RyuBot.UI;
 
 public class Program
 {

@@ -1,6 +1,6 @@
 ﻿using Discord.Interactions;
 
-namespace Volte.Interactions.Results;
+namespace RyuBot.Interactions.Results;
 
 public class InteractionOkResult<TInteraction> : RuntimeResult where TInteraction : SocketInteraction
 {

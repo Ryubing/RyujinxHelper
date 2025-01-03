@@ -1,8 +1,9 @@
 using JsonParser = System.Text.Json.JsonSerializer; // same class in namespace LiteDB
 using System.Text.Json.Serialization;
 using LiteDB;
+using RyuBot.Commands.Text;
 
-namespace Volte.Entities;
+namespace RyuBot.Entities;
 
 public sealed class Reminder
 {

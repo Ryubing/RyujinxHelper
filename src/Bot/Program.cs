@@ -1,6 +1,7 @@
 ﻿using Qommon.Collections;
+using RyuBot.Helpers;
 
-namespace Volte;
+namespace RyuBot;
 
 public static class Program
 {

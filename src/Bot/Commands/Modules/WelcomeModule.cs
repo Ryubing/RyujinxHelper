@@ -1,4 +1,8 @@
-namespace Volte.Commands.Text.Modules;
+using RyuBot.Entities;
+using RyuBot.Helpers;
+using RyuBot.Services;
+
+namespace RyuBot.Commands.Text.Modules;
 
 [Group("Welcome", "W")]
 [RequireGuildAdmin]

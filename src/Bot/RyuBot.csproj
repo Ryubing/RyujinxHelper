@@ -18,6 +18,7 @@
         <PlatformTarget>AnyCPU</PlatformTarget>
         <GenerateAssemblyInfo>true</GenerateAssemblyInfo>
         <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+        <RootNamespace>Volte</RootNamespace>
     </PropertyGroup>
     <ItemGroup>
       <None Include="..\..\.editorconfig" Link=".editorconfig" />

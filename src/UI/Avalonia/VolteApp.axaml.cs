@@ -10,11 +10,11 @@ using Avalonia.Markup.Xaml;
 using Avalonia.Threading;
 using Gommon;
 using Humanizer;
-using Volte.Entities;
-using Volte.UI.Avalonia.Pages;
-using Volte.UI.Helpers;
+using RyuBot.Entities;
+using RyuBot.UI.Avalonia.Pages;
+using RyuBot.UI.Helpers;
 
-namespace Volte.UI.Avalonia;
+namespace RyuBot.UI.Avalonia;
 
 public class VolteApp : Application
 {

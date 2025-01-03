@@ -1,4 +1,6 @@
-namespace Volte.Commands.Text.Modules;
+using RyuBot.Services;
+
+namespace RyuBot.Commands.Text.Modules;
 
 [Group("Starboard", "Sb")]
 [RequireGuildAdmin]

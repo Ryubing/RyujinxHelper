@@ -1,6 +1,8 @@
 using System.Net;
+using RyuBot.Entities;
+using RyuBot.Helpers;
 
-namespace Volte.Services;
+namespace RyuBot.Services;
 
 public sealed class StarboardService : VolteService
 {

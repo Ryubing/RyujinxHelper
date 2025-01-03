@@ -2,7 +2,7 @@
 
 using Discord.Interactions;
 
-namespace Volte.Interactions.Commands;
+namespace RyuBot.Interactions.Commands;
 
 public class TestModule : VolteSlashCommandModule
 {

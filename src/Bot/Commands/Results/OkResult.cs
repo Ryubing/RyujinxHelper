@@ -1,6 +1,8 @@
-using Volte.Interactive;
+using RyuBot.Entities;
+using RyuBot.Interactive;
+using RyuBot.Services;
 
-namespace Volte.Commands.Text;
+namespace RyuBot.Commands.Text;
 
 public class OkResult : ActionResult
 {

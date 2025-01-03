@@ -1,4 +1,4 @@
-namespace Volte.Entities;
+namespace RyuBot.Entities;
 
 public delegate void DataEditor(GuildData data);
 public delegate void TagInitializer(Tag tag);

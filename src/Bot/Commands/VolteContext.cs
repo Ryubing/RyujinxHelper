@@ -1,4 +1,8 @@
-﻿namespace Volte.Commands.Text;
+﻿using RyuBot.Entities;
+using RyuBot.Helpers;
+using RyuBot.Services;
+
+namespace RyuBot.Commands.Text;
 
 public sealed class VolteContext : CommandContext
 {

@@ -1,7 +1,9 @@
 ﻿using Discord.Interactions;
-using Volte.Interactions.Results;
+using RyuBot.Entities;
+using RyuBot.Interactions.Results;
+using RyuBot.Services;
 
-namespace Volte.Interactions.Commands;
+namespace RyuBot.Interactions.Commands;
 
 public class VolteInteractionModule<T> : InteractionModuleBase<SocketInteractionContext<T>> where T : SocketInteraction
 {

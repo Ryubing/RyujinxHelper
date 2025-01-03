@@ -1,7 +1,8 @@
 ﻿using Discord.Interactions;
+using RyuBot.Commands.Text;
 using RunMode = Qmmands.RunMode;
 
-namespace Volte.Interactive;
+namespace RyuBot.Interactive;
 
 public interface IButtonCallback
 {

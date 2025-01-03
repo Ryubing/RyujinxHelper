@@ -1,12 +1,12 @@
-﻿using Volte.Helpers;
+﻿using RyuBot.Helpers;
 
-namespace Volte.UI;
+namespace RyuBot.UI;
 
 public class VolteManager
 {
     static VolteManager()
     {
-        Console.Title = $"Volte {Version.InformationVersion}";
+        Console.Title = $"RyuBot {Version.InformationVersion}";
         Console.CursorVisible = false;
     }
     

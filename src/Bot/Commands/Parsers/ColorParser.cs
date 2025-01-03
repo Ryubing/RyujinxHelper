@@ -1,6 +1,6 @@
 ﻿using System.Globalization;
 
-namespace Volte.Commands.Text;
+namespace RyuBot.Commands.Text;
 
 [InjectTypeParser]
 public sealed class ColorParser : VolteTypeParser<Color>

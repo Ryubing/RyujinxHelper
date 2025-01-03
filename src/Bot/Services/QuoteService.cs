@@ -1,6 +1,8 @@
 using System.Text.RegularExpressions;
+using RyuBot.Commands.Text;
+using RyuBot.Entities;
 
-namespace Volte.Services;
+namespace RyuBot.Services;
 
 //thanks discord-csharp/MODiX for the idea and some of the code (definitely the regex lol)
 public sealed partial class QuoteService(DiscordSocketClient client) : VolteService

@@ -1,4 +1,6 @@
-﻿namespace Volte.Interactive;
+﻿using RyuBot.Helpers;
+
+namespace RyuBot.Interactive;
 
 public class PaginatedAppearanceOptions
 {

@@ -1,6 +1,7 @@
-using Volte.Interactive;
+using RyuBot.Helpers;
+using RyuBot.Interactive;
 
-namespace Volte.Commands.Text.Modules;
+namespace RyuBot.Commands.Text.Modules;
 
 public partial class UtilityModule
 {

@@ -1,6 +1,6 @@
 ﻿using System.Collections.Immutable;
 
-namespace Volte.Helpers;
+namespace RyuBot.Helpers;
 
 public class Event<T>
     where T : class

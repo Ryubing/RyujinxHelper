@@ -1,4 +1,4 @@
-﻿namespace Volte.Interactive;
+﻿namespace RyuBot.Interactive;
 
 public class InteractiveServiceConfig
 {

@@ -1,8 +1,10 @@
 ﻿using Discord.Interactions;
-using Volte.Interactions;
+using RyuBot.Commands.Text;
+using RyuBot.Interactions;
+using RyuBot.Services;
 using RunMode = Qmmands.RunMode;
 
-namespace Volte.Interactive;
+namespace RyuBot.Interactive;
 
 public class ButtonPaginatorCallback : IButtonCallback
 {

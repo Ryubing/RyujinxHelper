@@ -3,10 +3,10 @@ using Avalonia.Data.Converters;
 using Avalonia.Media;
 using Discord;
 using Gommon;
-using Volte.Entities;
+using RyuBot.Entities;
 using Color = System.Drawing.Color;
 
-namespace Volte.UI.Converters;
+namespace RyuBot.UI.Converters;
 
 public class LogSeverityToBrush : VolteBrushConverter<LogSeverityToBrush>
 {

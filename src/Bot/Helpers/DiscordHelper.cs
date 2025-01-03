@@ -1,7 +1,10 @@
-using Volte.Commands.Text.Modules;
-using Volte.Interactions;
+using RyuBot.Commands.Text;
+using RyuBot.Commands.Text.Modules;
+using RyuBot.Entities;
+using RyuBot.Interactions;
+using RyuBot.Services;
 
-namespace Volte.Helpers;
+namespace RyuBot.Helpers;
 
 public static class DiscordHelper
 {
@@ -130,7 +133,7 @@ public static class DiscordHelper
             var channels = client.Guilds.SelectMany(x => x.Channels).DistinctBy(x => x.Id).Count();
 
             PrintHeader();
-            Info(LogSource.Volte, $"Currently running Volte V{Version.InformationVersion}.");
+            Info(LogSource.Volte, $"Currently running RyuBot V{Version.InformationVersion}.");
             Info(LogSource.Volte, "Use this URL to invite me to your guilds:");
             Info(LogSource.Volte, client.GetInviteUrl());
             Info(LogSource.Volte, $"Logged in as {client.CurrentUser.Username}#{client.CurrentUser.Discriminator}");

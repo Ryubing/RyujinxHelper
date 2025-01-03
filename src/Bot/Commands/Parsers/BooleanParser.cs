@@ -1,4 +1,4 @@
-﻿namespace Volte.Commands.Text;
+﻿namespace RyuBot.Commands.Text;
 
 [InjectTypeParser(true)]
 public sealed class BooleanParser : VolteTypeParser<bool>

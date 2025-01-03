@@ -5,11 +5,11 @@ using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using Discord;
 using Gommon;
-using Volte.Entities;
-using Volte.Helpers;
-using Volte.UI.Helpers;
+using RyuBot.Entities;
+using RyuBot.Helpers;
+using RyuBot.UI.Helpers;
 
-namespace Volte.UI.Avalonia.Pages;
+namespace RyuBot.UI.Avalonia.Pages;
 
 public partial class LogsViewModel : ObservableObject
 {

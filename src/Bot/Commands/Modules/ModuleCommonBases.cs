@@ -1,6 +1,8 @@
 using System.Web;
+using RyuBot.Entities;
+using RyuBot.Services;
 
-namespace Volte.Commands.Text.Modules;
+namespace RyuBot.Commands.Text.Modules;
 
 public sealed partial class UtilityModule : VolteModule
 {
@@ -153,12 +155,12 @@ public sealed partial class ModerationModule : VolteModule
 }
 
 [Group("Settings", "Setting", "Options", "Option")]
-[Description("The set of commands used to modify how Volte functions in your guild.")]
+[Description("The set of commands used to modify how RyuBot functions in your guild.")]
 [RequireGuildAdmin]
 public partial class SettingsModule : VolteModule
 {
     public WelcomeService WelcomeService { get; set; }
 
-    [Command, DummyCommand, Description("The set of commands used to modify how Volte functions in your guild.")]
+    [Command, DummyCommand, Description("The set of commands used to modify how RyuBot functions in your guild.")]
     public Task<ActionResult> BaseAsync() => None();
 }

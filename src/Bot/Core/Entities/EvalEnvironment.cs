@@ -1,8 +1,10 @@
 using System.Collections;
+using RyuBot.Commands.Text;
+using RyuBot.Services;
 
 // ReSharper disable MemberCanBePrivate.Global
 
-namespace Volte.Entities;
+namespace RyuBot.Entities;
 
 public sealed class EvalEnvironment
 {

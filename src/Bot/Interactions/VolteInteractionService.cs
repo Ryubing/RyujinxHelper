@@ -1,8 +1,11 @@
 ﻿using Discord.Interactions;
-using Volte.Interactions.Results;
+using RyuBot.Entities;
+using RyuBot.Helpers;
+using RyuBot.Interactions.Results;
+using RyuBot.Services;
 using IResult = Discord.Interactions.IResult;
 
-namespace Volte.Interactions;
+namespace RyuBot.Interactions;
 
 public class VolteInteractionService : VolteService
 {

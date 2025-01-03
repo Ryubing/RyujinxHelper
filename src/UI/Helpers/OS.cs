@@ -1,4 +1,4 @@
-﻿namespace Volte.UI.Helpers;
+﻿namespace RyuBot.UI.Helpers;
 
 // ReSharper disable once InconsistentNaming
 public static class OS

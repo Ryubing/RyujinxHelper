@@ -1,4 +1,6 @@
-﻿namespace Volte.Interactive;
+﻿using RyuBot.Commands.Text;
+
+namespace RyuBot.Interactive;
 
 public class EnsureSourceChannelCriterion : ICriterion<IMessage>
 {

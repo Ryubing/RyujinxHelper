@@ -1,4 +1,4 @@
-namespace Volte.Entities;
+namespace RyuBot.Entities;
 
 public class LogSources
 {
@@ -35,7 +35,7 @@ public enum LogSource
     /// </summary>
     Gateway = 5,
     /// <summary>
-    ///     Indicates that this log message is from Volte itself.
+    ///     Indicates that this log message is from RyuBot itself.
     /// </summary>
     Volte = 6,
     /// <summary>

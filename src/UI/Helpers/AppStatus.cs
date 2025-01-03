@@ -2,11 +2,12 @@
 using Discord;
 using Gommon;
 using Humanizer;
-using Volte.Entities;
-using Volte.Helpers;
+using RyuBot.Entities;
+using RyuBot.Helpers;
+
 // ReSharper disable MemberCanBePrivate.Global
 
-namespace Volte.UI.Helpers;
+namespace RyuBot.UI.Helpers;
 
 public partial class AppStatus : ObservableObject
 {

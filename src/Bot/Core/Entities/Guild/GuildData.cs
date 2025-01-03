@@ -1,6 +1,6 @@
 ﻿using System.Text.Json.Serialization;
 
-namespace Volte.Entities;
+namespace RyuBot.Entities;
 
 public sealed class GuildData
 {

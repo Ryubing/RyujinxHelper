@@ -1,14 +1,14 @@
-﻿namespace Volte.Commands.Text.Modules;
+﻿namespace RyuBot.Commands.Text.Modules;
 
 public sealed partial class UtilityModule
 {
-    private const string BaseWikiUrl = "https://github.com/Polyhaze/Volte/wiki";
+    private const string BaseWikiUrl = "https://github.com/Polyhaze/RyuBot/wiki";
 
     private readonly Dictionary<string, Uri> _wikiPageUris = new()
     {
         {"Home", new Uri(BaseWikiUrl)},
         {"Features", new Uri($"{BaseWikiUrl}/Features")},
-        {"Setting Volte Up", new Uri($"{BaseWikiUrl}/Setting-Volte-Up")},
+        {"Setting RyuBot Up", new Uri($"{BaseWikiUrl}/Setting-RyuBot-Up")},
         {"Argument Cheatsheet", new Uri($"{BaseWikiUrl}/Argument-Cheatsheet")},
         {"Selfhost:Windows", new Uri($"{BaseWikiUrl}/Windows")},
         {"Selfhost:Linux", new Uri($"{BaseWikiUrl}/Linux")},

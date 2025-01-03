@@ -1,11 +1,12 @@
 ﻿using Colorful;
 using JetBrains.Annotations;
+using RyuBot.Entities;
 using Sentry.Extensibility;
 
 using Color = System.Drawing.Color;
 using Optional = Gommon.Optional;
 
-namespace Volte.Helpers;
+namespace RyuBot.Helpers;
 
 public static partial class Logger
 {
@@ -25,7 +26,7 @@ public static partial class Logger
     }
 
     private static readonly string[] VolteAscii =
-        new Figlet().ToAscii("Volte").ConcreteValue.Split("\n", StringSplitOptions.RemoveEmptyEntries);
+        new Figlet().ToAscii("RyuBot").ConcreteValue.Split("\n", StringSplitOptions.RemoveEmptyEntries);
         
     static Logger() => FilePath.Logs.Create();
         

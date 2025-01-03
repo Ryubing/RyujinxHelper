@@ -3,8 +3,11 @@ using System.Text.RegularExpressions;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Scripting;
 using Microsoft.CodeAnalysis.Scripting;
+using RyuBot.Commands.Text;
+using RyuBot.Entities;
+using RyuBot.Services;
 
-namespace Volte.Helpers;
+namespace RyuBot.Helpers;
 
 public static partial class EvalHelper
 {
@@ -13,7 +16,7 @@ public static partial class EvalHelper
         "System", "System.IO", "System.Linq", "System.Text", "System.Threading", "System.Threading.Tasks",
         "System.Collections.Generic", "System.Diagnostics", "System.Globalization", "System.Net.Http",
 
-        "Volte", "Volte.Helpers", "Volte.Entities", "Volte.Commands.Text", "Volte.Services",
+        "RyuBot", "RyuBot.Helpers", "RyuBot.Entities", "RyuBot.Commands.Text", "RyuBot.Services",
 
         "Discord", "Discord.WebSocket",
 

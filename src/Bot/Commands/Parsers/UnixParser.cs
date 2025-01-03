@@ -1,4 +1,6 @@
-﻿namespace Volte.Commands.Text;
+﻿using RyuBot.Helpers;
+
+namespace RyuBot.Commands.Text;
 
 [InjectTypeParser]
 public sealed class UnixParser : VolteTypeParser<Dictionary<string, string>>

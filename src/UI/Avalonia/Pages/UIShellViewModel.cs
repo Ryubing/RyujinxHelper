@@ -1,6 +1,6 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
 
-namespace Volte.UI.Avalonia.Pages;
+namespace RyuBot.UI.Avalonia.Pages;
 
 // ReSharper disable once InconsistentNaming
 public partial class UIShellViewModel : ObservableObject

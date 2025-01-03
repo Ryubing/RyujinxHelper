@@ -1,4 +1,8 @@
-namespace Volte.Services;
+using RyuBot.Commands.Text;
+using RyuBot.Entities;
+using RyuBot.Helpers;
+
+namespace RyuBot.Services;
 
 public sealed class ModerationService : VolteService
 {

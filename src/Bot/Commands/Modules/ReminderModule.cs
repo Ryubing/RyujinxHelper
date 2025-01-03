@@ -1,4 +1,7 @@
-namespace Volte.Commands.Text.Modules;
+using RyuBot.Entities;
+using RyuBot.Helpers;
+
+namespace RyuBot.Commands.Text.Modules;
 
 [Group("Remind", "RemindMe", "Reminder")]
 public sealed class ReminderModule : VolteModule

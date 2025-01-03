@@ -1,4 +1,8 @@
-﻿namespace Volte.Services;
+﻿using RyuBot.Commands.Text;
+using RyuBot.Entities;
+using RyuBot.Helpers;
+
+namespace RyuBot.Services;
 
 public sealed class MessageService : VolteService
 {
@@ -106,7 +110,7 @@ public sealed class MessageService : VolteService
                 Critical(LogSource.Service,
                     $"The command {args.Context.Command.Name} didn't return some form of {typeof(ActionResult)}. " +
                     "This is developer error. " +
-                    "Please report this to my developers: https://github.com/Polyhaze/Volte. Thank you!");
+                    "Please report this to my developers: https://github.com/Polyhaze/RyuBot. Thank you!");
                 Critical(LogSource.Volte, "---------- IMPORTANT ----------");
                 return;
             }

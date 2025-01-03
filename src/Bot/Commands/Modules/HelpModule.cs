@@ -1,11 +1,12 @@
-using Volte.Interactive;
+using RyuBot.Helpers;
+using RyuBot.Interactive;
 
-namespace Volte.Commands.Text.Modules;
+namespace RyuBot.Commands.Text.Modules;
 
 public sealed class HelpModule : VolteModule
 {
     [Command("Help", "H")]
-    [Description("Get help for Volte's many commands.")]
+    [Description("Get help for RyuBot's many commands.")]
     public async Task<ActionResult> HelpAsync(
         [Remainder,
          Description(

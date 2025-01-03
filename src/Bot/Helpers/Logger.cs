@@ -1,8 +1,10 @@
 using System.IO;
 using System.Runtime.CompilerServices;
+using RyuBot.Entities;
+
 // ReSharper disable MemberCanBePrivate.Global
 
-namespace Volte.Helpers;
+namespace RyuBot.Helpers;
 
 public static partial class Logger
 {

@@ -1,7 +1,7 @@
 ﻿using Discord.Interactions;
 // ReSharper disable MemberCanBePrivate.Global
 
-namespace Volte.Interactions;
+namespace RyuBot.Interactions;
 
 #nullable enable
 public class ReplyBuilder<TInteraction> where TInteraction : SocketInteraction

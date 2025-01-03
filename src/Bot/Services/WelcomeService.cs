@@ -1,4 +1,6 @@
-﻿namespace Volte.Services;
+﻿using RyuBot.Entities;
+
+namespace RyuBot.Services;
 
 public sealed class WelcomeService : VolteService
 {

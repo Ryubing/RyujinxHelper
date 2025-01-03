@@ -1,11 +1,11 @@
-using Volte.Interactive;
+using RyuBot.Interactive;
 
-namespace Volte.Commands.Text.Modules;
+namespace RyuBot.Commands.Text.Modules;
 
 public partial class BotOwnerModule
 {
     [Command("Addons", "Addon")]
-    [Description("Get an addon or list all addons currently initialized in this instance of Volte.")]
+    [Description("Get an addon or list all addons currently initialized in this instance of RyuBot.")]
     public Task<ActionResult> AddonAsync([Remainder, Description("An addon's name.")]
         string listOrAddon = "list")
     {

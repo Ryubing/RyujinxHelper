@@ -1,9 +1,12 @@
 ﻿using Discord.Interactions;
-using Volte.Interactions;
-using Volte.Interactive;
+using RyuBot.Commands.Text;
+using RyuBot.Entities;
+using RyuBot.Helpers;
+using RyuBot.Interactive;
+using RyuBot.Interactions;
 using RunMode = Qmmands.RunMode;
 
-namespace Volte.Services;
+namespace RyuBot.Services;
 
 public sealed class InteractiveService : VolteService, IDisposable
 {

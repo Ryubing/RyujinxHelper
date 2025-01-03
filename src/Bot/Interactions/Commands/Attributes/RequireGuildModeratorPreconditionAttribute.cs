@@ -1,6 +1,7 @@
 ﻿using Discord.Interactions;
+using RyuBot.Services;
 
-namespace Volte.Interactions.Commands;
+namespace RyuBot.Interactions.Commands;
 
 public class RequireGuildModeratorPreconditionAttribute : PreconditionAttribute
 {

@@ -1,4 +1,4 @@
-namespace Volte.Commands.Text;
+namespace RyuBot.Commands.Text;
 
 public class BadRequestResult : ActionResult
 {

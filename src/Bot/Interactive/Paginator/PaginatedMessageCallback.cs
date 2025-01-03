@@ -1,4 +1,7 @@
-﻿namespace Volte.Interactive;
+﻿using RyuBot.Commands.Text;
+using RyuBot.Services;
+
+namespace RyuBot.Interactive;
 
 // ReSharper disable SuspiciousTypeConversion.Global
 public sealed class PaginatedMessageCallback : IReactionCallback, IAsyncDisposable

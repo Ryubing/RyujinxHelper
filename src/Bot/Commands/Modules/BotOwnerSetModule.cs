@@ -1,4 +1,6 @@
-namespace Volte.Commands.Text.Modules;
+using RyuBot.Helpers;
+
+namespace RyuBot.Commands.Text.Modules;
 
 [RequireBotOwner]
 [Group("Set")]

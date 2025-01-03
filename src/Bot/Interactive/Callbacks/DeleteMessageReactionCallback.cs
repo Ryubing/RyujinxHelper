@@ -1,4 +1,7 @@
-namespace Volte.Interactive;
+using RyuBot.Commands.Text;
+using RyuBot.Helpers;
+
+namespace RyuBot.Interactive;
 
 public class DeleteMessageReactionCallback : IReactionCallback
 {

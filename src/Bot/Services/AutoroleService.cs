@@ -1,4 +1,7 @@
-﻿namespace Volte.Services;
+﻿using RyuBot.Entities;
+using RyuBot.Helpers;
+
+namespace RyuBot.Services;
 
 public sealed class AutoroleService : VolteService
 {
@@ -22,7 +25,7 @@ public sealed class AutoroleService : VolteService
             return;
         }
 
-        await args.User.AddRoleAsync(targetRole, DiscordHelper.RequestOptions(x => x.AuditLogReason = "Volte Autorole"));
+        await args.User.AddRoleAsync(targetRole, DiscordHelper.RequestOptions(x => x.AuditLogReason = "RyuBot Autorole"));
         Debug(LogSource.Volte,
             $"Applied role {targetRole.Name} to user {args.User} in guild {args.Guild.Name}.");
     }

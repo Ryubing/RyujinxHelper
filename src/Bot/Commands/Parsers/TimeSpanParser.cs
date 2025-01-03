@@ -1,6 +1,6 @@
 using System.Text.RegularExpressions;
 
-namespace Volte.Commands.Text;
+namespace RyuBot.Commands.Text;
 
 [InjectTypeParser]
 public partial class TimeSpanParser : VolteTypeParser<TimeSpan>

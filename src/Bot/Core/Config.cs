@@ -1,6 +1,7 @@
 ﻿using System.Text.Json.Serialization;
+using RyuBot.Entities;
 
-namespace Volte;
+namespace RyuBot;
 
 public static class Config
 {

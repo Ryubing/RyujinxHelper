@@ -1,12 +1,12 @@
 ﻿using System.Text;
 using Discord;
 using Gommon;
-using Volte.Entities;
-using Volte.Helpers;
+using RyuBot.Entities;
+using RyuBot.Helpers;
 
 // ReSharper disable MemberCanBePrivate.Global
 
-namespace Volte.UI.Avalonia.Pages;
+namespace RyuBot.UI.Avalonia.Pages;
 
 public record struct VolteLog
 {

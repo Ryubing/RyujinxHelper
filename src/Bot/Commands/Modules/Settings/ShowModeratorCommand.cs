@@ -1,4 +1,4 @@
-namespace Volte.Commands.Text.Modules;
+namespace RyuBot.Commands.Text.Modules;
 
 public partial class SettingsModule
 {

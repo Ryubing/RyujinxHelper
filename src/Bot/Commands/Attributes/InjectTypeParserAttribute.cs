@@ -1,4 +1,4 @@
-﻿namespace Volte.Commands.Text;
+﻿namespace RyuBot.Commands.Text;
 
 [AttributeUsage(AttributeTargets.Class)]
 public sealed class InjectTypeParserAttribute(bool overridePrimitive = false) : Attribute

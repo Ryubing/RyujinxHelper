@@ -1,9 +1,11 @@
 ﻿// ReSharper disable MemberCanBePrivate.Global
 
-namespace Volte.Entities;
+using RyuBot.Commands.Text;
+
+namespace RyuBot.Entities;
 
 /// <summary>
-///     The base class for all Command-related Volte EventArgs.
+///     The base class for all Command-related RyuBot EventArgs.
 /// </summary>
 public abstract class CommandEventArgs : EventArgs
 {

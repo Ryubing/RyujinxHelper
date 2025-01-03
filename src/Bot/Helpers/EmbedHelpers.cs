@@ -1,4 +1,6 @@
-﻿namespace Volte.Helpers;
+﻿using RyuBot.Entities;
+
+namespace RyuBot.Helpers;
 
 public static class EmbedHelpers
 {

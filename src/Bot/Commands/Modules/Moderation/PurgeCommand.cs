@@ -1,4 +1,7 @@
-namespace Volte.Commands.Text.Modules;
+using RyuBot.Entities;
+using RyuBot.Helpers;
+
+namespace RyuBot.Commands.Text.Modules;
 
 public sealed partial class ModerationModule : VolteModule
 {
@@ -21,7 +24,7 @@ public sealed partial class ModerationModule : VolteModule
         catch (ArgumentOutOfRangeException)
         {
             return BadRequest(
-                $"Messages bulk deleted must be younger than 14 days. {Format.Code("This is a Discord restriction, not a Volte one.")}");
+                $"Messages bulk deleted must be younger than 14 days. {Format.Code("This is a Discord restriction, not a RyuBot one.")}");
         }
 
         //-1 to show that the correct amount of messages were deleted.

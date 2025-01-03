@@ -1,8 +1,10 @@
 using System.Collections;
-using Volte.Commands.Text.Modules;
+using RyuBot.Commands.Text;
+using RyuBot.Commands.Text.Modules;
+using RyuBot.Entities;
 using Module = Qmmands.Module;
 
-namespace Volte.Helpers;
+namespace RyuBot.Helpers;
 
 public static class TextCommandHelper
 {

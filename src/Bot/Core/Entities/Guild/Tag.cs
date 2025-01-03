@@ -1,6 +1,8 @@
 using System.Text.Json.Serialization;
+using RyuBot.Commands.Text;
+using RyuBot.Helpers;
 
-namespace Volte.Entities;
+namespace RyuBot.Entities;
 
 public sealed class Tag
 {

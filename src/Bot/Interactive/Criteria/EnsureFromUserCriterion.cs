@@ -1,6 +1,7 @@
 ﻿using System.ComponentModel;
+using RyuBot.Commands.Text;
 
-namespace Volte.Interactive;
+namespace RyuBot.Interactive;
 
 public class EnsureFromUserCriterion : ICriterion<IMessage>
 {

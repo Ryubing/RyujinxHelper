@@ -1,4 +1,7 @@
-namespace Volte.Entities;
+using RyuBot.Commands.Text;
+using RyuBot.Services;
+
+namespace RyuBot.Entities;
 
 public sealed class MessageReceivedEventArgs : EventArgs
 {

@@ -1,4 +1,6 @@
-namespace Volte.Commands.Text.Modules;
+using RyuBot.Entities;
+
+namespace RyuBot.Commands.Text.Modules;
 
 public partial class ModerationModule
 {

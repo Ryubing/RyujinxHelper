@@ -1,7 +1,9 @@
 using Microsoft.CodeAnalysis.CSharp.Scripting;
 using Microsoft.CodeAnalysis.Scripting;
+using RyuBot.Entities;
+using RyuBot.Helpers;
 
-namespace Volte.Services;
+namespace RyuBot.Services;
 
 public sealed class AddonService : VolteService
 {

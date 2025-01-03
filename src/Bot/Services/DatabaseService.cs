@@ -1,13 +1,14 @@
 using LiteDB;
+using RyuBot.Entities;
 
 // ReSharper disable ReturnTypeCanBeEnumerable.Global
 
-namespace Volte.Services;
+namespace RyuBot.Services;
 
 public sealed class DatabaseService : VolteService, IDisposable
 {
     public static readonly LiteDatabase Database =
-        new($"filename={FilePath.Data / "Volte.db"};upgrade=true;connection=direct");
+        new($"filename={FilePath.Data / "RyuBot.db"};upgrade=true;connection=direct");
 
     private readonly DiscordSocketClient _client;
 

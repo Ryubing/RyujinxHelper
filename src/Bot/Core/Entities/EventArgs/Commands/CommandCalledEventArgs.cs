@@ -1,4 +1,6 @@
-﻿namespace Volte.Entities;
+﻿using RyuBot.Commands.Text;
+
+namespace RyuBot.Entities;
 
 public sealed class CommandCalledEventArgs : CommandEventArgs
 {

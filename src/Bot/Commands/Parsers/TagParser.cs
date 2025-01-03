@@ -1,4 +1,6 @@
-﻿namespace Volte.Commands.Text;
+﻿using RyuBot.Entities;
+
+namespace RyuBot.Commands.Text;
 
 [InjectTypeParser]
 public sealed class TagParser : VolteTypeParser<Tag>

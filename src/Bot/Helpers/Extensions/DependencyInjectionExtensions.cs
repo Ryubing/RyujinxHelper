@@ -1,6 +1,6 @@
 ﻿using Microsoft.Extensions.DependencyInjection.Extensions;
-using Volte;
-using Version = Volte.Version;
+using RyuBot;
+using Version = RyuBot.Version;
 
 namespace Gommon;
 

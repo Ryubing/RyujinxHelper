@@ -1,6 +1,6 @@
 ﻿using Discord.Interactions;
 
-namespace Volte.Interactions;
+namespace RyuBot.Interactions;
 
 public static class Extensions
 {

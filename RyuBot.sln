@@ -3,9 +3,9 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 16
 VisualStudioVersion = 16.0.28721.148
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Volte", "src\Bot\Volte.csproj", "{5D4A85B0-1326-4CA2-A26C-D646D9579342}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "RyuBot", "src\Bot\RyuBot.csproj", "{5D4A85B0-1326-4CA2-A26C-D646D9579342}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Volte.UI", "src\UI\Volte.UI.csproj", "{BCD42127-89FE-44F3-AD2F-D224ED94B03A}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RyuBot.UI", "src\UI\RyuBot.UI.csproj", "{BCD42127-89FE-44F3-AD2F-D224ED94B03A}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

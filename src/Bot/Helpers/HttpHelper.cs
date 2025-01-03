@@ -1,4 +1,4 @@
-namespace Volte.Helpers;
+namespace RyuBot.Helpers;
 
 public static class HttpHelper
 {

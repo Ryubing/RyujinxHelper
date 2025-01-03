@@ -1,4 +1,4 @@
-namespace Volte.Helpers;
+namespace RyuBot.Helpers;
 
 // https://stackoverflow.com/a/31194647
 public sealed class AsyncDuplicateLock<T>

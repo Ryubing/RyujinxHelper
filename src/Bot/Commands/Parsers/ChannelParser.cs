@@ -1,4 +1,4 @@
-namespace Volte.Commands.Text;
+namespace RyuBot.Commands.Text;
 
 [InjectTypeParser]
 public sealed class ChannelParser : VolteTypeParser<SocketTextChannel>

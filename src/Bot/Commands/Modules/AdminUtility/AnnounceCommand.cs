@@ -1,6 +1,6 @@
 ﻿using System.Net;
 
-namespace Volte.Commands.Text.Modules;
+namespace RyuBot.Commands.Text.Modules;
 
 public sealed partial class AdminUtilityModule
 {

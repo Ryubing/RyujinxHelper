@@ -2,7 +2,9 @@
 
 // ReSharper disable MemberCanBePrivate.Global
 
-namespace Volte.Entities;
+using RyuBot.Helpers;
+
+namespace RyuBot.Entities;
 
 public sealed class PollInfo
 {

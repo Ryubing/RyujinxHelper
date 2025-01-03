@@ -6,20 +6,21 @@ using Discord;
 using Discord.WebSocket;
 using Gommon;
 using Qmmands;
-using Volte.Helpers;
+using RyuBot.Entities;
+using RyuBot.Helpers;
 
-namespace Volte.Commands.Text.Modules;
+namespace RyuBot.Commands.Text.Modules;
 
 public sealed partial class UtilityModule
 {
     [Command("Info", "Uptime")]
-    [Description("Provides basic information about this instance of Volte.")]
+    [Description("Provides basic information about this instance of RyuBot.")]
     public async Task<ActionResult> InfoAsync()
         => Ok(Context.CreateEmbedBuilder()
             .WithTitle($"About {Context.Client.CurrentUser.Username}#{Context.Client.CurrentUser.DiscriminatorValue}")
             .AddField("Successful Command Usages", CalledCommandsInfo.Successes + MessageService.UnsavedSuccessfulCommandCalls, true)
             .AddField("Failed Command Usages", CalledCommandsInfo.Failures + MessageService.UnsavedFailedCommandCalls, true)
-            .AddField("Author", $"{await Context.Client.Rest.GetUserAsync(168548441939509248)}, contributors on {Format.Url("GitHub", "https://github.com/Polyhaze/Volte")}, and members of the Polyhaze organization.")
+            .AddField("Author", $"{await Context.Client.Rest.GetUserAsync(168548441939509248)}, contributors on {Format.Url("GitHub", "https://github.com/Polyhaze/RyuBot")}, and members of the Polyhaze organization.")
             .AddField("Discord Application Created", (await Context.Client.GetApplicationInfoAsync()).CreatedAt.ToDiscordTimestamp(TimestampType.LongDateTime), true)
             .AddField("Uptime", Process.GetCurrentProcess().CalculateUptime(), true)
             .AddField("Language/Library", $"C# 12, Discord.Net {Version.DiscordNetVersion}")

@@ -5,6 +5,7 @@
         <LangVersion>latest</LangVersion>
         <Nullable>enable</Nullable>
         <ImplicitUsings>enable</ImplicitUsings>
+        <RootNamespace>Volte.UI</RootNamespace>
     </PropertyGroup>
     <ItemGroup>
         <PackageReference Condition="'$(Configuration)' == 'Debug'" Include="Avalonia.Diagnostics" Version="11.1.2" />
@@ -18,7 +19,7 @@
         <PackageReference Include="Projektanker.Icons.Avalonia" Version="9.4.0" />
         <PackageReference Include="Projektanker.Icons.Avalonia.FontAwesome" Version="9.4.0"/>
         
-        <ProjectReference Include="../Bot/Volte.csproj"/>
+        <ProjectReference Include="..\Bot\RyuBot.csproj" />
     </ItemGroup>
     <ItemGroup>
         <AvaloniaResource Include="../Bot/Resources/Volte.ico" Link="Assets\icon.ico" />

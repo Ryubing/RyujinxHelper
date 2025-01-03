@@ -1,12 +1,15 @@
-using Volte.Commands.Text.Modules;
+using RyuBot.Commands.Text.Modules;
+using RyuBot.Entities;
+using RyuBot.Helpers;
+using RyuBot.Services;
 
-namespace Volte;
+namespace RyuBot;
 
 public class VolteBot
 {
     public static Task StartAsync(Gommon.Optional<CancellationTokenSource> cts = default)
     {
-        Console.Title = $"Volte {Version.InformationVersion}";
+        Console.Title = $"RyuBot {Version.InformationVersion}";
         Console.CursorVisible = false;
         return LoginAsync(cts);
     }

@@ -1,6 +1,7 @@
 ﻿using System.IO;
+using RyuBot.Services;
 
-namespace Volte.Entities;
+namespace RyuBot.Entities;
 
 public class CalledCommandsInfo
 {

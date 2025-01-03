@@ -58,6 +58,7 @@ public class RyujinxBot
         Client.RegisterVolteEventHandlers(Services);
 
         ExecuteBackgroundAsync(async () => await Services.Get<AddonService>().InitAsync());
+        await Services.Get<CompatibilityCsvService>().InitAsync();
 
         try
         {

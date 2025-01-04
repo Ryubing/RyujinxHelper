@@ -10,7 +10,8 @@ public partial class CompatibilityModule
         [Autocomplete(typeof(GameCompatibilityNameAutocompleter))]
         string gameName)
     {
-        var csvEntry = Compatibility.GetByGameName(gameName);
+        if (Compatibility.GetByGameName(gameName) is not { } csvEntry)
+            return BadRequest($"Could not find a game compatibility entry for `{gameName}`.");
         
         return Ok(Context.CreateReplyBuilder(true)
             .WithEmbed(embed =>

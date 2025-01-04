@@ -19,7 +19,7 @@ public class CompatibilityCsvService : BotService
     public CompatibilityCsv Csv { get; private set; }
 
     public CompatibilityCsv.Entry GetByGameName(string name) 
-        => Csv.Entries.First(x => x.GameName.EqualsIgnoreCase(name));
+        => Csv.Entries.FirstOrDefault(x => x.GameName.EqualsIgnoreCase(name));
 
 
     public async Task InitAsync()

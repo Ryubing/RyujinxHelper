@@ -12,6 +12,10 @@ public partial class GitHubModule
         [Autocomplete<LatestReleaseAutocompleter>]
         string releaseChannel = "Stable")
     {
+        if (releaseChannel is not ("Stable" or "Canary"))
+            return BadRequest(
+                "Unknown release channel. Please wait for the autocomplete suggestions to fill in if you aren't sure what to put!");
+        
         var isCanary = releaseChannel.EqualsIgnoreCase("Canary");
         
         var latest = releaseChannel.EqualsIgnoreCase("Canary") && Context.Guild?.Id == 1294443224030511104
@@ -73,6 +77,10 @@ public class LatestReleaseAutocompleter : AutocompleteHandler
         IParameterInfo parameter, 
         IServiceProvider services)
     {
+        if (!autocompleteInteraction.Data.Options.Any(option => option.Focused))
+            return Task.FromResult(AutocompletionResult.FromSuccess());
+        
+        
         List<AutocompleteResult> result = [new("Stable", "Stable")];
 
         if (context.Guild?.Id == 1294443224030511104)

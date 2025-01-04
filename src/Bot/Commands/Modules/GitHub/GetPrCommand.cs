@@ -10,14 +10,19 @@ public partial class GitHubModule
     private static readonly Regex PrBuildPattern = PrBuildRegex();
     
     [SlashCommand("pull-request", "Show the title & build downloads of a Pull Request on the Ryujinx GitHub.")]
-    public async Task<RuntimeResult> PrAsync([Summary("pr_number", "The Pull Request to display.")] int prNumber)
+    public async Task<RuntimeResult> PrAsync(
+        [Summary("pr_number", "The Pull Request to display.")] int prNumber,
+        [Summary("ignore_builds", "Don't show the build downloads on the reply.")] bool ignoreBuilds = false)
     {
         var pr = await GitHub.GetPullRequestAsync(Context, prNumber);
 
         if (pr is null)
             return BadRequest($"Pull Request {prNumber} not found.");
 
-        var comments = await GitHub.GetCommentsForIssueAsync(Context, prNumber);
+        if (Context.Guild?.Id is 1291765437100720243)
+            ignoreBuilds = true; //ryu-mirror PR builds aren't the best; users in that server should benefit from the speedup of doing one less REST request.
+
+        var comments = !ignoreBuilds ? await GitHub.GetCommentsForIssueAsync(Context, prNumber) : [];
         var buildComment = comments.FirstOrDefault(x => x.User.Login == "github-actions[bot]");
         var builds = new Dictionary<string, string>();
 

@@ -42,6 +42,7 @@ public partial class GitHubModule
                         if (builds.Count > 0)
                             sb.AppendLine().AppendLine()
                                 .AppendLine("## Downloads: ")
+                                .AppendLine("*You must have an account on GitHub and be logged in in order to download these.*")
                                 .AppendLine().AppendLine();
             
                         foreach (var (rid, downloadUrl) in builds)
@@ -71,7 +72,7 @@ public partial class GitHubModule
         "linux_arm64" => "Linux ARM64",
         "linux_x64" => "Linux x64",
         "win_x64" => "Windows x64",
-        "macos_universal" => "macOS Universal App Bundle",
+        "macos_universal" => "macOS Universal",
         _ => inputRid
     };
     

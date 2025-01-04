@@ -49,7 +49,7 @@ public class GitHubService : BotService
         }
     }
 
-    public Task<Release> GetLatestStableAync<TInteraction>(SocketInteractionContext<TInteraction> ctx)
+    public Task<Release> GetLatestStableAsync<TInteraction>(SocketInteractionContext<TInteraction> ctx)
         where TInteraction : SocketInteraction
     {
         var (owner, repoName) = GetRepo(ctx);

@@ -20,7 +20,7 @@ public partial class GitHubModule
         
         var latest = releaseChannel.EqualsIgnoreCase("Canary") && Context.Guild?.Id == 1294443224030511104
             ? await GitHub.GetLatestCanaryAsync()
-            : await GitHub.GetLatestStableAync(Context);
+            : await GitHub.GetLatestStableAsync(Context);
 
         var assets = latest.Assets.Where(x =>
             !x.Name.ContainsIgnoreCase("nogui") && !x.Name.ContainsIgnoreCase("headless"))

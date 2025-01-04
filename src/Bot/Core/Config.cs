@@ -10,7 +10,7 @@ public static class Config
     public static readonly JsonSerializerOptions JsonOptions = CreateSerializerOptions(true);
     public static readonly JsonSerializerOptions MinifiedJsonOptions = CreateSerializerOptions(false);
 
-    public static readonly FilePath Path = FilePath.Data / "volte.json";
+    public static readonly FilePath Path = FilePath.Data / "ryubot.json";
 
     private static JsonSerializerOptions CreateSerializerOptions(bool writeIndented)
         => new()
@@ -50,8 +50,10 @@ public static class Config
         _configuration = new TConfig
         {
             Token = "token here",
-            WhitelistGuilds = [],
             SentryDsn = "",
+            GitHubUsername = "",
+            GitHubPassword = "",
+            WhitelistGuilds = [],
             Owner = 0,
             Game = "game here",
             Streamer = "streamer here",
@@ -134,6 +136,9 @@ public static class Config
 
     public static string SentryDsn => _configuration.SentryDsn;
 
+    public static (string Username, string Pasword) GitHubLogin =>
+        (_configuration.GitHubUsername, _configuration.GitHubPassword);
+
     public static ulong Owner => _configuration.Owner;
 
     public static string Game => _configuration.Game;
@@ -156,6 +161,12 @@ public struct HeadlessBotConfig : IVolteConfig
             
     [JsonPropertyName("sentry_dsn")]
     public string SentryDsn { get; set; }
+    
+    [JsonPropertyName("github_username")]
+    public string GitHubUsername { get; set; }
+    
+    [JsonPropertyName("github_password")]
+    public string GitHubPassword { get; set; }
     
     [JsonPropertyName("only_works_in_guilds")]
     public ulong[] WhitelistGuilds { get; set; }
@@ -192,6 +203,12 @@ public interface IVolteConfig
     
     [JsonPropertyName("sentry_dsn")]
     public string SentryDsn { get; set; }
+    
+    [JsonPropertyName("github_username")]
+    public string GitHubUsername { get; set; }
+    
+    [JsonPropertyName("github_password")]
+    public string GitHubPassword { get; set; }
     
     [JsonPropertyName("only_works_in_guild")]
     public ulong[] WhitelistGuilds { get; set; }

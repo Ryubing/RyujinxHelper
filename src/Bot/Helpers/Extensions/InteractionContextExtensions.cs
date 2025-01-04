@@ -29,6 +29,5 @@ public static class InteractionContextExtensions
     ) where TInteraction : SocketInteraction
         => new EmbedBuilder()
             .WithColor(context.User.GetHighestRole()?.Color ?? Config.SuccessColor)
-            .WithAuthor(context.User.ToString(), context.User.GetEffectiveAvatarUrl())
             .WithDescription(content ?? string.Empty);
 }

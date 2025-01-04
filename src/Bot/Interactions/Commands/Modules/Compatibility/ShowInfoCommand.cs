@@ -11,26 +11,34 @@ public partial class CompatibilityModule
         string gameName)
     {
         var csvEntry = Compatibility.GetByGameName(gameName);
-
-        Color embedColor = csvEntry.PlayabilityStatus.ToLower() switch
-        {
-            "nothing" or "boots" or "menus" => Color.Red,
-            "ingame" => System.Drawing.Color.Yellow.Into(c => new Color(c.R, c.G, c.B)),
-            "playable" => Color.Green
-            
-        };
         
         return Ok(Context.CreateReplyBuilder(true)
             .WithEmbed(embed =>
             {
                 embed.WithTitle(csvEntry.GameName.Truncate(EmbedBuilder.MaxTitleLength));
+                embed.AddField("Status", Capitalize(csvEntry.PlayabilityStatus));
                 embed.AddField("Title ID", csvEntry.TitleId);
-                embed.AddField("Status", csvEntry.PlayabilityStatus);
                 embed.AddField("Last Updated", csvEntry.LastEvent.FormatPrettyString());
                 embed.WithFooter(csvEntry.IssueLabels);
-                embed.WithColor(embedColor);
+                embed.WithColor(csvEntry.PlayabilityStatus.ToLower() switch
+                {
+                    "nothing" or "boots" or "menus" => Color.Red,
+                    "ingame" => System.Drawing.Color.Yellow.Into(c => new Color(c.R, c.G, c.B)),
+                    _ => Color.Green
+                });
                 embed.WithCurrentTimestamp();
             }));
+    }
+
+    private static string Capitalize(string value)
+    {
+        if (value == string.Empty)
+            return string.Empty;
+        
+        var firstChar = value[0];
+        var rest = value[1..];
+
+        return $"{char.ToUpper(firstChar)}{rest}";
     }
 }
 

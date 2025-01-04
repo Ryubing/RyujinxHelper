@@ -1,4 +1,5 @@
 ﻿using Microsoft.Extensions.DependencyInjection.Extensions;
+using Octokit;
 using RyuBot;
 using Version = RyuBot.Version;
 
@@ -22,6 +23,12 @@ public static partial class Extensions
             }))
             .Apply(_ =>
             {
+                var ghc = new GitHubClient(new ProductHeaderValue("RyujinxHelper", Version.DotNetVersion.ToString()));
+                var (username, password) = Config.GitHubLogin;
+                ghc.Credentials = new Credentials(username, password);
+
+                coll.AddSingleton(ghc);
+                
                 if (!Config.SentryDsn.IsNullOrEmpty())
                     coll.AddSingleton(SentrySdk.Init(opts =>
                     {

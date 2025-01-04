@@ -82,9 +82,12 @@ public class RyujinxBotInteractionService : BotService
         if (!_commandsRegistered)
         {
             await _backing.AddModulesAsync(Assembly.GetExecutingAssembly(), _provider);
-
+#if DEBUG
+            await _backing.RegisterCommandsToGuildAsync(DiscordHelper.DevGuildId);
+#else
             await Config.WhitelistGuilds
                 .ForEachAsync(async id => await _backing.RegisterCommandsToGuildAsync(id));
+#endif
             
             _commandsRegistered = true;
         }

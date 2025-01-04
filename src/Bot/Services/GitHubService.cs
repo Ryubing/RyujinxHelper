@@ -1,34 +1,62 @@
 ﻿using Discord.Interactions;
+using GitHubJwt;
 using Octokit;
 
 namespace RyuBot.Services;
 
 public class GitHubService : BotService
 {
-    private const string RepoOwner = "Ryubing";
-    private const string RepoName = "Ryujinx";
-    
-    private readonly GitHubClient _gitHub;
+    public GitHubClient ApiClient { get; private set; }
+    private readonly PeriodicTimer _githubRefreshTimer = new(9.Minutes());
+    private readonly CancellationTokenSource _cts;
+    private readonly GitHubJwtFactory _jwtFactory;
 
-    public GitHubService(GitHubClient ghc)
+    private const long InstallationId = 59135375;
+    
+    public GitHubService(GitHubJwtFactory jwtFactory, CancellationTokenSource cts)
     {
-        _gitHub = ghc;
+        _cts = cts;
+        _jwtFactory = jwtFactory;
+        Initialize();
     }
 
-    private static (string Owner, string Name) GetRepo<T>(SocketInteractionContext<T> ctx) where T : SocketInteraction => 
-        ctx.Guild?.Id switch
+    public void Initialize() => ExecuteBackgroundAsync(async () =>
+    {
+        await LoginToGithubAsync();
+        
+        while (await _githubRefreshTimer.WaitForNextTickAsync(_cts.Token))
         {
-            1291765437100720243 => ("ryujinx-mirror", "ryujinx"),
-            _ => (RepoOwner, RepoName)
+            Info(LogSource.Service, "Refreshing GitHub authentication.");
+            await LoginToGithubAsync();
+        }
+    });
+
+    private async Task LoginToGithubAsync()
+    {
+        var topLevelClient = new GitHubClient(new ProductHeaderValue("RyujinxHelper", Version.DotNetVersion.ToString()))
+        {
+            Credentials = new(_jwtFactory.CreateEncodedJwtToken(), AuthenticationType.Bearer)
         };
+        
+        Info(LogSource.Service, "Authenticated with JWT");
+        
+        var installationToken = await topLevelClient.GitHubApps.CreateInstallationToken(InstallationId);
+        Info(LogSource.Service, $"Created installation token for ID {InstallationId}");
+        
+        ApiClient = new GitHubClient(new ProductHeaderValue($"RyujinxHelper-Installation{InstallationId}",
+            Version.DotNetVersion.ToString()))
+        {
+            Credentials = new Credentials(installationToken.Token)
+        };
+    }
 
     public async Task<Issue> GetIssueAsync<TInteraction>(SocketInteractionContext<TInteraction> ctx, int issueNumber)
         where TInteraction : SocketInteraction
     {
         try
         {
-            var (owner, repoName) = GetRepo(ctx);
-            return await _gitHub.Issue.Get(owner, repoName, issueNumber);
+            var (owner, repoName) = GitHubHelper.GetRepo(ctx);
+            return await ApiClient.Issue.Get(owner, repoName, issueNumber);
         }
         catch
         {
@@ -40,8 +68,8 @@ public class GitHubService : BotService
     { 
         try
         {
-            var (owner, repoName) = GetRepo(ctx);
-            return await _gitHub.PullRequest.Get(owner, repoName, prNumber);
+            var (owner, repoName) = GitHubHelper.GetRepo(ctx);
+            return await ApiClient.PullRequest.Get(owner, repoName, prNumber);
         }
         catch
         {
@@ -52,17 +80,10 @@ public class GitHubService : BotService
     public Task<Release> GetLatestStableAsync<TInteraction>(SocketInteractionContext<TInteraction> ctx)
         where TInteraction : SocketInteraction
     {
-        var (owner, repoName) = GetRepo(ctx);
-        return _gitHub.Repository.Release.GetLatest(owner, repoName);
+        var (owner, repoName) = GitHubHelper.GetRepo(ctx);
+        return ApiClient.Repository.Release.GetLatest(owner, repoName);
     }
 
     public Task<Release> GetLatestCanaryAsync()
-        => _gitHub.Repository.Release.GetLatest(RepoOwner, "Canary-Releases");
-
-    public Task<IReadOnlyList<User>> GetStargazersAsync<TInteraction>(SocketInteractionContext<TInteraction> ctx)
-        where TInteraction : SocketInteraction
-    {
-        var (owner, repoName) = GetRepo(ctx);
-        return _gitHub.Activity.Starring.GetAllStargazers(owner, repoName);
-    }
+        => ApiClient.Repository.Release.GetLatest(GitHubHelper.MainRepoOwner, "Canary-Releases");
 }

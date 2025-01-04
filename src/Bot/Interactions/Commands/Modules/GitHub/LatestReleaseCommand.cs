@@ -16,9 +16,9 @@ public partial class GitHubModule
             return BadRequest(
                 "Unknown release channel. Please wait for the autocomplete suggestions to fill in if you aren't sure what to put!");
         
-        var isCanary = releaseChannel.EqualsIgnoreCase("Canary");
-        
-        var latest = releaseChannel.EqualsIgnoreCase("Canary") && Context.Guild?.Id == 1294443224030511104
+        var isCanary = releaseChannel.EqualsIgnoreCase("Canary") && Context.Guild?.Id == 1294443224030511104;
+
+        var latest = isCanary
             ? await GitHub.GetLatestCanaryAsync()
             : await GitHub.GetLatestStableAsync(Context);
 

@@ -108,7 +108,7 @@ public class RyujinxBotInteractionService : BotService
     ) where TInteraction : SocketInteraction
         => OnCommandExecuted<TInteraction, ContextCommandInfo, CommandParameterInfo>(commandInfo, context, result);
 
-    private static async Task OnCommandExecuted<TInteraction, TCommandInfo, TParameterInfo>(TCommandInfo _,
+    private static async Task OnCommandExecuted<TInteraction, TCommandInfo, TParameterInfo>(TCommandInfo command,
         SocketInteractionContext<TInteraction> context, IResult result)
         where TInteraction : SocketInteraction 
         where TParameterInfo : CommandParameterInfo
@@ -119,7 +119,11 @@ public class RyujinxBotInteractionService : BotService
             switch (result)
             {
                 case InteractionOkResult<TInteraction> okResult:
-                    await okResult.Reply.RespondAsync();
+                    if (okResult.Reply.ShouldFollowup)
+                        await okResult.Reply.FollowupAsync();
+                    else
+                        await okResult.Reply.RespondAsync();
+                    
                     break;
                 case InteractionBadRequestResult badRequest:
                     await context.CreateReplyBuilder(true)
@@ -128,6 +132,15 @@ public class RyujinxBotInteractionService : BotService
                                 .WithDescription(badRequest.ErrorReason)
                                 .WithCurrentTimestamp()
                         ).RespondAsync();
+                    break;
+            }
+        }
+        else
+        {
+            switch (result)
+            {
+                case ExecuteResult { Error: InteractionCommandError.Exception } errorResult:
+                    Error(LogSource.Service, $"Error occurred executing command {command.Name}", errorResult.Exception);
                     break;
             }
         }

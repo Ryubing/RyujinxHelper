@@ -12,6 +12,7 @@ public class ReplyBuilder<TInteraction> where TInteraction : SocketInteraction
     public HashSet<Embed> Embeds { get; } = [];
     public bool IsTts { get; private set; }
     public bool IsEphemeral { get; private set; }
+    public bool ShouldFollowup { get; private set; }
     public AllowedMentions AllowedMentions { get; private set; } = AllowedMentions.None;
     public Task UpdateOrNoopTask => _updateTask ?? Task.CompletedTask;
     private Task? _updateTask;
@@ -66,6 +67,12 @@ public class ReplyBuilder<TInteraction> where TInteraction : SocketInteraction
     public ReplyBuilder<TInteraction> WithEphemeral(bool ephemeral = true)
     {
         IsEphemeral = ephemeral;
+        return this;
+    }
+    
+    public ReplyBuilder<TInteraction> WithAutoFollowup(bool followup = true)
+    {
+        ShouldFollowup = followup;
         return this;
     }
 

@@ -60,7 +60,8 @@ public static class Extensions
 
     public static ReplyBuilder<TInteraction> CreateReplyBuilder<TInteraction>(
         this SocketInteractionContext<TInteraction> interaction,
-        bool ephemeral = false
+        bool ephemeral = false, 
+        bool needsFollowup = false
     ) where TInteraction : SocketInteraction
         => new ReplyBuilder<TInteraction>(interaction).WithEphemeral(ephemeral);
 }

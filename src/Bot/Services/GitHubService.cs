@@ -50,8 +50,7 @@ public class GitHubService : BotService
         };
     }
 
-    public async Task<Issue> GetIssueAsync<TInteraction>(SocketInteractionContext<TInteraction> ctx, int issueNumber)
-        where TInteraction : SocketInteraction
+    public async Task<Issue> GetIssueAsync(IInteractionContext ctx, int issueNumber)
     {
         try
         {
@@ -64,7 +63,7 @@ public class GitHubService : BotService
         }
     }
 
-    public async Task<PullRequest> GetPullRequestAsync<TInteraction>(SocketInteractionContext<TInteraction> ctx, int prNumber) where TInteraction : SocketInteraction
+    public async Task<PullRequest> GetPullRequestAsync(IInteractionContext ctx, int prNumber)
     { 
         try
         {
@@ -77,8 +76,7 @@ public class GitHubService : BotService
         }
     }
 
-    public Task<Release> GetLatestStableAsync<TInteraction>(SocketInteractionContext<TInteraction> ctx)
-        where TInteraction : SocketInteraction
+    public Task<Release> GetLatestStableAsync(IInteractionContext ctx)
     {
         var (owner, repoName) = GitHubHelper.GetRepo(ctx);
         return ApiClient.Repository.Release.GetLatest(owner, repoName);

@@ -17,7 +17,7 @@ public partial class GitHubModule
         return Ok(Context.CreateReplyBuilder()
             .WithEmbed(embed =>
             {
-                embed.WithAuthor(issue.User.Name, issue.User.AvatarUrl, issue.User.Url);
+                embed.WithAuthor(issue.User.Name, issue.User.AvatarUrl, issue.HtmlUrl);
                 embed.WithTitle($"[{issue.Number}] {issue.Title}".Truncate(EmbedBuilder.MaxTitleLength));
                 embed.WithDescription(issue.Body.Truncate(EmbedBuilder.MaxDescriptionLength));
                 embed.WithColor(GetColorBasedOnIssueState(issue));
@@ -30,7 +30,7 @@ public partial class GitHubModule
     private Color GetColorBasedOnIssueState(Issue issue) =>
         IsIssueOpen(issue)
             ? Color.Green 
-            : Color.Red;
+            : Color.DarkRed;
 
     private bool IsIssueOpen(Issue issue) => issue.ClosedAt is null;
 }

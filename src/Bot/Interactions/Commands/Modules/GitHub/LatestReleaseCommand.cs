@@ -36,34 +36,33 @@ public partial class GitHubModule
         StringBuilder releaseBody = new();
 
         if (windows != null)
-            releaseBody.AppendLine($"{Format.Url(windows.Name, windows.BrowserDownloadUrl)}");
+            releaseBody.AppendLine($"{Format.Url("Windows x64", windows.BrowserDownloadUrl)}");
         
         if (linuxX64 != null)
-            releaseBody.Append($"{Format.Url(linuxX64.Name, linuxX64.BrowserDownloadUrl)} ");
+            releaseBody.Append($"{Format.Url("Linux x64", linuxX64.BrowserDownloadUrl)} ");
 
         if (linuxX64AppImage != null)
             releaseBody.AppendLine($"({Format.Url("AppImage", linuxX64AppImage.BrowserDownloadUrl)})");
-        else
+        else if (linuxX64 != null)
             releaseBody.AppendLine();
         
         if (macOs != null)
-            releaseBody.AppendLine($"{Format.Url(macOs.Name, macOs.BrowserDownloadUrl)}");
+            releaseBody.AppendLine($"{Format.Url("macOS Universal", macOs.BrowserDownloadUrl)}");
         
         if (linuxArm64 != null)
-            releaseBody.Append($"{Format.Url(linuxArm64.Name, linuxArm64.BrowserDownloadUrl)} ");
+            releaseBody.Append($"{Format.Url("Linux ARM64", linuxArm64.BrowserDownloadUrl)} ");
         
         if (linuxArm64AppImage != null)
             releaseBody.AppendLine($"({Format.Url("AppImage", linuxArm64AppImage.BrowserDownloadUrl)})");
-        else
+        else if (linuxArm64 != null)
             releaseBody.AppendLine();
-            
 
         return Ok(Context.CreateReplyBuilder()
             .WithEmbed(embed =>
             {
-                embed.WithTitle($"Ryujinx {(!isCanary ? "Stable" : string.Empty)} {latest.Name}");
-                embed.AddField("Commit SHA", latest.TargetCommitish);
-                embed.WithDescription(releaseBody.ToString());
+                embed.WithAuthor(latest.Author.Login, latest.Author.AvatarUrl, latest.HtmlUrl);
+                embed.WithTitle($"Ryujinx{(!isCanary ? " Stable" : string.Empty)} {latest.Name}");
+                embed.WithDescription(releaseBody);
                 embed.WithTimestamp(latest.CreatedAt);
             }));
     }

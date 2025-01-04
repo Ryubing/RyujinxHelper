@@ -13,6 +13,7 @@ public class ReplyBuilder<TInteraction> where TInteraction : SocketInteraction
     public bool IsTts { get; private set; }
     public bool IsEphemeral { get; private set; }
     public bool ShouldFollowup { get; private set; }
+    public bool DidDefer { get; private set; }
     public AllowedMentions AllowedMentions { get; private set; } = AllowedMentions.None;
     public Task UpdateOrNoopTask => _updateTask ?? Task.CompletedTask;
     private Task? _updateTask;
@@ -70,6 +71,12 @@ public class ReplyBuilder<TInteraction> where TInteraction : SocketInteraction
         return this;
     }
     
+    public ReplyBuilder<TInteraction> WithDeferral(bool deferred = true)
+    {
+        DidDefer = deferred;
+        return this;
+    }
+    
     public ReplyBuilder<TInteraction> WithAutoFollowup(bool followup = true)
     {
         ShouldFollowup = followup;
@@ -114,6 +121,25 @@ public class ReplyBuilder<TInteraction> where TInteraction : SocketInteraction
     {
         ActionRows.Add(new ActionRowBuilder().AddComponent(menu.Build()));
         return this;
+    }
+
+    public Task<RestInteractionMessage> ModifyOriginalResponseAsync(RequestOptions? options = null)
+    {
+        return Context.Interaction.ModifyOriginalResponseAsync(msg =>
+        {
+            msg.Content = opt(Content);
+            msg.AllowedMentions = opt(AllowedMentions);
+            msg.Embeds = opt(Embeds.ToArray());
+            if (ActionRows.Count > 0)
+                msg.Components = opt(new ComponentBuilder().AddActionRows(ActionRows).Build());
+        }, options);
+
+        Discord.Optional<T> opt<T>(T value)
+        {
+            return value is null 
+                ? Discord.Optional<T>.Unspecified 
+                : new Discord.Optional<T>(value);
+        }
     }
 
     public Task RespondAsync(RequestOptions? options = null)

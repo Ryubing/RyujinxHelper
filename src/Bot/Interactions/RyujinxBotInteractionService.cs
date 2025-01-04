@@ -114,12 +114,14 @@ public class RyujinxBotInteractionService : BotService
         where TParameterInfo : CommandParameterInfo
         where TCommandInfo : CommandInfo<TParameterInfo>
     {
-        if (result.IsSuccess)
+        if (result?.IsSuccess ?? true)
         {
             switch (result)
             {
                 case InteractionOkResult<TInteraction> okResult:
-                    if (okResult.Reply.ShouldFollowup)
+                    if (okResult.Reply.DidDefer)
+                        await okResult.Reply.ModifyOriginalResponseAsync();
+                    else if (okResult.Reply.ShouldFollowup)
                         await okResult.Reply.FollowupAsync();
                     else
                         await okResult.Reply.RespondAsync();

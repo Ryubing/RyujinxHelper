@@ -14,62 +14,67 @@ public partial class GitHubModule
         [Summary("pr_number", "The Pull Request to display.")] int prNumber,
         [Summary("ignore_builds", "Don't show the build downloads on the reply.")] bool ignoreBuilds = false)
     {
-        var pr = await GitHub.GetPullRequestAsync(Context, prNumber);
+                    await Context.Interaction.DeferAsync();
 
-        if (pr is null)
-            return BadRequest($"Pull Request {prNumber} not found.");
+            var pr = await GitHub.GetPullRequestAsync(Context, prNumber);
 
-        if (Context.Guild?.Id is 1291765437100720243)
-            ignoreBuilds = true; //ryu-mirror PR builds aren't the best; users in that server should benefit from the speedup of doing one less REST request.
+            if (pr is null)
+                return BadRequest($"Pull Request {prNumber} not found.");
 
-        var comments = !ignoreBuilds ? await GitHub.GetCommentsForIssueAsync(Context, prNumber) : [];
-        var buildComment = comments.FirstOrDefault(x => x.User.Login == "github-actions[bot]");
-        var builds = new Dictionary<string, string>();
+            if (Context.Guild?.Id is 1291765437100720243)
+                ignoreBuilds = true; 
+            //ryu-mirror PR builds aren't the best; users in that server should benefit from the speedup of doing one less REST request.
 
-        foreach (var line in buildComment?.Body?.Split('\n', StringSplitOptions.RemoveEmptyEntries) ?? [])
-        {
-            if (PrBuildPattern.IsMatch(line, out var match))
+            var comments = !ignoreBuilds ? await GitHub.GetCommentsForIssueAsync(Context, prNumber) : [];
+            var buildComment = comments.FirstOrDefault(x => x.User.Login == "github-actions[bot]");
+            var builds = new Dictionary<string, string>();
+
+            foreach (var line in buildComment?.Body?.Split('\n', StringSplitOptions.RemoveEmptyEntries) ?? [])
             {
-                builds.Add(FormatRid(match.Groups["RuntimeIdentifier"].Value), match.Groups["DownloadUrl"].Value);
+                if (PrBuildPattern.IsMatch(line, out var match))
+                {
+                    builds.Add(FormatRid(match.Groups["RuntimeIdentifier"].Value), match.Groups["DownloadUrl"].Value);
+                }
             }
-        }
-        
-        return Ok(Context.CreateReplyBuilder()
-            .WithButtons(Buttons.Link(pr.HtmlUrl, "Open on GitHub"))
-            .WithEmbed(embed =>
-            {
-                embed.WithAuthor(pr.User.Name, pr.User.AvatarUrl, pr.HtmlUrl);
-                embed.WithTitle($"[{pr.Number}] {pr.Title}".Truncate(EmbedBuilder.MaxTitleLength));
-                embed.AddField("Labels", pr.Labels.Select(x => x.Name.Capitalize()).JoinToString(", "));
 
-                if (builds.Count > 0)
+            return Ok(Context.CreateReplyBuilder(deferred: true)
+                .WithButtons(Buttons.Link(pr.HtmlUrl, "Open on GitHub"))
+                .WithEmbed(embed =>
                 {
-                    var buildsText = String(sb =>
+                    embed.WithAuthor(pr.User.Name, pr.User.AvatarUrl, pr.HtmlUrl);
+                    embed.WithTitle($"[{pr.Number}] {pr.Title}".Truncate(EmbedBuilder.MaxTitleLength));
+                    embed.AddField("Labels", pr.Labels.Count > 0 ? pr.Labels.Select(x => x.Name.Capitalize()).JoinToString(", ") : "None");
+
+                    if (builds.Count > 0)
                     {
-                        if (builds.Count > 0)
-                            sb.AppendLine().AppendLine()
-                                .AppendLine("## Downloads: ")
-                                .AppendLine("*You must have an account on GitHub and be logged in in order to download these.*")
-                                .AppendLine().AppendLine();
-            
-                        foreach (var (rid, downloadUrl) in builds)
+                        var buildsText = String(sb =>
                         {
-                            sb.AppendLine(Format.Bold(Format.Url($"{rid} download", downloadUrl)));
-                        }
-                    });
-                    
-                    var prBody = pr.Body.Truncate(EmbedBuilder.MaxDescriptionLength - buildsText.Length);
-                    
-                    embed.WithDescription($"{prBody}{buildsText}");
-                }
-                else
-                {
-                    embed.WithDescription(pr.Body.Truncate(EmbedBuilder.MaxDescriptionLength));
-                }
-                embed.WithColor(GetColorBasedOnIssueState(pr));
-                if (pr.UpdatedAt is var dto)
-                    embed.WithTimestamp(dto);
-            }));
+                            if (builds.Count > 0)
+                                sb.AppendLine().AppendLine()
+                                    .AppendLine("## Downloads: ")
+                                    .AppendLine(
+                                        "*You must have an account on GitHub and be logged in in order to download these.*")
+                                    .AppendLine().AppendLine();
+
+                            foreach (var (rid, downloadUrl) in builds)
+                            {
+                                sb.AppendLine(Format.Bold(Format.Url($"{rid} download", downloadUrl)));
+                            }
+                        });
+
+                        var prBody = pr.Body.Truncate(EmbedBuilder.MaxDescriptionLength - buildsText.Length);
+
+                        embed.WithDescription($"{prBody}{buildsText}");
+                    }
+                    else
+                    {
+                        embed.WithDescription(pr.Body.Truncate(EmbedBuilder.MaxDescriptionLength));
+                    }
+
+                    embed.WithColor(GetColorBasedOnIssueState(pr));
+                    if (pr.UpdatedAt is var dto)
+                        embed.WithTimestamp(dto);
+                }));
     }
 
     private static string FormatRid(string inputRid) => inputRid.ToLower() switch

@@ -12,7 +12,7 @@
         <RepositoryUrl>https://github.com/Polyhaze/Volte</RepositoryUrl>
         <Copyright>MIT</Copyright>
         <Version>1.0.0.0</Version> <!-- actual version number -->
-        <InformationalVersion>Dev Build</InformationalVersion> <!-- release/dev build --> 
+        <InformationalVersion>Release</InformationalVersion> <!-- release/dev build --> 
         <Platforms>AnyCPU;x64</Platforms>
         <ApplicationIcon>Resources/RyujinxBot.ico</ApplicationIcon>
         <PlatformTarget>AnyCPU</PlatformTarget>

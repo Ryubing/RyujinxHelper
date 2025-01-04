@@ -118,7 +118,7 @@ public class RyujinxBotInteractionService : BotService
         {
             switch (result)
             {
-                case InteractionOkResult<TInteraction> okResult:
+                case OkResult<TInteraction> okResult:
                     if (okResult.Reply.DidDefer)
                         await okResult.Reply.ModifyOriginalResponseAsync();
                     else if (okResult.Reply.ShouldFollowup)
@@ -127,7 +127,7 @@ public class RyujinxBotInteractionService : BotService
                         await okResult.Reply.RespondAsync();
                     
                     break;
-                case InteractionBadRequestResult badRequest:
+                case BadRequestResult badRequest:
                     await context.CreateReplyBuilder(true)
                         .WithEmbed(e =>
                             e.WithTitle("No can do, partner.")

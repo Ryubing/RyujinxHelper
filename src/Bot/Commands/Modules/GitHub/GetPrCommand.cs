@@ -1,6 +1,5 @@
 ﻿using System.Text.RegularExpressions;
 using Discord.Interactions;
-using Octokit;
 using RyuBot.Interactions;
 
 namespace Volte.Interactions.Commands.Modules;
@@ -45,8 +44,7 @@ public partial class GitHubModule
             {
                 embed.WithAuthor(pr.User.Name, pr.User.AvatarUrl, pr.HtmlUrl);
                 embed.WithTitle($"[{pr.Number}] {pr.Title}".Truncate(EmbedBuilder.MaxTitleLength));
-                embed.AddField("Labels",
-                    pr.Labels.Count > 0 ? pr.Labels.Select(x => x.Name.Capitalize()).JoinToString(", ") : "None");
+                embed.AddField("Labels", pr.FormatLabels());
 
                 if (builds.Count > 0)
                 {

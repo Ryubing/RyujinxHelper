@@ -21,7 +21,10 @@ public partial class CompatibilityModule
                 embed.AddField("Status", Capitalize(csvEntry.Status));
                 embed.AddField("Title ID", csvEntry.TitleId.OrElse("Not provided"));
                 embed.AddField("Last Updated", csvEntry.LastEvent.FormatPrettyString());
-                embed.WithFooter(csvEntry.IssueLabels.Where(it => !it.StartsWithIgnoreCase("status")).Select(StringHelper.Capitalize).JoinToString(", "));
+                embed.WithFooter(csvEntry.IssueLabels
+                    .Where(it => !it.StartsWithIgnoreCase("status"))
+                    .Select(GitHubHelper.FormatLabelName).JoinToString(", ")
+                );
                 embed.WithColor(csvEntry.Status.ToLower() switch
                 {
                     "nothing" or "boots" or "menus" => Color.Red,

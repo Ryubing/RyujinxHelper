@@ -1,5 +1,6 @@
 ﻿using Octokit;
 using RyuBot.Commands;
+using RyuBot.Interactions;
 
 namespace Volte.Interactions.Commands.Modules;
 

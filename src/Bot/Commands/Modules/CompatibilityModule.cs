@@ -1,4 +1,4 @@
-﻿namespace RyuBot.Interactions.Commands.Modules;
+﻿namespace RyuBot.Commands.Modules;
 
 public partial class CompatibilityModule : RyujinxBotSlashCommandModule
 {

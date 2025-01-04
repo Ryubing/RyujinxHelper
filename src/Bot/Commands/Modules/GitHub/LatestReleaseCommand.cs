@@ -58,6 +58,7 @@ public partial class GitHubModule
             releaseBody.AppendLine();
 
         return Ok(Context.CreateReplyBuilder()
+            .WithButtons(Buttons.Link(latest.HtmlUrl, "Open on GitHub"))
             .WithEmbed(embed =>
             {
                 embed.WithAuthor(latest.Author.Login, latest.Author.AvatarUrl, latest.HtmlUrl);

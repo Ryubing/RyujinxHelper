@@ -15,13 +15,14 @@ public partial class GitHubModule
             return BadRequest($"Issue {issueNumber} not found.");
 
         return Ok(Context.CreateReplyBuilder()
+            .WithButtons(Buttons.Link(issue.HtmlUrl, "Open on GitHub"))
             .WithEmbed(embed =>
             {
                 embed.WithAuthor(issue.User.Name, issue.User.AvatarUrl, issue.HtmlUrl);
                 embed.WithTitle($"[{issue.Number}] {issue.Title}".Truncate(EmbedBuilder.MaxTitleLength));
+                embed.AddField("Labels", issue.Labels.Select(x => x.Name).JoinToString(", "));
                 embed.WithDescription(issue.Body.Truncate(EmbedBuilder.MaxDescriptionLength));
                 embed.WithColor(GetColorBasedOnIssueState(issue));
-                embed.AddField("Labels", issue.Labels.Select(x => x.Name).JoinToString(", "));
                 if (issue.UpdatedAt is { } dto)
                     embed.WithTimestamp(dto);
             }));

@@ -1,9 +1,9 @@
 ﻿using Discord.Interactions;
 using RyuBot.Entities;
+using RyuBot.Interactions;
 using RyuBot.Interactions.Results;
-using RyuBot.Services;
 
-namespace RyuBot.Interactions.Commands;
+namespace RyuBot.Commands;
 
 public abstract class RyujinxBotInteractionModule<T> : InteractionModuleBase<SocketInteractionContext<T>> where T : SocketInteraction
 {

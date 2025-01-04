@@ -30,10 +30,12 @@ public partial class GitHubModule
         }
         
         return Ok(Context.CreateReplyBuilder()
+            .WithButtons(Buttons.Link(pr.HtmlUrl, "Open on GitHub"))
             .WithEmbed(embed =>
             {
                 embed.WithAuthor(pr.User.Name, pr.User.AvatarUrl, pr.HtmlUrl);
                 embed.WithTitle($"[{pr.Number}] {pr.Title}".Truncate(EmbedBuilder.MaxTitleLength));
+                embed.AddField("Labels", pr.Labels.Select(x => x.Name.Capitalize()).JoinToString(", "));
 
                 if (builds.Count > 0)
                 {
@@ -59,9 +61,7 @@ public partial class GitHubModule
                 {
                     embed.WithDescription(pr.Body.Truncate(EmbedBuilder.MaxDescriptionLength));
                 }
-                
                 embed.WithColor(GetColorBasedOnIssueState(pr));
-                embed.AddField("Labels", pr.Labels.Select(x => x.Name).JoinToString(", "));
                 if (pr.UpdatedAt is var dto)
                     embed.WithTimestamp(dto);
             }));

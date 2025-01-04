@@ -26,11 +26,4 @@ public partial class GitHubModule
                     embed.WithTimestamp(dto);
             }));
     }
-
-    private Color GetColorBasedOnIssueState(Issue issue) =>
-        IsIssueOpen(issue)
-            ? Color.Green 
-            : Color.DarkRed;
-
-    private bool IsIssueOpen(Issue issue) => issue.ClosedAt is null;
 }

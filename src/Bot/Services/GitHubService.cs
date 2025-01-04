@@ -7,7 +7,7 @@ namespace RyuBot.Services;
 public class GitHubService : BotService
 {
     public GitHubClient ApiClient { get; private set; }
-    private readonly PeriodicTimer _githubRefreshTimer = new(9.Minutes());
+    private readonly PeriodicTimer _githubRefreshTimer = new(59.Minutes());
     private readonly CancellationTokenSource _cts;
     private readonly GitHubJwtFactory _jwtFactory;
 
@@ -31,16 +31,17 @@ public class GitHubService : BotService
         }
     });
 
-    private async Task LoginToGithubAsync()
-    {
-        var topLevelClient = new GitHubClient(new ProductHeaderValue("RyujinxHelper", Version.DotNetVersion.ToString()))
+    private GitHubClient CreateTopLevelClient() =>
+        new(new ProductHeaderValue("RyujinxHelper", Version.DotNetVersion.ToString()))
         {
             Credentials = new(_jwtFactory.CreateEncodedJwtToken(), AuthenticationType.Bearer)
         };
+
+    private async Task LoginToGithubAsync()
+    {
+        Info(LogSource.Service, $"Authenticated with JWT");
         
-        Info(LogSource.Service, "Authenticated with JWT");
-        
-        var installationToken = await topLevelClient.GitHubApps.CreateInstallationToken(InstallationId);
+        var installationToken = await CreateTopLevelClient().GitHubApps.CreateInstallationToken(InstallationId);
         Info(LogSource.Service, $"Created installation token for ID {InstallationId}");
         
         ApiClient = new GitHubClient(new ProductHeaderValue($"RyujinxHelper-Installation{InstallationId}",
@@ -74,6 +75,12 @@ public class GitHubService : BotService
         {
             return null;
         }
+    }
+
+    public Task<IReadOnlyList<IssueComment>> GetCommentsForIssueAsync(IInteractionContext ctx, int issueNumber)
+    {
+        var (owner, repoName) = GitHubHelper.GetRepo(ctx);
+        return ApiClient.Issue.Comment.GetAllForIssue(owner, repoName, issueNumber);
     }
 
     public Task<Release> GetLatestStableAsync(IInteractionContext ctx)

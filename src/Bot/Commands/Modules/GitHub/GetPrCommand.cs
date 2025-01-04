@@ -21,7 +21,7 @@ public partial class GitHubModule
         var buildComment = comments.FirstOrDefault(x => x.User.Login == "github-actions[bot]");
         var builds = new Dictionary<string, string>();
 
-        foreach (var line in buildComment?.Body?.Split('\n') ?? [])
+        foreach (var line in buildComment?.Body?.Split('\n', StringSplitOptions.RemoveEmptyEntries) ?? [])
         {
             if (PrBuildPattern.IsMatch(line, out var match))
             {

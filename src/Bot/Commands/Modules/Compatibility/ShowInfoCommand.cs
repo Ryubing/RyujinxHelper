@@ -19,7 +19,7 @@ public partial class CompatibilityModule
             {
                 embed.WithTitle(csvEntry.GameName.Truncate(EmbedBuilder.MaxTitleLength));
                 embed.AddField("Status", Capitalize(csvEntry.Status));
-                embed.AddField("Title ID", csvEntry.TitleId);
+                embed.AddField("Title ID", csvEntry.TitleId.OrElse("Not provided"));
                 embed.AddField("Last Updated", csvEntry.LastEvent.FormatPrettyString());
                 embed.WithFooter(csvEntry.IssueLabels.Where(it => !it.StartsWithIgnoreCase("status")).Select(StringHelper.Capitalize).JoinToString(", "));
                 embed.WithColor(csvEntry.Status.ToLower() switch

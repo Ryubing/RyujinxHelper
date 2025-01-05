@@ -1,5 +1,5 @@
 ﻿using Discord.Interactions;
-
+using Octokit;
 using RyuBot.Interactions;
 
 namespace Volte.Interactions.Commands.Modules;
@@ -34,28 +34,12 @@ public partial class GitHubModule
         var linuxArm64AppImage = assets.FirstOrDefault(x => x.Name.ContainsIgnoreCase("arm64") && x.Name.EndsWithIgnoreCase(".AppImage"));
 
         StringBuilder releaseBody = new();
-
-        if (windows != null)
-            releaseBody.AppendLine($"{Format.Url("Windows x64", windows.BrowserDownloadUrl)}");
+        var downloads = 0;
         
-        if (linuxX64 != null)
-            releaseBody.Append($"{Format.Url("Linux x64", linuxX64.BrowserDownloadUrl)} ");
-
-        if (linuxX64AppImage != null)
-            releaseBody.AppendLine($"({Format.Url("AppImage", linuxX64AppImage.BrowserDownloadUrl)})");
-        else if (linuxX64 != null)
-            releaseBody.AppendLine();
-        
-        if (macOs != null)
-            releaseBody.AppendLine($"{Format.Url("macOS Universal", macOs.BrowserDownloadUrl)}");
-        
-        if (linuxArm64 != null)
-            releaseBody.Append($"{Format.Url("Linux ARM64", linuxArm64.BrowserDownloadUrl)} ");
-        
-        if (linuxArm64AppImage != null)
-            releaseBody.AppendLine($"({Format.Url("AppImage", linuxArm64AppImage.BrowserDownloadUrl)})");
-        else if (linuxArm64 != null)
-            releaseBody.AppendLine();
+        applyArtifact(windows, "Windows x64");
+        applyArtifacts((linuxX64, linuxX64AppImage), "Linux x64");
+        applyArtifact(macOs, "macOS Universal");
+        applyArtifacts((linuxArm64, linuxArm64AppImage), "Linux ARM64");
 
         return Ok(CreateReplyBuilder()
             .WithButtons(Buttons.Link(latest.HtmlUrl, "Open on GitHub"))
@@ -63,9 +47,37 @@ public partial class GitHubModule
             {
                 embed.WithAuthor(latest.Author.Login, latest.Author.AvatarUrl, latest.HtmlUrl);
                 embed.WithTitle($"Ryujinx{(!isCanary ? " Stable" : string.Empty)} {latest.Name}");
-                embed.WithDescription(releaseBody);
+                embed.WithDescription($"{releaseBody}\n{downloads} total downloads");
                 embed.WithTimestamp(latest.CreatedAt);
             }));
+        
+        void applyArtifact(ReleaseAsset asset, string friendlyName)
+        {
+            if (asset is null) 
+                return;
+
+            releaseBody.AppendLine($"{Format.Url(friendlyName, asset.BrowserDownloadUrl)}");
+            downloads += asset.DownloadCount;
+        }
+        
+        void applyArtifacts(
+            (ReleaseAsset Normal, ReleaseAsset AppImage) asset, 
+            string friendlyName)
+        {
+            if (asset.Normal != null)
+            {
+                releaseBody.Append($"{Format.Url(friendlyName, asset.Normal.BrowserDownloadUrl)} ");
+                downloads += asset.Normal.DownloadCount;
+            }
+
+            if (asset.AppImage != null)
+            {
+                releaseBody.AppendLine($"({Format.Url("AppImage", asset.AppImage.BrowserDownloadUrl)})");
+                downloads += asset.AppImage.DownloadCount;
+            }
+            else if (asset.Normal != null)
+                releaseBody.AppendLine();
+        }
     }
 }
 

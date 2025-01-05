@@ -21,10 +21,11 @@ public partial class CompatibilityModule
             .WithEmbed(embed =>
             {
                 embed.WithTitle(csvEntry.GameName.Truncate(EmbedBuilder.MaxTitleLength));
-                embed.AddField("Status", Capitalize(csvEntry.Status));
-                embed.AddField("Title ID", csvEntry.TitleId.OrElse("Not provided"));
-                embed.AddField("Last Updated", csvEntry.LastEvent.FormatPrettyString());
-                embed.WithFooter(csvEntry.IssueLabels
+                embed.AddField("Status", Capitalize(csvEntry.Status), true);
+                csvEntry.TitleId.IfPresent(tid
+                    => embed.AddField("Title ID", tid, true)
+                );
+                embed.AddField("Labels", csvEntry.IssueLabels
                     .Where(it => !it.StartsWithIgnoreCase("status"))
                     .Select(GitHubHelper.FormatLabelName).JoinToString(", ")
                 );
@@ -34,7 +35,7 @@ public partial class CompatibilityModule
                     "ingame" => System.Drawing.Color.Yellow.Into(c => new Color(c.R, c.G, c.B)),
                     _ => Color.Green
                 });
-                embed.WithCurrentTimestamp();
+                embed.WithTimestamp(csvEntry.LastEvent);
             }));
     }
 

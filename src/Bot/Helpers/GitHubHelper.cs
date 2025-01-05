@@ -51,7 +51,7 @@ public static class GitHubHelper
         "graphics-backend:vulkan" => "Graphics: Vulkan",
         "not planned but open to a PR" => "Not planned, but open to a PR",
         "blocked on external progress" => "Blocked on External Progress",
-        _ => labelName
+        _ => labelName.Capitalize()
     };
 
 }

@@ -1,4 +1,5 @@
-﻿using Gommon;
+﻿using Avalonia.Controls.Notifications;
+using Gommon;
 using MenuFactory.Abstractions.Attributes;
 using RyuBot.Helpers;
 using RyuBot.Interactions;
@@ -12,6 +13,11 @@ public class UIShellViewMenu
     public static async Task ClearCommands()
     {
         var interactionService = RyujinxBot.Services.Get<RyujinxBotInteractionService>();
+        if (interactionService is null || RyujinxBot.Client is null)
+        {
+            RyujinxBotApp.Notify("Not logged in", "State error", NotificationType.Error);
+            return;
+        }
 #if DEBUG
         var removedCommands = await interactionService.ClearAllCommandsInGuildAsync(DiscordHelper.DevGuildId);
 #else

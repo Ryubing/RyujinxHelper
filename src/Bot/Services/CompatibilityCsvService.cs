@@ -27,7 +27,7 @@ public class CompatibilityCsvService : BotService
     public Gommon.Optional<CompatibilityCsv.Entry> FindOrNull(string nameOrTitleId)
         => Csv.Entries.FindFirst(x => 
             x.GameName.EqualsIgnoreCase(nameOrTitleId) || 
-            x.TitleId.Check(it => it.EqualsAnyIgnoreCase(nameOrTitleId))
+            x.TitleId.Check(it => it.EqualsIgnoreCase(nameOrTitleId))
         );
 
     public IEnumerable<CompatibilityCsv.Entry> SearchEntries(string nameOrTitleId) =>

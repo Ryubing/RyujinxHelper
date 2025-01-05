@@ -7,7 +7,6 @@
             <ResourceDictionary.MergedDictionaries>
                 <ResourceDictionary>
                     <FontFamily x:Key="JetBrainsMono">avares://RyuBot.UI/Assets/Fonts/#JetBrains Mono</FontFamily>
-                    <FontFamily x:Key="Mojangles">avares://RyuBot.UI/Assets/Fonts/#Mojangles</FontFamily>
                 </ResourceDictionary>
             </ResourceDictionary.MergedDictionaries>
             <ResourceDictionary.ThemeDictionaries>

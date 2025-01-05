@@ -3,11 +3,13 @@ using Gommon;
 using MenuFactory.Abstractions.Attributes;
 using RyuBot.Helpers;
 using RyuBot.Interactions;
+// ReSharper disable UnusedMember.Global
+// These members are never directly invoked.
 
-namespace RyuBot.UI.Avalonia.MenuModel;
+namespace RyuBot.UI.Avalonia.Pages;
 
 // ReSharper disable once InconsistentNaming
-public class UIShellViewMenu
+public class ShellViewMenu
 {
     [Menu("Clear Commands", "Dev", Icon = "fa-solid fa-broom")]
     public static async Task ClearCommands()
@@ -18,6 +20,7 @@ public class UIShellViewMenu
             RyujinxBotApp.Notify("Not logged in", "State error", NotificationType.Error);
             return;
         }
+        
 #if DEBUG
         var removedCommands = await interactionService.ClearAllCommandsInGuildAsync(DiscordHelper.DevGuildId);
 #else

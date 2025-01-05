@@ -13,7 +13,6 @@ using Humanizer;
 using MenuFactory;
 using MenuFactory.Abstractions;
 using RyuBot.Entities;
-using RyuBot.UI.Avalonia.MenuModel;
 using RyuBot.UI.Avalonia.Pages;
 using RyuBot.UI.Helpers;
 
@@ -70,7 +69,7 @@ public class RyujinxBotApp : Application
             };
 
             MenuFactory = new AvaloniaMenuFactory(XamlRoot);
-            MenuFactory.AddMenuGroup<UIShellViewMenu>();
+            MenuFactory.AddMenuGroup<ShellViewMenu>();
             shelLView.MainMenu.ItemsSource = MenuFactory.Items;
             
             desktop.MainWindow.Closing += (_, _) =>

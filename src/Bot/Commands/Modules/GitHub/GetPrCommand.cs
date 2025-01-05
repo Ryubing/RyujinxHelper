@@ -15,7 +15,7 @@ public partial class GitHubModule
         [Summary("ignore_builds", "Don't show the build downloads on the reply.")]
         bool ignoreBuilds = false)
     {
-        await DeferAsync();
+        
 
         var pr = await GitHub.GetPullRequestAsync(Context, prNumber);
 
@@ -24,6 +24,10 @@ public partial class GitHubModule
 
         if (Context.Guild?.Id is 1291765437100720243)
             ignoreBuilds = true;
+        
+        if (!ignoreBuilds)
+            await DeferAsync();
+        
         //ryu-mirror PR builds aren't the best; users in that server should benefit from the speedup of doing one less REST request.
 
         var comments = !ignoreBuilds ? await GitHub.GetCommentsForIssueAsync(Context, prNumber) : [];

@@ -8,6 +8,8 @@ namespace RyuBot.Interactions;
 [Obsolete("Use an inheritor of this class; not this class directly.")]
 public abstract class RyujinxBotModuleBase<T> : InteractionModuleBase<SocketInteractionContext<T>> where T : SocketInteraction
 {
+    public RyujinxBotInteractionService Interactions { get; set; }
+    
     private bool DidDefer { get; set; }
     private bool DeferralWasEphemeral { get; set; }
 

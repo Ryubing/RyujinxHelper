@@ -77,6 +77,11 @@ public class RyujinxBotInteractionService : BotService
     private static bool IsInAllowedGuild(SocketInteraction interaction) 
         => Config.WhitelistGuilds.Contains(interaction.GuildId ?? ulong.MaxValue);
 
+    public async Task ClearCommandsAsync()
+    {
+        await _backing.RemoveModulesFromGuildAsync(DiscordHelper.DevGuildId, _backing.Modules.ToArray());
+    }
+    
     public async Task InitAsync()
     {
         if (!_commandsRegistered)

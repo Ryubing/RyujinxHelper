@@ -23,8 +23,8 @@ public partial class GitHubModule
             : await GitHub.GetLatestStableAsync(Context);
 
         var assets = latest.Assets.Where(x =>
-            !x.Name.ContainsIgnoreCase("nogui") && !x.Name.ContainsIgnoreCase("headless"))
-            .ToArray();
+            !x.Name.ContainsIgnoreCase("nogui") && !x.Name.ContainsIgnoreCase("headless")
+        ).ToArray();
 
         var windows = assets.FirstOrDefault(x => x.Name.ContainsIgnoreCase("win_x64"));
         var linuxX64 = assets.FirstOrDefault(x => x.Name.ContainsIgnoreCase("linux_x64") && !x.Name.EndsWithIgnoreCase(".AppImage"));

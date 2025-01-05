@@ -51,6 +51,32 @@ public static class GitHubHelper
         "graphics-backend:vulkan" => "Graphics: Vulkan",
         "not planned but open to a PR" => "Not planned, but open to a PR",
         "blocked on external progress" => "Blocked on External Progress",
+        
+        // old compat list labels
+        
+        "ldn-works" => "LDN Works",
+        "ldn-untested" => "LDN Untested",
+        "ldn-broken" => "LDN Broken",
+        "ldn-partial" => "Partial LDN",
+        "nvdec" => "NVDEC",
+        "services" => "NX Services",
+        "services-horizon" => "Horizon OS Services",
+        "slow" => "Runs Slow",
+        "crash" => "Crashes",
+        "deadlock" => "[Deadlock](<https://wikipedia.org/wiki/Deadlock_(computer_science)>)",
+        "regression" => "[Regression](<https://wikipedia.org/wiki/Software_regression>)",
+        "opengl" => "OpenGL",
+        "opengl-backend-bug" => "OpenGL Backend Bug",
+        "vulkan-backend-bug" => "Vulkan Backend Bug",
+        "mac-bug" => "Mac-specific Bug(s)",
+        "amd-vendor-bug" => "AMD GPU Bug",
+        "intel-vendor-bug" => "Intel GPU Bug",
+        "loader-allocator" => "Loader Allocator",
+        "audout" => "AudOut",
+        "32-bit" => "32-bit Game",
+        "UE4" => "Unreal Engine 4",
+        "homebrew" => "Homebrew Content",
+        "online-broken" => "Online Broken",
         _ => labelName.Capitalize()
     };
 

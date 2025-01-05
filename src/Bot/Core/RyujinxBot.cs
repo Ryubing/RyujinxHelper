@@ -44,7 +44,7 @@ public class RyujinxBot
         Client.RegisterVolteEventHandlers(Services);
         
         await Services.Get<CompatibilityCsvService>().InitAsync();
-
+        
         try
         {
             SetAppStatus($"Logged in, took {sw.Elapsed.Humanize(2)}.",

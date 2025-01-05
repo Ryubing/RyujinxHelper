@@ -44,7 +44,7 @@ public partial class GitHubModule
             .WithButtons(Buttons.Link(pr.HtmlUrl, "Open on GitHub"))
             .WithEmbed(embed =>
             {
-                embed.WithAuthor(pr.User.Name, pr.User.AvatarUrl, pr.HtmlUrl);
+                embed.WithAuthor(pr.User.Login, pr.User.AvatarUrl, pr.HtmlUrl);
                 embed.WithTitle($"[{pr.Number}] {pr.Title}".Truncate(EmbedBuilder.MaxTitleLength));
                 embed.AddField("Labels", pr.FormatLabels());
 

@@ -130,6 +130,8 @@ public static class Config
 
     public static string Token => _configuration.Token;
 
+    public static long GitHubAppInstallationId => _configuration.GitHubAppInstallationId; 
+
     public static ulong[] WhitelistGuilds => _configuration.WhitelistGuilds;
 
     public static string SentryDsn => _configuration.SentryDsn;
@@ -153,6 +155,9 @@ public struct HeadlessBotConfig : IVolteConfig
 {
     [JsonPropertyName("discord_token")]
     public string Token { get; set; }
+    
+    [JsonPropertyName("github_app_installation_id")]
+    public long GitHubAppInstallationId { get; set; } 
             
     [JsonPropertyName("sentry_dsn")]
     public string SentryDsn { get; set; }
@@ -189,6 +194,9 @@ public interface IVolteConfig
 {
     [JsonPropertyName("discord_token")]
     public string Token { get; set; }
+    
+    [JsonPropertyName("github_app_installation_id")]
+    public long GitHubAppInstallationId { get; set; } 
     
     [JsonPropertyName("sentry_dsn")]
     public string SentryDsn { get; set; }

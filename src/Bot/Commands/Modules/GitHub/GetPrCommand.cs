@@ -15,8 +15,6 @@ public partial class GitHubModule
         [Summary("ignore_builds", "Don't show the build downloads on the reply.")]
         bool ignoreBuilds = false)
     {
-        
-
         var pr = await GitHub.GetPullRequestAsync(Context, prNumber);
 
         if (pr is null)

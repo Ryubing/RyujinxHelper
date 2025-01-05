@@ -17,17 +17,25 @@ public class GitHubService : BotService
     {
         _cts = cts;
         _jwtFactory = jwtFactory;
-        Initialize();
+        
+        if (Config.GitHubAppInstallationId is not 0)
+        {
+            Initialize(Config.GitHubAppInstallationId);
+        }
+        else
+        {
+            Warn(LogSource.Service, "Skipping initialization for GitHub service due to missing Installation ID in config.");
+        }
     }
 
-    public void Initialize() => ExecuteBackgroundAsync(async () =>
+    public void Initialize(long installationId) => ExecuteBackgroundAsync(async () =>
     {
-        await LoginToGithubAsync();
+        await LoginToGithubAsync(installationId);
         
         while (await _githubRefreshTimer.WaitForNextTickAsync(_cts.Token))
         {
             Info(LogSource.Service, "Refreshing GitHub authentication.");
-            await LoginToGithubAsync();
+            await LoginToGithubAsync(installationId);
         }
     });
 
@@ -37,58 +45,94 @@ public class GitHubService : BotService
             Credentials = new(_jwtFactory.CreateEncodedJwtToken(), AuthenticationType.Bearer)
         };
 
-    private async Task LoginToGithubAsync()
+    private async Task LoginToGithubAsync(long installationId)
     {
-        Info(LogSource.Service, $"Authenticated with JWT");
+        Info(LogSource.Service, "Authenticated with JWT");
         
-        var installationToken = await CreateTopLevelClient().GitHubApps.CreateInstallationToken(InstallationId);
-        Info(LogSource.Service, $"Created installation token for ID {InstallationId}");
+        var installationToken = await CreateTopLevelClient().GitHubApps.CreateInstallationToken(installationId);
+        Info(LogSource.Service, $"Created installation token for ID {installationId}");
         
-        ApiClient = new GitHubClient(new ProductHeaderValue($"RyujinxHelper-Installation{InstallationId}",
+        ApiClient = new GitHubClient(new ProductHeaderValue($"RyujinxHelper-Installation{installationId}",
             Version.DotNetVersion.ToString()))
         {
             Credentials = new Credentials(installationToken.Token)
         };
     }
 
-    public async Task<Issue> GetIssueAsync(IInteractionContext ctx, int issueNumber)
+    public Task<Issue> GetIssueAsync(IInteractionContext ctx, int issueNumber)
     {
         try
         {
             var (owner, repoName) = GitHubHelper.GetRepo(ctx);
-            return await ApiClient.Issue.Get(owner, repoName, issueNumber);
+            return ApiClient.Issue.Get(owner, repoName, issueNumber);
         }
         catch
         {
-            return null;
+            return Task.FromResult<Issue>(null);
         }
     }
 
-    public async Task<PullRequest> GetPullRequestAsync(IInteractionContext ctx, int prNumber)
+    public Task<PullRequest> GetPullRequestAsync(IInteractionContext ctx, int prNumber)
     { 
         try
         {
             var (owner, repoName) = GitHubHelper.GetRepo(ctx);
-            return await ApiClient.PullRequest.Get(owner, repoName, prNumber);
+            return ApiClient.PullRequest.Get(owner, repoName, prNumber);
         }
         catch
         {
-            return null;
+            return Task.FromResult<PullRequest>(null);
         }
     }
 
     public Task<IReadOnlyList<IssueComment>> GetCommentsForIssueAsync(IInteractionContext ctx, int issueNumber)
     {
-        var (owner, repoName) = GitHubHelper.GetRepo(ctx);
-        return ApiClient.Issue.Comment.GetAllForIssue(owner, repoName, issueNumber);
+        try
+        {
+            var (owner, repoName) = GitHubHelper.GetRepo(ctx);
+            return ApiClient.Issue.Comment.GetAllForIssue(owner, repoName, issueNumber);
+        }
+        catch
+        {
+            return Task.FromResult<IReadOnlyList<IssueComment>>([]);
+        }
     }
 
     public Task<Release> GetLatestStableAsync(IInteractionContext ctx)
     {
-        var (owner, repoName) = GitHubHelper.GetRepo(ctx);
-        return ApiClient.Repository.Release.GetLatest(owner, repoName);
+        try
+        {
+            var (owner, repoName) = GitHubHelper.GetRepo(ctx);
+            return ApiClient.Repository.Release.GetLatest(owner, repoName);
+        }
+        catch
+        {
+            return Task.FromResult<Release>(null);
+        }
     }
 
     public Task<Release> GetLatestCanaryAsync()
-        => ApiClient.Repository.Release.GetLatest(GitHubHelper.MainRepoOwner, "Canary-Releases");
+    {
+        try
+        {
+            return ApiClient.Repository.Release.GetLatest(GitHubHelper.MainRepoOwner, "Canary-Releases");
+        }
+        catch
+        {
+            return Task.FromResult<Release>(null);
+        }
+    }
+    
+    public Task<Repository> GetRepositoryAsync(IInteractionContext ctx)
+    {
+        try
+        {
+            var (owner, repoName) = GitHubHelper.GetRepo(ctx);
+            return ApiClient.Repository.Get(owner, repoName);
+        }
+        catch
+        {
+            return Task.FromResult<Repository>(null);
+        }
+    }
 }

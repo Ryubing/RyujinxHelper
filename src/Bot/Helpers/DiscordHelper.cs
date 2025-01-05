@@ -102,18 +102,19 @@ public static class DiscordHelper
             Info(LogSource.Volte, $"Logged in as {client.CurrentUser.Username}#{client.CurrentUser.Discriminator}");
             Info(LogSource.Volte, $"Connected to {"guild".ToQuantity(guilds)}");
 
-            var (type, name, streamer) = Config.ParseActivity();
-
-            if (streamer is null && type != ActivityType.CustomStatus)
+            if (Config.TryParseActivity(out var activityInfo))
             {
-                await client.SetGameAsync(name, null, type);
-                Info(LogSource.Volte, $"Set {client.CurrentUser.Username}'s game to \"{Config.Game}\".");
-            }
-            else if (type != ActivityType.CustomStatus)
-            {
-                await client.SetGameAsync(name, Config.FormattedStreamUrl, type);
-                Info(LogSource.Volte,
-                    $"Set {client.CurrentUser.Username}'s activity to \"{type}: {name}\", at Twitch user {Config.Streamer}.");
+                if (activityInfo.Streamer is null && activityInfo.Type != ActivityType.CustomStatus)
+                {
+                    await client.SetGameAsync(activityInfo.Name, null, activityInfo.Type);
+                    Info(LogSource.Volte, $"Set {client.CurrentUser.Username}'s game to \"{Config.Game}\".");
+                }
+                else if (activityInfo.Type != ActivityType.CustomStatus)
+                {
+                    await client.SetGameAsync(activityInfo.Name, Config.FormattedStreamUrl, activityInfo.Type);
+                    Info(LogSource.Volte,
+                        $"Set {client.CurrentUser.Username}'s activity to \"{activityInfo.Type}: {activityInfo.Name}\", at Twitch user {Config.Streamer}.");
+                }
             }
             
             await provider.Get<RyujinxBotInteractionService>().InitAsync();

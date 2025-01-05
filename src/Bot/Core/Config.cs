@@ -51,7 +51,9 @@ public static class Config
         {
             Token = "token here",
             SentryDsn = "",
-            WhitelistGuilds = [],
+            WhitelistGuilds = [
+                new(1294443224030511104, "Ryubing", "Ryujinx")
+            ],
             Owner = 0,
             Game = "game here",
             Streamer = "streamer here",
@@ -109,20 +111,26 @@ public static class Config
         }
     }
 
-    public static (ActivityType Type, string Name, string Streamer) ParseActivity()
+    public static bool TryParseActivity(out (ActivityType Type, string Name, string Streamer) activityInfo)
     {
+        if (_configuration.Game.Equals("game here") && _configuration.Streamer.Equals("streamer here"))
+        {
+            activityInfo = default;
+            return false;
+        }
+        
         var split = Game.Split(" ");
         var title = split.Skip(1).JoinToString(" ");
         if (split[0].ToLower() is "streaming") title = split.Skip(2).JoinToString(" ");
-        return split[0].ToLower() switch
+        activityInfo = split[0].ToLower() switch
         {
             "playing" => (ActivityType.Playing, title, null),
-            "listeningto" => (ActivityType.Listening, title, null),
-            "listening" => (ActivityType.Listening, title, null),
+            "listeningto" or "listening" => (ActivityType.Listening, title, null),
             "streaming" => (ActivityType.Streaming, title, split[1]),
             "watching" => (ActivityType.Watching, title, null),
-            _ => (ActivityType.Playing, Game, null)
+            _ => ((ActivityType Type, string Name, string Streamer))(ActivityType.Playing, Game, null)
         };
+        return true;
     }
 
     public static bool IsValidToken() 
@@ -130,9 +138,14 @@ public static class Config
 
     public static string Token => _configuration.Token;
 
-    public static long GitHubAppInstallationId => _configuration.GitHubAppInstallationId; 
+    public static long GitHubAppInstallationId => _configuration.GitHubAppInstallationId;
 
-    public static ulong[] WhitelistGuilds => _configuration.WhitelistGuilds;
+    public static Dictionary<ulong, (string RepoOwner, string RepoName)> WhitelistGuilds => _configuration
+        .WhitelistGuilds
+        .ToDictionary(
+            x => x.GuildId, 
+            x => (x.RepoOwner, x.RepoName)
+        );
 
     public static string SentryDsn => _configuration.SentryDsn;
 
@@ -162,8 +175,8 @@ public struct HeadlessBotConfig : IVolteConfig
     [JsonPropertyName("sentry_dsn")]
     public string SentryDsn { get; set; }
     
-    [JsonPropertyName("only_works_in_guilds")]
-    public ulong[] WhitelistGuilds { get; set; }
+    [JsonPropertyName("guild_info")]
+    public GuildGitHubRepoDefinition[] WhitelistGuilds { get; set; }
 
     [JsonPropertyName("bot_owner")]
     public ulong Owner { get; set; }
@@ -201,8 +214,8 @@ public interface IVolteConfig
     [JsonPropertyName("sentry_dsn")]
     public string SentryDsn { get; set; }
     
-    [JsonPropertyName("only_works_in_guild")]
-    public ulong[] WhitelistGuilds { get; set; }
+    [JsonPropertyName("guild_info")]
+    public GuildGitHubRepoDefinition[] WhitelistGuilds { get; set; }
     
     [JsonPropertyName("bot_owner")]
     public ulong Owner { get; set; }

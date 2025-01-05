@@ -75,7 +75,7 @@ public class RyujinxBotInteractionService : BotService
     }
     
     private static bool IsInAllowedGuild(SocketInteraction interaction) 
-        => Config.WhitelistGuilds.Contains(interaction.GuildId ?? ulong.MaxValue);
+        => Config.WhitelistGuilds.ContainsKey(interaction.GuildId ?? ulong.MaxValue);
 
     public async Task<int> ClearAllCommandsInGuildAsync(ulong guildId)
     {
@@ -100,7 +100,7 @@ public class RyujinxBotInteractionService : BotService
 #if DEBUG
             await _backing.RegisterCommandsToGuildAsync(DiscordHelper.DevGuildId);
 #else
-            await Config.WhitelistGuilds
+            await Config.WhitelistGuilds.Keys
                 .ForEachAsync(async id => await _backing.RegisterCommandsToGuildAsync(id));
 #endif
             

@@ -77,8 +77,7 @@ public partial class GitHubModule
                 }
 
                 embed.WithColor(GetColorBasedOnIssueState(pr));
-                if (pr.UpdatedAt is var dto)
-                    embed.WithTimestamp(dto);
+                embed.WithFooter(FormatIssueState(pr));
             }));
     }
 

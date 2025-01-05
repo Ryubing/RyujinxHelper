@@ -22,8 +22,7 @@ public partial class GitHubModule
                 embed.AddField("Labels", issue.FormatLabels());
                 embed.WithDescription(issue.Body.Truncate(EmbedBuilder.MaxDescriptionLength));
                 embed.WithColor(GetColorBasedOnIssueState(issue));
-                if (issue.UpdatedAt is { } dto)
-                    embed.WithTimestamp(dto);
+                embed.WithFooter(FormatIssueState(issue));
             }));
     }
 }

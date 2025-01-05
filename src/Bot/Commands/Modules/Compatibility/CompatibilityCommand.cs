@@ -1,6 +1,5 @@
 ﻿using System.Globalization;
 using Discord.Interactions;
-using RyuBot.Interactions;
 
 namespace RyuBot.Commands.Modules;
 
@@ -9,7 +8,7 @@ public partial class CompatibilityModule
     [SlashCommand("compatibility", "Show compatibility information for a game.")]
     public Task<RuntimeResult> CompatibilityAsync(
         [Summary("game", "The name or title ID of the game to lookup.")]
-        [Autocomplete(typeof(GameCompatibilityNameAutocompleter))]
+        [Autocomplete(typeof(GameCompatibilityNameAutocompleter))] 
         string game,
         [Summary("public", "Post the compatibility result publicly.")]
         bool publicResult = false

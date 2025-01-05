@@ -7,11 +7,10 @@ public static class Buttons
     private static ButtonBuilder CreateBuilder(MessageComponentId id, ButtonStyle style, IEmote emote = null)
         => new ButtonBuilder().WithStyle(style).WithCustomId(id).WithEmote(emote);
 
-    private static void EnsureNeitherNull(string label, IEmote emote)
-    {
-        if (label is null && emote is null)
-            throw new ArgumentException("Cannot create a button without a label OR emote.");
-    }
+    private static void EnsureNeitherNull(string label, IEmote emote) 
+        => Guard.Ensure(
+            !(label is null && emote is null),
+            "Cannot create a button without a label OR emote.");
 
     public static ButtonBuilder Danger(MessageComponentId id, string label = null, IEmote emote = null,
         bool disabled = false)

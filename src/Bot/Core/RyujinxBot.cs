@@ -61,8 +61,7 @@ public class RyujinxBot
             await ShutdownAsync();
         }
     }
-
-    // ReSharper disable SuggestBaseTypeForParameter
+    
     public static async Task ShutdownAsync()
     {
         Critical(LogSource.Volte, "Bot shutdown requested; shutting down and cleaning up.");

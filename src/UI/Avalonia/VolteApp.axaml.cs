@@ -10,7 +10,10 @@ using Avalonia.Markup.Xaml;
 using Avalonia.Threading;
 using Gommon;
 using Humanizer;
+using MenuFactory;
+using MenuFactory.Abstractions;
 using RyuBot.Entities;
+using RyuBot.UI.Avalonia.MenuModel;
 using RyuBot.UI.Avalonia.Pages;
 using RyuBot.UI.Helpers;
 
@@ -21,6 +24,12 @@ public class RyujinxBotApp : Application
     private static WindowNotificationManager? _notificationManager;
 
     public static TopLevel? XamlRoot { get; private set; }
+    
+    /// <summary>
+    /// Application <see cref="IMenuFactory"/> (used for extending the main menu at runtime)
+    /// </summary>
+    public static IMenuFactory MenuFactory { get; private set; } = null!;
+    
 
     public static readonly KeyGesture OpenDevTools = new(Key.F4, KeyModifiers.Control);
 
@@ -49,7 +58,9 @@ public class RyujinxBotApp : Application
     {
         if (AvaloniaHelper.TryGetDesktop(out var desktop))
         {
-            XamlRoot = desktop.MainWindow = new UIShellView();
+            var shelLView = new UIShellView();
+
+            XamlRoot = desktop.MainWindow = shelLView;
             
             desktop.MainWindow.Loaded += (_, _) => _notificationManager = new(XamlRoot)
             {
@@ -57,6 +68,10 @@ public class RyujinxBotApp : Application
                 MaxItems = 4,
                 Margin = new(0, 0, 4, 30)
             };
+
+            MenuFactory = new AvaloniaMenuFactory(XamlRoot);
+            MenuFactory.AddMenuGroup<UIShellViewMenu>();
+            shelLView.MainMenu.ItemsSource = MenuFactory.Items;
             
             desktop.MainWindow.Closing += (_, _) =>
             {

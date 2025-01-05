@@ -1,4 +1,5 @@
-﻿using Discord.Interactions;
+﻿using System.Globalization;
+using Discord.Interactions;
 using RyuBot.Interactions;
 
 namespace RyuBot.Commands.Modules;
@@ -7,21 +8,25 @@ public partial class CompatibilityModule
 {
     [SlashCommand("compatibility", "Show compatibility information for a game.")]
     public Task<RuntimeResult> CompatibilityAsync(
-        [Summary("game_title", "The name of the game to lookup.")]
+        [Summary("game", "The name or title ID of the game to lookup.")]
         [Autocomplete(typeof(GameCompatibilityNameAutocompleter))]
-        string gameName,
+        string game,
         [Summary("public", "Post the compatibility result publicly.")]
         bool publicResult = false
         )
     {
-        if (Compatibility.GetByGameName(gameName) is not { } csvEntry)
-            return BadRequest($"Could not find a game compatibility entry for `{gameName}`.");
+        var searchedForTitleId = ulong.TryParse(game, NumberStyles.HexNumber, null, out _);
+        
+        if (!Compatibility.FindOrNull(game).TryGet(out var csvEntry))
+            return BadRequest($"Could not find a game compatibility entry for `{game}`. {
+                (searchedForTitleId ? "Try specifying a name instead of ID!" : string.Empty)
+            }".TrimEnd());
         
         return Ok(CreateReplyBuilder(!publicResult)
             .WithEmbed(embed =>
             {
                 embed.WithTitle(csvEntry.GameName.Truncate(EmbedBuilder.MaxTitleLength));
-                embed.AddField("Status", Capitalize(csvEntry.Status), true);
+                embed.AddField("Status", csvEntry.Status.Capitalize(), true);
                 csvEntry.TitleId.IfPresent(tid
                     => embed.AddField("Title ID", tid, true)
                 );
@@ -38,17 +43,6 @@ public partial class CompatibilityModule
                 embed.WithTimestamp(csvEntry.LastEvent);
             }));
     }
-
-    private static string Capitalize(string value)
-    {
-        if (value == string.Empty)
-            return string.Empty;
-        
-        var firstChar = value[0];
-        var rest = value[1..];
-
-        return $"{char.ToUpper(firstChar)}{rest}";
-    }
 }
 
 public class GameCompatibilityNameAutocompleter : AutocompleteHandler
@@ -59,14 +53,15 @@ public class GameCompatibilityNameAutocompleter : AutocompleteHandler
         IParameterInfo parameter, 
         IServiceProvider services)
     {
-        var compatCsv = services.Get<CompatibilityCsvService>().Csv;
+        var compatCsv = services.Get<CompatibilityCsvService>();
         
         foreach (var option in autocompleteInteraction.Data.Options)
         {
             if (option.Focused && !string.Empty.Equals(option.Value))
             {
                 var userValue = option.Value.ToString();
-                var results = compatCsv.Entries.Where(x => x.GameName.ContainsIgnoreCase(userValue)).Take(25).ToArray();
+                var results = compatCsv.SearchEntries(userValue).Take(25).ToArray();
+                
                 if (results.Length > 0)
                 {
                     return Task.FromResult(AutocompletionResult.FromSuccess(

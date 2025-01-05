@@ -11,24 +11,22 @@ public abstract class RyujinxBotModuleBase<T> : InteractionModuleBase<SocketInte
     public RyujinxBotInteractionService Interactions { get; set; }
     
     private bool DidDefer { get; set; }
-    private bool DeferralWasEphemeral { get; set; }
 
     protected new async Task DeferAsync(bool ephemeral = false, RequestOptions options = null)
     {
         await Context.Interaction.DeferAsync(ephemeral, options);
         DidDefer = true;
-        DeferralWasEphemeral = ephemeral;
     }
 
     protected ReplyBuilder<T> CreateReplyBuilder(
-        bool? ephemeral = null
-    ) => Context.CreateReplyBuilder(ephemeral ?? DeferralWasEphemeral, DidDefer);
+        bool ephemeral = false
+    ) => Context.CreateReplyBuilder(ephemeral, DidDefer);
     
     public bool IsInGuild() => Context.Guild != null;
     
     protected NoneResult None() => new();
 
-    protected BadRequestResult BadRequest(string reason) => new(reason);
+    protected BadRequestResult BadRequest(string reason) => new(reason, DidDefer);
 
     protected OkResult<T> Ok(ReplyBuilder<T> reply) => new(reply);
 

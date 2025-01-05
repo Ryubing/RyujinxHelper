@@ -123,6 +123,14 @@ public class ReplyBuilder<TInteraction> where TInteraction : SocketInteraction
         return this;
     }
 
+    public Task ExecuteAsync(RequestOptions? options = null) =>
+        DidDefer
+            ? ModifyOriginalResponseAsync(options)
+            : ShouldFollowup
+                ? FollowupAsync(options)
+                : RespondAsync(options);
+
+
     public Task<RestInteractionMessage> ModifyOriginalResponseAsync(RequestOptions? options = null)
     {
         return Context.Interaction.ModifyOriginalResponseAsync(msg =>

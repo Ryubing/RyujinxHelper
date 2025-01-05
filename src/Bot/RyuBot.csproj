@@ -25,12 +25,6 @@
       <None Include="..\..\build.sh" Link="Build Script" />
     </ItemGroup>
     <ItemGroup>
-        <EmbeddedResource Include="Resources/Mono/JetBrainsMonoNL-Regular.ttf" LogicalName="Regular" />
-        <EmbeddedResource Include="Resources/Mono/JetBrainsMonoNL-Bold.ttf" LogicalName="Bold" />
-        <EmbeddedResource Include="Resources/Mono/JetBrainsMonoNL-BoldItalic.ttf" LogicalName="BoldItalic" />
-        <EmbeddedResource Include="Resources/Mono/JetBrainsMonoNL-Italic.ttf" LogicalName="Italic" />
-    </ItemGroup>
-    <ItemGroup>
         <PackageReference Include="Discord.Net.Interactions" Version="3.17.0" />
         <PackageReference Include="Discord.Net.WebSocket" Version="3.17.0" />
         <PackageReference Include="GitHubJwt" Version="0.0.6" />

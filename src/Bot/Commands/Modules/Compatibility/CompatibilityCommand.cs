@@ -9,12 +9,15 @@ public partial class CompatibilityModule
     public Task<RuntimeResult> CompatibilityAsync(
         [Summary("game_title", "The name of the game to lookup.")]
         [Autocomplete(typeof(GameCompatibilityNameAutocompleter))]
-        string gameName)
+        string gameName,
+        [Summary("public", "Post the compatibility result publicly.")]
+        bool publicResult = false
+        )
     {
         if (Compatibility.GetByGameName(gameName) is not { } csvEntry)
             return BadRequest($"Could not find a game compatibility entry for `{gameName}`.");
         
-        return Ok(CreateReplyBuilder(true)
+        return Ok(CreateReplyBuilder(!publicResult)
             .WithEmbed(embed =>
             {
                 embed.WithTitle(csvEntry.GameName.Truncate(EmbedBuilder.MaxTitleLength));

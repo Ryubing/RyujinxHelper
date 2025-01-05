@@ -11,7 +11,7 @@ public class OkResult<TInteraction> : RuntimeResult where TInteraction : SocketI
 
     public readonly ReplyBuilder<TInteraction> Reply;
     
-    public static implicit operator Task<OkResult<TInteraction>>(OkResult<TInteraction> input) 
-        => Task.FromResult(input);
+    public static implicit operator Task<RuntimeResult>(OkResult<TInteraction> input) 
+        => Task.FromResult<RuntimeResult>(input);
 }
 

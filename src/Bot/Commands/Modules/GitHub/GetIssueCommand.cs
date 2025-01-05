@@ -1,5 +1,4 @@
 ﻿using Discord.Interactions;
-using Octokit;
 using RyuBot.Interactions;
 
 namespace Volte.Interactions.Commands.Modules;
@@ -14,7 +13,7 @@ public partial class GitHubModule
         if (issue is null)
             return BadRequest($"Issue {issueNumber} not found.");
         
-        return Ok(Context.CreateReplyBuilder()
+        return Ok(CreateReplyBuilder()
             .WithButtons(Buttons.Link(issue.HtmlUrl, "Open on GitHub"))
             .WithEmbed(embed =>
             {

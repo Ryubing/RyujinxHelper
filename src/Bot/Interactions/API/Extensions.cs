@@ -56,12 +56,13 @@ public static class Extensions
     
     public static MessageComponentId GetId(this SocketInteractionContext<SocketMessageComponent> ctx)
         => ctx.Interaction.Data.CustomId;
-
-
+    
     public static ReplyBuilder<TInteraction> CreateReplyBuilder<TInteraction>(
-        this SocketInteractionContext<TInteraction> interaction,
-        bool ephemeral = false, 
+        this SocketInteractionContext<TInteraction> context,
+        bool ephemeral = false,
         bool deferred = false
     ) where TInteraction : SocketInteraction
-        => new ReplyBuilder<TInteraction>(interaction).WithEphemeral(ephemeral).WithDeferral(deferred);
+        => new ReplyBuilder<TInteraction>(context)
+            .WithEphemeral(ephemeral)
+            .WithDeferral(deferred);
 }

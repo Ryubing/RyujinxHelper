@@ -15,7 +15,7 @@ public partial class GitHubModule
         [Summary("ignore_builds", "Don't show the build downloads on the reply.")]
         bool ignoreBuilds = false)
     {
-        await Context.Interaction.DeferAsync();
+        await DeferAsync();
 
         var pr = await GitHub.GetPullRequestAsync(Context, prNumber);
 
@@ -38,7 +38,7 @@ public partial class GitHubModule
             }
         }
 
-        return Ok(Context.CreateReplyBuilder(deferred: true)
+        return Ok(CreateReplyBuilder()
             .WithButtons(Buttons.Link(pr.HtmlUrl, "Open on GitHub"))
             .WithEmbed(embed =>
             {

@@ -6,7 +6,7 @@ namespace RyuBot.Commands.Modules;
 public partial class CompatibilityModule
 {
     [SlashCommand("compatibility", "Show compatibility information for a game.")]
-    public async Task<RuntimeResult> CompatibilityAsync(
+    public Task<RuntimeResult> CompatibilityAsync(
         [Summary("game_title", "The name of the game to lookup.")]
         [Autocomplete(typeof(GameCompatibilityNameAutocompleter))]
         string gameName)
@@ -14,7 +14,7 @@ public partial class CompatibilityModule
         if (Compatibility.GetByGameName(gameName) is not { } csvEntry)
             return BadRequest($"Could not find a game compatibility entry for `{gameName}`.");
         
-        return Ok(Context.CreateReplyBuilder(true)
+        return Ok(CreateReplyBuilder(true)
             .WithEmbed(embed =>
             {
                 embed.WithTitle(csvEntry.GameName.Truncate(EmbedBuilder.MaxTitleLength));

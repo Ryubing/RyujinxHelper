@@ -57,7 +57,7 @@ public partial class GitHubModule
         else if (linuxArm64 != null)
             releaseBody.AppendLine();
 
-        return Ok(Context.CreateReplyBuilder()
+        return Ok(CreateReplyBuilder()
             .WithButtons(Buttons.Link(latest.HtmlUrl, "Open on GitHub"))
             .WithEmbed(embed =>
             {

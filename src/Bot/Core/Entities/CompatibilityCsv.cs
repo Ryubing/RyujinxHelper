@@ -72,7 +72,7 @@ public class CompatibilityEntry
         sb.Append($"{nameof(IssueLabels)}=\"{IssueLabels}\", ");
         sb.Append($"{nameof(Status)}=\"{Status}\", ");
         sb.Append($"{nameof(LastEvent)}=\"{LastEvent}\", ");
-        sb.Append($"{nameof(EventCount)}={EventCount}, ");
+        sb.Append($"{nameof(EventCount)}={EventCount}");
         sb.Append('}');
 
         return sb.ToString();

@@ -1,12 +1,11 @@
 ﻿using Discord.Interactions;
-using RyuBot.Entities;
-using RyuBot.Interactions;
 using RyuBot.Interactions.Results;
 
 namespace RyuBot.Interactions;
 
 [Obsolete("Use an inheritor of this class; not this class directly.")]
-public abstract class RyujinxBotModuleBase<T> : InteractionModuleBase<SocketInteractionContext<T>> where T : SocketInteraction
+public abstract class RyujinxBotModuleBase<TInteraction> : InteractionModuleBase<SocketInteractionContext<TInteraction>> 
+    where TInteraction : SocketInteraction
 {
     public RyujinxBotInteractionService Interactions { get; set; }
     
@@ -18,7 +17,7 @@ public abstract class RyujinxBotModuleBase<T> : InteractionModuleBase<SocketInte
         DidDefer = true;
     }
 
-    protected ReplyBuilder<T> CreateReplyBuilder(
+    protected ReplyBuilder<TInteraction> CreateReplyBuilder(
         bool ephemeral = false
     ) => Context.CreateReplyBuilder(ephemeral, DidDefer);
     
@@ -26,14 +25,14 @@ public abstract class RyujinxBotModuleBase<T> : InteractionModuleBase<SocketInte
     
     protected NoneResult None() => new();
 
-    protected BadRequestResult<T> BadRequest(string reason) => new(Context, reason, DidDefer);
+    protected BadRequestResult<TInteraction> BadRequest(string reason) => new(Context, reason, DidDefer);
 
-    protected OkResult<T> Ok(ReplyBuilder<T> reply) => new(reply);
+    protected OkResult<TInteraction> Ok(ReplyBuilder<TInteraction> reply) => new(reply);
 
-    protected OkResult<T> Ok(string message, bool ephemeral = false) 
+    protected OkResult<TInteraction> Ok(string message, bool ephemeral = false) 
         => Ok(CreateReplyBuilder(ephemeral).WithEmbedFrom(message));
     
-    protected OkResult<T> Ok(EmbedBuilder embed, bool ephemeral = false) 
+    protected OkResult<TInteraction> Ok(EmbedBuilder embed, bool ephemeral = false) 
         => new(CreateReplyBuilder(ephemeral).WithEmbeds(embed));
 }
 

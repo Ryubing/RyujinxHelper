@@ -24,7 +24,7 @@
                             <TextBlock Grid.Column="0"
                                        FontFamily="{StaticResource JetBrainsMono}"
                                        Text="{Binding GameName}"
-                                       Width="333"
+                                       Width="450"
                                        TextWrapping="Wrap"/>
                             <TextBlock Grid.Column="1"
                                        Width="145"

@@ -13,7 +13,8 @@ public class CompatibilityCsv
             entries.Add(new CompatibilityEntry(reader.Header, row));
         }
 
-        Entries = entries.ToArray();
+        Entries = entries.Where(x => !x.Status.IsNullOrEmpty())
+            .OrderBy(it => it.GameName).ToArray();
     }
 
     public CompatibilityEntry[] Entries { get; }
@@ -65,19 +66,13 @@ public class CompatibilityEntry
     public override string ToString()
     {
         var sb = new StringBuilder("CompatibilityCsv.Entry: {");
-        sb.Append($"{nameof(IssueNumber)}={IssueNumber}");
-        sb.Append(',');
-        sb.Append($"{nameof(GameName)}=\"{GameName}\"");
-        sb.Append(',');
-        sb.Append($"{nameof(TitleId)}={TitleId}");
-        sb.Append(',');
-        sb.Append($"{nameof(IssueLabels)}=\"{IssueLabels}\"");
-        sb.Append(',');
-        sb.Append($"{nameof(Status)}=\"{Status}\"");
-        sb.Append(',');
-        sb.Append($"{nameof(LastEvent)}=\"{LastEvent}\"");
-        sb.Append(',');
-        sb.Append($"{nameof(EventCount)}={EventCount}");
+        sb.Append($"{nameof(IssueNumber)}={IssueNumber}, ");
+        sb.Append($"{nameof(GameName)}=\"{GameName}\", ");
+        sb.Append($"{nameof(TitleId)}={TitleId}, ");
+        sb.Append($"{nameof(IssueLabels)}=\"{IssueLabels}\", ");
+        sb.Append($"{nameof(Status)}=\"{Status}\", ");
+        sb.Append($"{nameof(LastEvent)}=\"{LastEvent}\", ");
+        sb.Append($"{nameof(EventCount)}={EventCount}, ");
         sb.Append('}');
 
         return sb.ToString();

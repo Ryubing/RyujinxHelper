@@ -130,42 +130,24 @@ public class RyujinxBotInteractionService : BotService
         where TCommandInfo : CommandInfo<TParameterInfo>
     {
         if (result is null) return;
-        
-        if (result.IsSuccess)
+
+        switch (result)
         {
-            switch (result)
-            {
-                case OkResult<TInteraction> okResult:
-                    await okResult.Reply.ExecuteAsync();
-                    break;
-                case BadRequestResult badRequest:
-                    await context.CreateReplyBuilder(true)
-                        .WithDeferral(badRequest.DidDefer)
-                        .WithEmbed(e =>
-                            e.WithTitle("No can do, partner.")
-                                .WithDescription(badRequest.ErrorReason)
-                                .WithCurrentTimestamp()
-                        ).ExecuteAsync();
-                    break;
-            }
-        }
-        else
-        {
-            switch (result)
-            {
-                // for when dnet fixes their fucking shit
-                //case ExecuteResult errorResult:
-                //    Error(LogSource.Service, $"Error occurred executing command {command.Name}", errorResult.Exception);
-                //    break;
-                case PreconditionResult unmetPreconditionResult:
-                    await context.CreateReplyBuilder(true)
-                        .WithEmbed(e =>
-                            e.WithTitle(unmetPreconditionResult.ErrorReason)
-                                .WithColor(Color.DarkRed)
-                                .WithCurrentTimestamp()
-                        ).ExecuteAsync();
-                    break;
-            }
+            case BotResultBase botResult:
+                await botResult.ExecuteAsync();
+                break;
+            case PreconditionResult unmetPreconditionResult:
+                await context.CreateReplyBuilder(true)
+                    .WithEmbed(e =>
+                        e.WithTitle(unmetPreconditionResult.ErrorReason)
+                            .WithColor(Color.DarkRed)
+                            .WithCurrentTimestamp()
+                    ).ExecuteAsync();
+                break;
+            // for when dnet fixes their fucking shit
+            //case ExecuteResult errorResult:
+            //    Error(LogSource.Service, $"Error occurred executing command {command.Name}", errorResult.Exception);
+            //    break;
         }
     }
 

@@ -26,7 +26,7 @@ public abstract class RyujinxBotModuleBase<T> : InteractionModuleBase<SocketInte
     
     protected NoneResult None() => new();
 
-    protected BadRequestResult BadRequest(string reason) => new(reason, DidDefer);
+    protected BadRequestResult<T> BadRequest(string reason) => new(Context, reason, DidDefer);
 
     protected OkResult<T> Ok(ReplyBuilder<T> reply) => new(reply);
 

@@ -2,15 +2,26 @@
 
 namespace RyuBot.Interactions.Results;
 
-public class BadRequestResult : RuntimeResult
+public class BadRequestResult<TInteraction> : BotResultBase where TInteraction : SocketInteraction
 {
-    public bool DidDefer { get; init; }
+    public SocketInteractionContext<TInteraction> Context { get; }
+    
+    public bool DidDefer { get; }
 
-    public BadRequestResult(string error, bool didDefer) : base(null, error)
+    public BadRequestResult(SocketInteractionContext<TInteraction> context, string error, bool didDefer) 
+        : base(null, error)
     {
+        Context = context;
         DidDefer = didDefer;
     }
 
-    public static implicit operator Task<RuntimeResult>(BadRequestResult input) 
-        => Task.FromResult<RuntimeResult>(input);
+    public override Task ExecuteAsync() =>
+        Context.CreateReplyBuilder(true)
+            .WithDeferral(DidDefer)
+            .WithEmbed(e =>
+                e.WithTitle("No can do, partner.")
+                    .WithDescription(ErrorReason)
+                    .WithColor(Color.Red)
+                    .WithCurrentTimestamp()
+            ).ExecuteAsync();
 }

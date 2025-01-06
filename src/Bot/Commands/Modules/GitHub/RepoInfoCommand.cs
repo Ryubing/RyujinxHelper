@@ -9,8 +9,6 @@ public partial class GitHubModule
     public async Task<RuntimeResult> RepoInfoAsync()
     {
         var repo = await GitHub.GetRepositoryAsync(Context);
-
-        throw new Exception("lol");
         
         return Ok(CreateReplyBuilder(true)
             .WithButtons(Buttons.Link(repo.HtmlUrl, "Open on GitHub"))

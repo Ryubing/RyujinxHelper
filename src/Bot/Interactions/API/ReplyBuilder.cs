@@ -3,6 +3,22 @@
 
 namespace RyuBot.Interactions;
 
+/// <summary>
+///     Acts as a mechanism to easily construct responses to Discord Interactions.<br/><br/>
+///     The "build" functions on this builder are the Async-suffixed methods:
+///     <see cref="RespondAsync"/>, <see cref="ModifyOriginalResponseAsync"/>, <see cref="FollowupAsync"/>
+///     <br/><br/>
+///     In combination with the command results system, this also has smart deferral;
+///     that is, if you defer in a command (using the Module's
+///     <see cref="RyujinxBotModuleBase{TInteraction}.DeferAsync"/> implementation),
+///     the ReplyBuilder will know to modify the original response instead of
+///     trying to make a new response.<br/>
+///
+///     The ReplyBuilder does not magically do this on its own; the custom DeferAsync effectively
+///     just sets <see cref="DidDefer"/> in this class to true when it's constructed;
+///     and then that value is respected when <see cref="ExecuteAsync"/> is called.
+/// </summary>
+/// <typeparam name="TInteraction">The type of Interaction that's being responded to.</typeparam>
 #nullable enable
 public class ReplyBuilder<TInteraction> where TInteraction : SocketInteraction
 {

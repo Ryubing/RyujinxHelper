@@ -4,12 +4,6 @@ namespace RyuBot.UI;
 
 public class BotManager
 {
-    static BotManager()
-    {
-        Console.Title = $"Ryujinx Bot {Version.InformationVersion}";
-        Console.CursorVisible = false;
-    }
-    
     private static Task? _botTask;
 
     public static CancellationTokenSource? Cts { get; private set; }

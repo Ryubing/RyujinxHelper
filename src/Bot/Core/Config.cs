@@ -52,7 +52,7 @@ public static class Config
             Token = "token here",
             SentryDsn = "",
             WhitelistGuilds = [
-                new(1294443224030511104, "Ryubing", "Ryujinx")
+                new(1294443224030511104, 1298451667863470120, "Ryubing", "Ryujinx")
             ],
             Owner = 0,
             Game = "game here",
@@ -140,11 +140,24 @@ public static class Config
 
     public static long GitHubAppInstallationId => _configuration.GitHubAppInstallationId;
 
-    public static Dictionary<ulong, (string RepoOwner, string RepoName)> WhitelistGuilds => _configuration
+    public static IEnumerable<ulong> WhitelistGuilds => _configuration
+        .WhitelistGuilds
+        .Select(
+            x => x.GuildId
+        );
+    
+    public static Dictionary<ulong, (string RepoOwner, string RepoName)> WhitelistGuildRepos => _configuration
         .WhitelistGuilds
         .ToDictionary(
             x => x.GuildId, 
             x => (x.RepoOwner, x.RepoName)
+        );
+    
+    public static Dictionary<ulong, ulong> WhitelistGuildPirateRoles => _configuration
+        .WhitelistGuilds
+        .ToDictionary(
+            x => x.GuildId, 
+            x => x.PirateRoleId
         );
 
     public static string SentryDsn => _configuration.SentryDsn;
@@ -176,7 +189,7 @@ public struct HeadlessBotConfig : IVolteConfig
     public string SentryDsn { get; set; }
     
     [JsonPropertyName("guild_info")]
-    public GuildGitHubRepoDefinition[] WhitelistGuilds { get; set; }
+    public GuildConfig[] WhitelistGuilds { get; set; }
 
     [JsonPropertyName("bot_owner")]
     public ulong Owner { get; set; }
@@ -215,7 +228,7 @@ public interface IVolteConfig
     public string SentryDsn { get; set; }
     
     [JsonPropertyName("guild_info")]
-    public GuildGitHubRepoDefinition[] WhitelistGuilds { get; set; }
+    public GuildConfig[] WhitelistGuilds { get; set; }
     
     [JsonPropertyName("bot_owner")]
     public ulong Owner { get; set; }

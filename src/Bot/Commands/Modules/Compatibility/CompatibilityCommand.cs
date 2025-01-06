@@ -6,6 +6,7 @@ namespace RyuBot.Commands.Modules;
 public partial class CompatibilityModule
 {
     [SlashCommand("compatibility", "Show compatibility information for a game.")]
+    [RequireNotPiratePrecondition]
     public Task<RuntimeResult> CompatibilityAsync(
         [Summary("game", "The name or title ID of the game to lookup.")]
         [Autocomplete(typeof(GameCompatibilityNameAutocompleter))] 

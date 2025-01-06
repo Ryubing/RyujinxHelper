@@ -8,7 +8,7 @@ public static class GitHubHelper
     public const string MainRepoName = "Ryujinx";
 
     public static (string Owner, string Name) GetRepo(IInteractionContext ctx) =>
-        Config.WhitelistGuilds
+        Config.WhitelistGuildRepos
             .FindValue(ctx.Guild?.Id ?? ulong.MaxValue)
             .OrElse((MainRepoOwner, MainRepoName));
 

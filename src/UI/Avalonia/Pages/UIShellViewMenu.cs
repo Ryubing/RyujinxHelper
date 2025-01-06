@@ -26,7 +26,7 @@ public class ShellViewMenu
 #else
         var removedCommands = 0;
         // ReSharper disable once LoopCanBeConvertedToQuery
-        foreach (var guildId in Config.WhitelistGuilds.Keys)
+        foreach (var guildId in Config.WhitelistGuilds)
         {
             removedCommands = Math.Max(await interactionService.ClearAllCommandsInGuildAsync(guildId), removedCommands);
         }

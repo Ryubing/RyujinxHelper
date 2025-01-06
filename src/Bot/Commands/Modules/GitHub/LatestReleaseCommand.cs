@@ -1,5 +1,6 @@
 ﻿using Discord.Interactions;
 using Octokit;
+using RyuBot.Commands;
 using RyuBot.Interactions;
 
 namespace Volte.Interactions.Commands.Modules;
@@ -7,6 +8,7 @@ namespace Volte.Interactions.Commands.Modules;
 public partial class GitHubModule
 {
     [SlashCommand("latest", "Show the download URLs for the latest release of Ryujinx.")]
+    [RequireNotPiratePrecondition]
     public async Task<RuntimeResult> LatestReleaseAsync(
         [Summary("release_channel", "The release channel to look for the latest version from. Only has more options in Ryubing.")]
         [Autocomplete<LatestReleaseAutocompleter>]

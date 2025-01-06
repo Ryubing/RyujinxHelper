@@ -75,7 +75,7 @@ public class RyujinxBotInteractionService : BotService
     }
     
     private static bool IsInAllowedGuild(SocketInteraction interaction) 
-        => Config.WhitelistGuilds.ContainsKey(interaction.GuildId ?? ulong.MaxValue);
+        => Config.WhitelistGuildRepos.ContainsKey(interaction.GuildId ?? ulong.MaxValue);
 
     public async Task<int> ClearAllCommandsInGuildAsync(ulong guildId)
     {
@@ -100,7 +100,7 @@ public class RyujinxBotInteractionService : BotService
 #if DEBUG
             await _backing.RegisterCommandsToGuildAsync(DiscordHelper.DevGuildId);
 #else
-            await Config.WhitelistGuilds.Keys
+            await Config.WhitelistGuilds
                 .ForEachAsync(async id => await _backing.RegisterCommandsToGuildAsync(id));
 #endif
             
@@ -129,7 +129,9 @@ public class RyujinxBotInteractionService : BotService
         where TParameterInfo : CommandParameterInfo
         where TCommandInfo : CommandInfo<TParameterInfo>
     {
-        if (result?.IsSuccess ?? true)
+        if (result is null) return;
+        
+        if (result.IsSuccess)
         {
             switch (result)
             {
@@ -151,8 +153,17 @@ public class RyujinxBotInteractionService : BotService
         {
             switch (result)
             {
-                case ExecuteResult { Error: InteractionCommandError.Exception } errorResult:
-                    Error(LogSource.Service, $"Error occurred executing command {command.Name}", errorResult.Exception);
+                // for when dnet fixes their fucking shit
+                //case ExecuteResult errorResult:
+                //    Error(LogSource.Service, $"Error occurred executing command {command.Name}", errorResult.Exception);
+                //    break;
+                case PreconditionResult unmetPreconditionResult:
+                    await context.CreateReplyBuilder(true)
+                        .WithEmbed(e =>
+                            e.WithTitle(unmetPreconditionResult.ErrorReason)
+                                .WithColor(Color.DarkRed)
+                                .WithCurrentTimestamp()
+                        ).ExecuteAsync();
                     break;
             }
         }

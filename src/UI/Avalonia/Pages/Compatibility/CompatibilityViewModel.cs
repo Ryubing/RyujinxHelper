@@ -1,5 +1,4 @@
-﻿using Avalonia.Collections;
-using CommunityToolkit.Mvvm.ComponentModel;
+﻿using CommunityToolkit.Mvvm.ComponentModel;
 using Gommon;
 using RyuBot.Entities;
 using RyuBot.Services;
@@ -10,24 +9,23 @@ public partial class CompatibilityViewModel : ObservableObject
 {
     [ObservableProperty] private CompatibilityCsv _csv = RyujinxBot.Services.Get<CompatibilityCsvService>().Csv;
 
-    [ObservableProperty] private AvaloniaList<CompatibilityEntry> _currentEntries;
+    [ObservableProperty] private IEnumerable<CompatibilityEntry> _currentEntries;
 
     public CompatibilityViewModel()
     {
-        _currentEntries = new AvaloniaList<CompatibilityEntry>(_csv.Entries);
+        _currentEntries = _csv.Entries;
     }
 
     public void Search(string? searchTerm)
     {
         if (string.IsNullOrEmpty(searchTerm))
         {
-            CurrentEntries = new AvaloniaList<CompatibilityEntry>(Csv.Entries);
+            CurrentEntries = Csv.Entries;
             return;
         }
-        
-        CurrentEntries = new AvaloniaList<CompatibilityEntry>(
-            Csv.Entries.Where(x => 
-                x.GameName.ContainsIgnoreCase(searchTerm)
-                || x.TitleId.Check(tid => tid.ContainsIgnoreCase(searchTerm))));
+
+        CurrentEntries = Csv.Entries.Where(x =>
+            x.GameName.ContainsIgnoreCase(searchTerm)
+            || x.TitleId.Check(tid => tid.ContainsIgnoreCase(searchTerm)));
     }
 }

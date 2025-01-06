@@ -27,6 +27,8 @@
                                        Width="333"
                                        TextWrapping="Wrap"/>
                             <TextBlock Grid.Column="1"
+                                       Padding="7, 0"
+                                       VerticalAlignment="Center"
                                        FontFamily="{StaticResource JetBrainsMono}"
                                        Text="{Binding Status}"
                                        Width="85"

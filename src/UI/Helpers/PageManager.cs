@@ -102,6 +102,7 @@ public partial class PageManager : ObservableObject
 
 public enum PageType : byte
 {
+    Compatibility = 1,
     Logs = 0
 }
 

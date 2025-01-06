@@ -30,10 +30,7 @@ public partial class CompatibilityModule
                 csvEntry.TitleId.IfPresent(tid
                     => embed.AddField("Title ID", tid, true)
                 );
-                embed.AddField("Labels", csvEntry.IssueLabels
-                    .Where(it => !it.StartsWithIgnoreCase("status"))
-                    .Select(GitHubHelper.FormatLabelName).JoinToString(", ")
-                );
+                embed.AddField("Labels", csvEntry.FormatIssueLabels());
                 embed.WithColor(csvEntry.Status.ToLower() switch
                 {
                     "nothing" or "boots" or "menus" => Color.Red,

@@ -50,11 +50,13 @@ public abstract class VolteBrushConverter<TConverter> : IValueConverter where TC
     
     public object? Convert(object? value, Type _, object? __, CultureInfo ___) =>
         BrushDefinitions.FindFirst(x => x.Raw.Equals(value))
-            .Convert(x => x.Brush);
+            .Convert(x => x.Brush).OrDefault();
 
     public object? ConvertBack(object? value, Type _, object? __, CultureInfo ___) =>
         BrushDefinitions.FindFirst(x => x.Brush.Equals(value))
-            .Convert(x => x.Raw);
+            .Convert(x => x.Raw).OrDefault();
 
     protected IBrush GetBrush(Color color) => Brush.Parse(color.ToHexadecimalString());
+
+    protected IBrush GetBrush(Discord.Color color) => Brush.Parse(color.ToHexadecimalString());
 }

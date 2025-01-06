@@ -1,0 +1,54 @@
+﻿<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:local="using:RyuBot.UI.Avalonia.Pages"
+             xmlns:entities="using:RyuBot.Entities"
+             xmlns:converters="using:RyuBot.UI.Converters"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
+             x:Class="RyuBot.UI.Avalonia.Pages.CompatibilityView"
+             x:DataType="local:CompatibilityViewModel">
+    <UserControl.DataContext>
+        <local:CompatibilityViewModel />
+    </UserControl.DataContext>
+    <ScrollViewer>
+        <StackPanel Orientation="Vertical">
+            <TextBox Watermark="Search compatibility entries..." TextChanged="TextBox_OnTextChanged" />
+            <ListBox Margin="5"
+                     Padding="10"
+                     Background="Transparent"
+                     ItemsSource="{Binding CurrentEntries}">
+                <ListBox.ItemTemplate>
+                    <DataTemplate DataType="{x:Type entities:CompatibilityEntry}">
+                        <Grid ColumnDefinitions="Auto,Auto,*,Auto" Margin="5">
+                            <TextBlock Grid.Column="0"
+                                       FontFamily="{StaticResource JetBrainsMono}"
+                                       Text="{Binding GameName}"
+                                       Width="333"
+                                       TextWrapping="Wrap"/>
+                            <TextBlock Grid.Column="1"
+                                       FontFamily="{StaticResource JetBrainsMono}"
+                                       Text="{Binding Status}"
+                                       Width="85"
+                                       Foreground="{Binding Status, Converter={x:Static converters:PlayabilityStatusConverter.Shared}}"
+                                       TextWrapping="NoWrap" />
+                            <TextBlock Grid.Column="2"
+                                       VerticalAlignment="Center"
+                                       FontFamily="{StaticResource JetBrainsMono}"
+                                       Text="{Binding FormattedIssueLabels}"
+                                       TextWrapping="WrapWithOverflow" />
+                            <TextBlock Grid.Column="3"
+                                       VerticalAlignment="Center"
+                                       HorizontalAlignment="Right"
+                                       FontFamily="{StaticResource JetBrainsMono}"
+                                       FontStyle="Oblique"
+                                       TextDecorations="Underline"
+                                       FontSize="9"
+                                       Text="{Binding LastEvent}" />
+                        </Grid>
+                    </DataTemplate>
+                </ListBox.ItemTemplate>
+            </ListBox>
+        </StackPanel>
+    </ScrollViewer>
+</UserControl>

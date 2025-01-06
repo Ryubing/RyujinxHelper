@@ -33,6 +33,12 @@ public static partial class Extensions
         string rgb() => $"{color.R:X2}{color.G:X2}{color.B:X2}";
     }
     
+    public static string ToHexadecimalString(this Color color, 
+        string prefix = "#")
+    {
+        return $"{color.R:X2}{color.G:X2}{color.B:X2}";
+    }
+    
     public static bool ExistsInAny<T>(this T @this, params IEnumerable<T>[] collections) 
         => collections.Any(x => x.Contains(@this));
 

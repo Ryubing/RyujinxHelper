@@ -22,7 +22,7 @@ public static class GitHubHelper
 
     public static string FormatLabelName(this Label lbl) => FormatLabelName(lbl.Name);
     
-    public static string FormatLabelName(string labelName) => labelName.ToLower() switch
+    public static string FormatLabelName(string labelName, bool markdown = true) => labelName.ToLower() switch
     {
         "audio" => "Audio",
         "bug" => "Bug",
@@ -60,8 +60,8 @@ public static class GitHubHelper
         "services-horizon" => "Horizon OS Services",
         "slow" => "Runs Slow",
         "crash" => "Crashes",
-        "deadlock" => "[Deadlock](<https://wikipedia.org/wiki/Deadlock_(computer_science)>)",
-        "regression" => "[Regression](<https://wikipedia.org/wiki/Software_regression>)",
+        "deadlock" => markdown ? "[Deadlock](<https://wikipedia.org/wiki/Deadlock_(computer_science)>)" : "Deadlock",
+        "regression" => markdown ? "[Regression](<https://wikipedia.org/wiki/Software_regression>)" : "Regression",
         "opengl" => "OpenGL",
         "opengl-backend-bug" => "OpenGL Backend Bug",
         "vulkan-backend-bug" => "Vulkan Backend Bug",

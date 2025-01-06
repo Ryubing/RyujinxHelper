@@ -18,19 +18,19 @@ public class CompatibilityCsvService : BotService
 
     public CompatibilityCsv Csv { get; private set; }
 
-    public CompatibilityCsv.Entry GetByGameName(string name)
+    public CompatibilityEntry GetByGameName(string name)
         => Csv.Entries.FirstOrDefault(x => x.GameName.EqualsIgnoreCase(name));
 
-    public CompatibilityCsv.Entry GetByTitleId(string titleId)
+    public CompatibilityEntry GetByTitleId(string titleId)
         => Csv.Entries.FirstOrDefault(x => x.TitleId == titleId);
 
-    public Gommon.Optional<CompatibilityCsv.Entry> FindOrNull(string nameOrTitleId)
+    public Gommon.Optional<CompatibilityEntry> FindOrNull(string nameOrTitleId)
         => Csv.Entries.FindFirst(x => 
             x.GameName.EqualsIgnoreCase(nameOrTitleId) || 
             x.TitleId.Check(it => it.EqualsIgnoreCase(nameOrTitleId))
         );
 
-    public IEnumerable<CompatibilityCsv.Entry> SearchEntries(string nameOrTitleId) =>
+    public IEnumerable<CompatibilityEntry> SearchEntries(string nameOrTitleId) =>
         Csv.Entries.Where(x => 
             x.GameName.ContainsIgnoreCase(nameOrTitleId) || 
             x.TitleId.Check(it => it.ContainsIgnoreCase(nameOrTitleId))

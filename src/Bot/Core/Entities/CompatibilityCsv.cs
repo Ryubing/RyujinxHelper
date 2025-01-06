@@ -1,68 +1,59 @@
-﻿namespace RyuBot.Entities;
+﻿using nietras.SeparatedValues;
+
+namespace RyuBot.Entities;
 
 public class CompatibilityCsv
 {
-    public CompatibilityCsv(string entireCsv)
+    public CompatibilityCsv(SepReader reader)
     {
-        Entries = entireCsv.Split('\n')
-            .Skip(1) //CSV format
-            .Select(it => new CompatibilityEntry(it.Split(',')))
-            .ToArray();
+        var entries = new List<CompatibilityEntry>();
+
+        foreach (var row in reader)
+        {
+            entries.Add(new CompatibilityEntry(reader.Header, row));
+        }
+
+        Entries = entries.ToArray();
     }
 
-    public CompatibilityEntry[] Entries { get; set; }
+    public CompatibilityEntry[] Entries { get; }
 }
 
 public class CompatibilityEntry
 {
-    // ReSharper disable InconsistentNaming
-    private const int issue_number = 0;
-    private const int issue_title = 1;
-    private const int extracted_game_id = 2;
-    private const int issue_labels = 3;
-    private const int extracted_status = 4;
-    private const int last_event_date = 5;
-    private const int events_count = 6;
-    // ReSharper restore InconsistentNaming
-
-    private readonly string[] _raw;
-
-    // ReSharper disable InconsistentNaming
-    private readonly Lazy<int> l_IssueNumber;
-    private readonly Lazy<string> l_GameName;
-    private readonly Lazy<Gommon.Optional<string>> l_TitleId;
-    private readonly Lazy<string[]> l_IssueLabels;
-    private readonly Lazy<string> l_Status;
-    private readonly Lazy<DateTime> l_LastEvent;
-    private readonly Lazy<int> l_EventCount;
-    // ReSharper restore InconsistentNaming
-
-    public CompatibilityEntry(string[] rawCsvEntry)
+    public CompatibilityEntry(SepReaderHeader header, SepReader.Row row)
     {
-        _raw = rawCsvEntry;
+        IssueNumber = row[header.IndexOf("issue_number")].Parse<int>();
+        
+        var titleIdRow = row[header.IndexOf("extracted_game_id")].ToString();
+        if (!string.IsNullOrEmpty(titleIdRow))
+            TitleId = titleIdRow;
 
-        l_IssueNumber = new(() => int.Parse(_raw[issue_number]));
-        l_GameName = new(() => _raw[issue_title].Split("-")[0].Trim());
-        l_TitleId = new(() =>
-        {
-            var tid = _raw[extracted_game_id];
-            return tid == string.Empty
-                ? default(Gommon.Optional<string>)
-                : tid;
-        });
-        l_IssueLabels = new(() => _raw[issue_labels].Split(';'));
-        l_Status = new(() => _raw[extracted_status]);
-        l_LastEvent = new(() => DateTime.TryParse(_raw[last_event_date], out var time) ? time : default);
-        l_EventCount = new(() => int.TryParse(_raw[events_count], out var count) ? count : -1);
+        var issueTitleRow = row[header.IndexOf("issue_title")].ToString();
+        if (TitleId.HasValue)
+            issueTitleRow = issueTitleRow.ReplaceIgnoreCase($" - {TitleId}", string.Empty);
+        
+        GameName = issueTitleRow.Trim().Trim('"');
+
+        IssueLabels = row[header.IndexOf("issue_labels")].ToString().Split(';');
+        Status = row[header.IndexOf("extracted_status")].ToString().Capitalize();
+        
+        if (row[header.IndexOf("last_event_date")].TryParse<DateTime>(out var dt))
+            LastEvent = dt;
+
+        if (row[header.IndexOf("events_count")].TryParse<int>(out var eventsCount))
+            EventCount = eventsCount;
     }
 
-    public int IssueNumber => l_IssueNumber.Value;
-    public string GameName => l_GameName.Value;
-    public Gommon.Optional<string> TitleId => l_TitleId.Value;
-    public string[] IssueLabels => l_IssueLabels.Value;
-    public string Status => l_Status.Value.Replace("status-", string.Empty).Capitalize();
-    public DateTime LastEvent => l_LastEvent.Value;
-    public int EventCount => l_EventCount.Value;
+    public int IssueNumber { get; }
+    public string GameName { get; }
+    public Gommon.Optional<string> TitleId { get; }
+    public string[] IssueLabels { get; }
+    public string Status { get; }
+    public DateTime LastEvent { get; }
+    public int EventCount { get; }
+
+    public string FormattedTitleId => TitleId.OrElse(new string(' ', 16));
 
     public string FormattedIssueLabels => FormatIssueLabels(false);
 

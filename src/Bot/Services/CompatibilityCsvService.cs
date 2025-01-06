@@ -1,4 +1,6 @@
-﻿namespace RyuBot.Services;
+﻿using nietras.SeparatedValues;
+
+namespace RyuBot.Services;
 
 public class CompatibilityCsvService : BotService
 {
@@ -44,7 +46,7 @@ public class CompatibilityCsvService : BotService
             var text = await _client.GetStringAsync(DownloadUrl);
             Info(LogSource.Service, "Compatibility CSV downloaded.");
 
-            Csv = new CompatibilityCsv(text);
+            Csv = new CompatibilityCsv(Sep.Reader().FromText(text));
             CsvPath.WriteAllText(text);
         }
         catch
@@ -52,8 +54,7 @@ public class CompatibilityCsvService : BotService
             if (CsvPath.ExistsAsFile)
             {
                 Info(LogSource.Service, "Request to get compatibility CSV failed; using previous version.");
-                var existingCsv = CsvPath.ReadAllText();
-                Csv = new CompatibilityCsv(existingCsv);
+                Csv = new CompatibilityCsv(Sep.Reader().FromFile(CsvPath.Path));
             }
         }
     }

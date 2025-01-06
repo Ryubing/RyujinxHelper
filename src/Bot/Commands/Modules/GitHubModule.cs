@@ -27,6 +27,11 @@ public partial class GitHubModule : RyujinxBotSlashCommandModule
         IsIssueOpen(issue)
             ? $"Opened {issue.CreatedAt.FormatPrettyString()}"
             : $"Closed {issue.ClosedAt!.Value.FormatPrettyString()}";
+    
+    private static string GetIssueState(Issue issue) =>
+        IsIssueOpen(issue)
+            ? "Open"
+            : "Closed";
 
     private static string FormatIssueState(PullRequest pr) =>
         IsIssueOpen(pr)
@@ -34,6 +39,13 @@ public partial class GitHubModule : RyujinxBotSlashCommandModule
             : pr.Merged
                 ? $"Merged {pr.ClosedAt!.Value.FormatPrettyString()}"
                 : $"Closed {pr.ClosedAt!.Value.FormatPrettyString()}";
+    
+    private static string GetIssueState(PullRequest pr) =>
+        IsIssueOpen(pr)
+            ? "Open"
+            : pr.Merged
+                ? "Merged"
+                : "Closed";
 
     private static bool IsIssueOpen(Issue issue) => issue.ClosedAt is null;
     private static bool IsIssueOpen(PullRequest pr) => pr.ClosedAt is null;

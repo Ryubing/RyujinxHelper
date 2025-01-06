@@ -156,7 +156,8 @@ public class ReplyBuilder<TInteraction> where TInteraction : SocketInteraction
             msg.Embeds = opt(Embeds.ToArray());
             if (ActionRows.Count > 0)
                 msg.Components = opt(new ComponentBuilder().AddActionRows(ActionRows).Build());
-        }, options);
+        }, options)
+            .ThenApply(_ => UpdateOrNoopTask);
 
         Discord.Optional<T> opt<T>(T value)
         {

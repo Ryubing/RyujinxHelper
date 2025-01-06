@@ -36,6 +36,9 @@ public partial class GitHubModule
         var linuxArm64AppImage = assets.FirstOrDefault(x => x.Name.ContainsIgnoreCase("arm64") && x.Name.EndsWithIgnoreCase(".AppImage"));
 
         StringBuilder releaseBody = new();
+        releaseBody.AppendLine(
+                $"## {Format.Url($"Ryujinx{(!isCanary ? " Stable" : string.Empty)} {latest.Name}", latest.HtmlUrl)}")
+            .AppendLine(DiscordHelper.Zws).AppendLine("### Downloads");
         var downloads = 0;
         
         applyArtifact(windows, "Windows x64");
@@ -44,11 +47,9 @@ public partial class GitHubModule
         applyArtifacts((linuxArm64, linuxArm64AppImage), "Linux ARM64");
 
         return Ok(CreateReplyBuilder()
-            .WithButtons(Buttons.Link(latest.HtmlUrl, "Open on GitHub"))
             .WithEmbed(embed =>
             {
                 embed.WithAuthor(latest.Author.Login, latest.Author.AvatarUrl, latest.HtmlUrl);
-                embed.WithTitle($"Ryujinx{(!isCanary ? " Stable" : string.Empty)} {latest.Name}");
                 embed.WithDescription($"{releaseBody}\n{downloads} total downloads");
                 embed.WithTimestamp(latest.CreatedAt);
             }));

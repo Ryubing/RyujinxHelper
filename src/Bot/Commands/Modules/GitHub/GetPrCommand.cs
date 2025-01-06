@@ -39,13 +39,18 @@ public partial class GitHubModule
                 builds.Add(FormatRid(match.Groups["RuntimeIdentifier"].Value), match.Groups["DownloadUrl"].Value);
             }
         }
+        
+        var body = String(sb =>
+        {
+            sb.AppendLine($"## {Format.Url($"[{GetIssueState(pr)}] Pull Request #{prNumber}", pr.HtmlUrl)}");
+            sb.AppendLine($"# {pr.Title.ReplaceLineEndings(string.Empty)}");
+            sb.Append(pr.Body);
+        });
 
         return Ok(CreateReplyBuilder()
-            .WithButtons(Buttons.Link(pr.HtmlUrl, "Open on GitHub"))
             .WithEmbed(embed =>
             {
                 embed.WithAuthor(pr.User.Login, pr.User.AvatarUrl, pr.HtmlUrl);
-                embed.WithTitle($"[{pr.Number}] {pr.Title}".Truncate(EmbedBuilder.MaxTitleLength));
                 embed.AddField("Labels", pr.FormatLabels());
 
                 if (builds.Count > 0)
@@ -65,13 +70,13 @@ public partial class GitHubModule
                         }
                     });
 
-                    var prBody = pr.Body.Truncate(EmbedBuilder.MaxDescriptionLength - buildsText.Length);
-
-                    embed.WithDescription($"{prBody}{buildsText}");
+                    embed.WithDescription($"{
+                        body.Truncate(EmbedBuilder.MaxDescriptionLength - buildsText.Length)
+                    }{buildsText}");
                 }
                 else
                 {
-                    embed.WithDescription(pr.Body.Truncate(EmbedBuilder.MaxDescriptionLength));
+                    embed.WithDescription(body.Truncate(EmbedBuilder.MaxDescriptionLength));
                 }
 
                 embed.WithColor(GetColorBasedOnIssueState(pr));

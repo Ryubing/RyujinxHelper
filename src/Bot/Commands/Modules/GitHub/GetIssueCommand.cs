@@ -12,15 +12,20 @@ public partial class GitHubModule
 
         if (issue is null)
             return BadRequest($"Issue {issueNumber} not found.");
+
+        var body = String(sb =>
+        {
+            sb.AppendLine($"## {Format.Url($"[{GetIssueState(issue)}] Issue #{issueNumber}", issue.HtmlUrl)}");
+            sb.AppendLine($"# {issue.Title.ReplaceLineEndings(string.Empty)}");
+            sb.Append(issue.Body);
+        });
         
         return Ok(CreateReplyBuilder()
-            .WithButtons(Buttons.Link(issue.HtmlUrl, "Open on GitHub"))
             .WithEmbed(embed =>
             {
                 embed.WithAuthor(issue.User.Login, issue.User.AvatarUrl, issue.HtmlUrl);
-                embed.WithTitle($"[{issue.Number}] {issue.Title}".Truncate(EmbedBuilder.MaxTitleLength));
                 embed.AddField("Labels", issue.FormatLabels());
-                embed.WithDescription(issue.Body.Truncate(EmbedBuilder.MaxDescriptionLength));
+                embed.WithDescription(body.Truncate(EmbedBuilder.MaxDescriptionLength));
                 embed.WithColor(GetColorBasedOnIssueState(issue));
                 embed.WithFooter(FormatIssueState(issue));
             }));

@@ -16,7 +16,13 @@ public static partial class Logger
 
     private static readonly Event<Action<VolteLogEventArgs>> LogEventHandler = new();
 
-    public static void Log(VolteLogEventArgs eventArgs) => LogEventHandler.Call(eventArgs);
+    public static void Log(VolteLogEventArgs eventArgs)
+    {
+        if (!IsDebugLoggingEnabled && eventArgs.Severity is LogSeverity.Debug)
+            return;
+
+        LogEventHandler.Call(eventArgs);
+    }
 
     public static bool IsDebugLoggingEnabled => Config.DebugEnabled || Version.IsDevelopment;
 

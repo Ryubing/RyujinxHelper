@@ -25,9 +25,9 @@ public static class Version
         InformationVersion = $"{DotNetVersion} {infoVer.Trim()}";
     }
     
-    public static readonly bool IsDevelopment = ReleaseType is DevelopmentStage.Development;
+    public static bool IsDevelopment => ReleaseType is DevelopmentStage.Development;
     
-    public static readonly DevelopmentStage ReleaseType = InformationVersion.ContainsIgnoreCase("dev") 
+    public static DevelopmentStage ReleaseType => InformationVersion.ContainsIgnoreCase("dev") 
         ? DevelopmentStage.Development 
         : DevelopmentStage.Release;
     

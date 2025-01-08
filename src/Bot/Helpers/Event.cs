@@ -56,7 +56,7 @@ public class Event<T>
     {
         lock (_subLock)
         {
-            if (_subscriptions.Length == 0)
+            if (_subscriptions.Length == 0 && _handlerlessEvents != null)
             {
                 _handlerlessEvents.Enqueue(arg);
                 return;

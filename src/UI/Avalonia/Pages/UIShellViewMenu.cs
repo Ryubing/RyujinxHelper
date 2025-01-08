@@ -49,7 +49,7 @@ public class ShellViewMenu
         }
 
         var dt = DateTime.Now;
-        var fp = FilePath.Data / "compat" / $"{dt.Year}-{dt.Month}-{dt.Day}.csv";
+        var fp = FilePath.Data / "compat" / $"clean-{dt.Year}-{dt.Month}-{dt.Day}-{dt.Ticks}.csv";
         
         compatCsv.Export(fp);
         

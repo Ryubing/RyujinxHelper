@@ -6,11 +6,11 @@ namespace RyuBot.Entities;
 
 public class CompatibilityCsv
 {
-    public const string ExtractedGameIdColumn = "\"extracted_game_id\"";
-    public const string IssueTitleColumn = "\"issue_title\"";
-    public const string IssueLabelsColumn = "\"issue_labels\"";
-    public const string ExtractedStatusColumn = "\"extracted_status\"";
-    public const string LastEventDateColumn = "\"last_event_date\"";
+    public const string TitleIdCol = "\"title_id\"";
+    public const string GameNameCol = "\"game_name\"";
+    public const string LabelsCol = "\"labels\"";
+    public const string StatusCol = "\"status\"";
+    public const string LastUpdatedCol = "\"last_updated\"";
     
     private readonly SepSpec _spec;
     
@@ -38,12 +38,12 @@ public class CompatibilityCsv
         foreach (var compatEntry in Entries)
         {
             using var row = sepWriter.NewRow();
-            row[IssueTitleColumn].Set($"\"{compatEntry.GameName}\"");
-            row[ExtractedGameIdColumn].Set(compatEntry.TitleId.OrElse(string.Empty));
-            row[IssueLabelsColumn].Set(compatEntry.IssueLabels.JoinToString(';'));
-            row[ExtractedStatusColumn].Set(compatEntry.Status.ToLower());
+            row[TitleIdCol].Set(compatEntry.TitleId.OrElse(string.Empty));
+            row[GameNameCol].Set($"\"{compatEntry.GameName}\"");
+            row[LabelsCol].Set(compatEntry.IssueLabels.JoinToString(';'));
+            row[StatusCol].Set(compatEntry.Status.ToLower());
             var le = compatEntry.LastEvent;
-            row[LastEventDateColumn].Set(
+            row[LastUpdatedCol].Set(
                 $"{le.Year}-{le.Month:00}-{le.Day:00} " +
                 $"{le.Hour:00}:{le.Minute:00}:{le.Second:00}.000"
                 );
@@ -63,21 +63,17 @@ public class CompatibilityEntry
         if (row.ColCount != header.ColNames.Count)
             throw new InvalidDataException($"CSV row {row.RowIndex} ({row.ToString()}) has mismatched column count");
             
-        var titleIdRow = colStr(row[header.IndexOf(CompatibilityCsv.ExtractedGameIdColumn)]);
+        var titleIdRow = colStr(row[header.IndexOf(CompatibilityCsv.TitleIdCol)]);
         TitleId = !string.IsNullOrEmpty(titleIdRow) 
             ? titleIdRow 
             : default(Gommon.Optional<string>);
 
-        var issueTitleRow = colStr(row[header.IndexOf(CompatibilityCsv.IssueTitleColumn)]);
-        if (TitleId.HasValue)
-            issueTitleRow = issueTitleRow.ReplaceIgnoreCase($" - {TitleId}", string.Empty);
+        GameName = colStr(row[header.IndexOf(CompatibilityCsv.GameNameCol)]).Trim().Trim('"');
 
-        GameName = issueTitleRow.Trim().Trim('"');
+        IssueLabels = colStr(row[header.IndexOf(CompatibilityCsv.LabelsCol)]).Split(';');
+        Status = colStr(row[header.IndexOf(CompatibilityCsv.StatusCol)]).Capitalize();
 
-        IssueLabels = colStr(row[header.IndexOf(CompatibilityCsv.IssueLabelsColumn)]).Split(';');
-        Status = colStr(row[header.IndexOf(CompatibilityCsv.ExtractedStatusColumn)]).Capitalize();
-
-        if (DateTime.TryParse(colStr(row[header.IndexOf(CompatibilityCsv.LastEventDateColumn)]), out var dt))
+        if (DateTime.TryParse(colStr(row[header.IndexOf(CompatibilityCsv.LastUpdatedCol)]), out var dt))
             LastEvent = dt;
 
         return;

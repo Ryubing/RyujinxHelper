@@ -117,7 +117,7 @@ public static class DiscordHelper
                 }
             }
             
-            await provider.Get<RyujinxBotInteractionService>().InitAsync();
+            ExecuteBackgroundAsync(() => provider.Get<RyujinxBotInteractionService>().InitAsync());
         };
     }
 

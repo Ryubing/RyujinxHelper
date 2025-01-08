@@ -22,19 +22,20 @@ public class ShellViewMenu
             RyujinxBotApp.Notify("Not logged in", "State error", NotificationType.Error);
             return;
         }
-        
+
 #if DEBUG
-        var removedCommands = await interactionService.ClearAllCommandsInGuildAsync(DiscordHelper.DevGuildId);
+        var removedCommandsText = $"{await interactionService.ClearAllCommandsInGuildAsync(DiscordHelper.DevGuildId)} commands removed";
 #else
-        var removedCommands = 0;
+        var removedCount = 0;
         // ReSharper disable once LoopCanBeConvertedToQuery
         foreach (var guildId in Config.WhitelistGuilds)
         {
-            removedCommands = Math.Max(await interactionService.ClearAllCommandsInGuildAsync(guildId), removedCommands);
+            removedCount = Math.Max(await interactionService.ClearAllCommandsInGuildAsync(guildId), removedCount);
         }
+        var removedCommandsText = $"{removedCount} commands removed from {Config.WhitelistGuilds.Count()} guilds.";
 #endif
 
-        RyujinxBotApp.Notify($"{removedCommands} removed", "Interaction commands cleared");
+        RyujinxBotApp.Notify(removedCommandsText, "Interaction commands cleared");
     }
 
     [Menu("Clean Compat List", "Dev", Icon = "fa-solid fa-broom")]

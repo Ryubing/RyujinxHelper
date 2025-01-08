@@ -96,8 +96,6 @@ public class RyujinxBotApp : Application
             });
 #endif
         }
-
-        BotManager.Start();
     }
 
     public static void Notify(Notification notification)

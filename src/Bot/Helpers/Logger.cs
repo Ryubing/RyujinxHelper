@@ -14,17 +14,26 @@ public static partial class Logger
         remove => LogEventHandler.Remove(value);
     }
 
-    private static readonly Event<Action<VolteLogEventArgs>> LogEventHandler = new();
+    private static readonly Event<VolteLogEventArgs> LogEventHandler = new(enableHandlerlessQueue: true);
 
     public static void Log(VolteLogEventArgs eventArgs)
     {
         if (!IsDebugLoggingEnabled && eventArgs.Severity is LogSeverity.Debug)
             return;
 
-        LogEventHandler.Call(eventArgs);
+        LogEventHandler.CallHandlers(eventArgs);
     }
 
-    public static bool IsDebugLoggingEnabled => Config.DebugEnabled || Version.IsDevelopment;
+    public static bool IsDebugLoggingEnabled
+    {
+        get
+        {
+            if (Version.IsDevelopment && !Config.DebugEnabled)
+                return false;
+
+            return Version.IsDevelopment || Config.DebugEnabled;
+        }
+    }
 
     #region Logger methods with invocation info
 

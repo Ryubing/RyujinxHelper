@@ -8,22 +8,24 @@ public class BotManager
 
     public static CancellationTokenSource? Cts { get; private set; }
 
-    public static void Start()
+    public static async Task LoginAsync()
     {
         if (RyujinxBot.Client is not null && Cts is not null) return;
 
         Cts = new();
         
-        _botTask = Task.Run(async () => await RyujinxBot.LoginAsync(Cts), Cts.Token);
+        await RyujinxBot.LoginAsync(Cts);
     }
     
     public static async Task<int> StartWait()
     {
         if (RyujinxBot.IsHeadless)
             Logger.OutputLogToStandardOut();
-        
-        Start();
-        await _botTask!;
+
+        Cts = new CancellationTokenSource();
+
+        _botTask = RyujinxBot.RunAsync(Cts);
+        await _botTask;
         return 0;
     }
     

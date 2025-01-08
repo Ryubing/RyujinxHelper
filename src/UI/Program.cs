@@ -22,8 +22,8 @@ public class Program
 
         if (RyujinxBot.IsHeadless) 
             return await BotManager.StartWait();
-        
-        BotManager.Start();
+
+        await BotManager.LoginAsync();
 
         IconProvider.Current.Register<FontAwesomeIconProvider>();
         

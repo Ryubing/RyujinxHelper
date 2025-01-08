@@ -6,7 +6,7 @@ public class RyujinxBot
     {
         Console.Title = $"RyuBot {Version.InformationVersion}";
         Console.CursorVisible = false;
-        return LoginAsync(cts);
+        return RunAsync(cts);
     }
 
     public static bool IsHeadless { get; set; }
@@ -19,13 +19,39 @@ public class RyujinxBot
     public RyujinxBot()
         => Console.CancelKeyPress += (_, _) => Cts?.Cancel();
 
-    public static async Task LoginAsync(Gommon.Optional<CancellationTokenSource> cts = default)
+    public static async Task RunAsync(Gommon.Optional<CancellationTokenSource> cts = default)
     {
-        if (!Config.StartupChecks<HeadlessBotConfig>()) return;
+        var sw = await LoginAsync(cts);
+        if (sw is null)
+            return;
+        
+        try
+        {
+            SetAppStatus($"Logged in, took {sw.Elapsed.Humanize(2)}.",
+                FontAwesome.Check,
+                isWorkingStatus: false,
+                statusExpiresAfter: 10.Seconds()
+            );
+            await Task.Delay(-1, Cts.Token);
+        }
+        catch (Exception e)
+        {
+            e.SentryCapture();
+
+            await ShutdownAsync();
+        }
+    }
+    
+
+    public static async Task<Stopwatch> LoginAsync(Gommon.Optional<CancellationTokenSource> cts = default)
+    {
+        if (!Config.StartupChecks<HeadlessBotConfig>()) 
+            return null;
 
         Config.Load<HeadlessBotConfig>();
 
-        if (!Config.IsValidToken()) return;
+        if (!Config.IsValidToken()) 
+            return null;
 
         LogFileRestartNotice();
 
@@ -45,21 +71,9 @@ public class RyujinxBot
         
         await Services.Get<CompatibilityCsvService>().InitAsync();
         
-        try
-        {
-            SetAppStatus($"Logged in, took {sw.Elapsed.Humanize(2)}.",
-                FontAwesome.Check,
-                isWorkingStatus: false,
-                statusExpiresAfter: 10.Seconds()
-            );
-            await Task.Delay(-1, Cts.Token);
-        }
-        catch (Exception e)
-        {
-            e.SentryCapture();
+        sw.Stop();
 
-            await ShutdownAsync();
-        }
+        return sw;
     }
     
     public static async Task ShutdownAsync()

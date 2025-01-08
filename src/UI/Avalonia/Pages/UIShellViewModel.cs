@@ -5,10 +5,12 @@ namespace RyuBot.UI.Avalonia.Pages;
 // ReSharper disable once InconsistentNaming
 public partial class UIShellViewModel : ObservableObject
 {
-    public required UIShellView? View { get; init; } 
+    public required UIShellView View { get; init; } 
 
     [ObservableProperty]
     private string _connection = "Disconnected";
+
+    public string StateString => $"{Connection} | {View.Title} | {Version.InformationVersion}";
 
     public UIShellViewModel()
     {
@@ -25,6 +27,7 @@ public partial class UIShellViewModel : ObservableObject
     private Task ChangeConnectionState()
     {
         Connection = BotManager.GetConnectionState();
+        OnPropertyChanged(nameof(StateString));
         return Task.CompletedTask;
     }
     

@@ -101,7 +101,7 @@ public class RyujinxBotInteractionService : BotService
             await _backing.RegisterCommandsToGuildAsync(DiscordHelper.DevGuildId);
 #else
             await Config.WhitelistGuilds
-                .ForEachAsync(async id => await _backing.RegisterCommandsToGuildAsync(id));
+                .ForEachAsync(id => _backing.RegisterCommandsToGuildAsync(id));
 #endif
             
             _commandsRegistered = true;

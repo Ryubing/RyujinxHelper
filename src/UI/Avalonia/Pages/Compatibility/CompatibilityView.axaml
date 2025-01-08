@@ -13,7 +13,7 @@
     </UserControl.DataContext>
     <ScrollViewer>
         <StackPanel Orientation="Vertical">
-            <TextBox Watermark="Search compatibility entries..." TextChanged="TextBox_OnTextChanged" />
+            <TextBox Margin="5, 5, 5, 0" Padding="10" Watermark="Search compatibility entries..." TextChanged="TextBox_OnTextChanged" />
             <ListBox Margin="5"
                      Padding="10"
                      Background="Transparent"

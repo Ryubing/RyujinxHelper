@@ -61,12 +61,10 @@ public class Event<T>
                 _handlerlessEvents.Enqueue(arg);
                 return;
             }
-
-            if (_handlerlessEvents is { Count: > 0 })
-            {
+            
+            if (_handlerlessEvents is not null)
                 while (_handlerlessEvents.TryDequeue(out var queuedArg))
                     this.Call(queuedArg);
-            }
             
             this.Call(arg);
         }

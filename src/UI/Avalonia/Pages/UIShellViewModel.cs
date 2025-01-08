@@ -6,11 +6,8 @@ namespace RyuBot.UI.Avalonia.Pages;
 public partial class UIShellViewModel : ObservableObject
 {
     public required UIShellView View { get; init; } 
-
-    [ObservableProperty]
-    private string _connection = "Disconnected";
-
-    public string StateString => $"{Connection} | {View.Title} | {Version.InformationVersion}";
+    
+    [ObservableProperty] private string _connection = BotManager.GetConnectionState();
 
     public UIShellViewModel()
     {
@@ -27,7 +24,6 @@ public partial class UIShellViewModel : ObservableObject
     private Task ChangeConnectionState()
     {
         Connection = BotManager.GetConnectionState();
-        OnPropertyChanged(nameof(StateString));
         return Task.CompletedTask;
     }
     

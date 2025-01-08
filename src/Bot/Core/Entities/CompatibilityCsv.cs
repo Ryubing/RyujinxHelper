@@ -1,4 +1,5 @@
-﻿using nietras.SeparatedValues;
+﻿using System.IO;
+using nietras.SeparatedValues;
 
 namespace RyuBot.Entities;
 
@@ -24,35 +25,36 @@ public class CompatibilityEntry
 {
     public CompatibilityEntry(SepReaderHeader header, SepReader.Row row)
     {
-        IssueNumber = row[header.IndexOf("issue_number")].Parse<int>();
-        
-        var titleIdRow = row[header.IndexOf("extracted_game_id")].ToString();
-        if (!string.IsNullOrEmpty(titleIdRow))
-            TitleId = titleIdRow;
+        if (row.ColCount != header.ColNames.Count)
+            throw new InvalidDataException($"CSV row {row.RowIndex} ({row.ToString()}) has mismatched column count");
+            
+        var titleIdRow = colStr(row[header.IndexOf("\"extracted_game_id\"")]);
+        TitleId = !string.IsNullOrEmpty(titleIdRow) 
+            ? titleIdRow 
+            : default(Gommon.Optional<string>);
 
-        var issueTitleRow = row[header.IndexOf("issue_title")].ToString();
+        var issueTitleRow = colStr(row[header.IndexOf("\"issue_title\"")]);
         if (TitleId.HasValue)
             issueTitleRow = issueTitleRow.ReplaceIgnoreCase($" - {TitleId}", string.Empty);
-        
+
         GameName = issueTitleRow.Trim().Trim('"');
 
-        IssueLabels = row[header.IndexOf("issue_labels")].ToString().Split(';');
-        Status = row[header.IndexOf("extracted_status")].ToString().Capitalize();
-        
-        if (row[header.IndexOf("last_event_date")].TryParse<DateTime>(out var dt))
+        IssueLabels = colStr(row[header.IndexOf("\"issue_labels\"")]).Split(';');
+        Status = colStr(row[header.IndexOf("\"extracted_status\"")]).Capitalize();
+
+        if (DateTime.TryParse(colStr(row[header.IndexOf("\"last_event_date\"")]), out var dt))
             LastEvent = dt;
 
-        if (row[header.IndexOf("events_count")].TryParse<int>(out var eventsCount))
-            EventCount = eventsCount;
+        return;
+            
+        string colStr(SepReader.Col col) => col.ToString().Trim('"');
     }
-
-    public int IssueNumber { get; }
+    
     public string GameName { get; }
     public Gommon.Optional<string> TitleId { get; }
     public string[] IssueLabels { get; }
     public string Status { get; }
     public DateTime LastEvent { get; }
-    public int EventCount { get; }
 
     public string FormattedTitleId => TitleId.OrElse(new string(' ', 16));
 
@@ -65,14 +67,12 @@ public class CompatibilityEntry
 
     public override string ToString()
     {
-        var sb = new StringBuilder("CompatibilityCsv.Entry: {");
-        sb.Append($"{nameof(IssueNumber)}={IssueNumber}, ");
+        var sb = new StringBuilder($"{nameof(CompatibilityEntry)}: {{");
         sb.Append($"{nameof(GameName)}=\"{GameName}\", ");
         sb.Append($"{nameof(TitleId)}={TitleId}, ");
         sb.Append($"{nameof(IssueLabels)}=\"{IssueLabels}\", ");
         sb.Append($"{nameof(Status)}=\"{Status}\", ");
-        sb.Append($"{nameof(LastEvent)}=\"{LastEvent}\", ");
-        sb.Append($"{nameof(EventCount)}={EventCount}");
+        sb.Append($"{nameof(LastEvent)}=\"{LastEvent}\"");
         sb.Append('}');
 
         return sb.ToString();

@@ -12,11 +12,11 @@ public class CompatibilityCsv
     public const string ExtractedStatusColumn = "\"extracted_status\"";
     public const string LastEventDateColumn = "\"last_event_date\"";
     
-    private readonly SepReader _reader;
+    private readonly SepSpec _spec;
     
     public CompatibilityCsv(SepReader reader)
     {
-        _reader = reader;
+        _spec = reader.Spec;
         var entries = new List<CompatibilityEntry>();
 
         foreach (var row in reader)
@@ -33,7 +33,7 @@ public class CompatibilityCsv
 
     public void Export(FilePath newPath)
     {
-        var sepWriter = _reader.Spec.Writer().ToText();
+        var sepWriter = _spec.Writer().ToText();
 
         foreach (var compatEntry in Entries)
         {

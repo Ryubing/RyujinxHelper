@@ -76,7 +76,11 @@ public class CompatibilityEntry
 
         GameName = colStr(row[indices.GameName]).Trim().Trim('"');
 
-        Labels = colStr(row[indices.Labels]).Split(';');
+        var labelsStr = colStr(row[indices.Labels]);
+        Labels = !string.IsNullOrWhiteSpace(labelsStr) 
+            ? labelsStr.Split(';') 
+            : [];
+        
         Status = colStr(row[indices.Status]).Capitalize();
 
         if (DateTime.TryParse(colStr(row[indices.LastUpdated]), out var dt))
@@ -97,12 +101,12 @@ public class CompatibilityEntry
 
     public string FormattedIssueLabels => FormatIssueLabels(false);
 
-    public string FormatIssueLabels(bool markdown = true) => Labels
-        .Where(it => !it.StartsWithIgnoreCase("status"))
-        .FormatCollection(
-            it => GitHubHelper.FormatLabelName(it, markdown),
-            separator: ", "
-        );
+    public string FormatIssueLabels(bool markdown = true) =>
+        Labels
+            .FormatCollection(
+                it => GitHubHelper.FormatLabelName(it, markdown),
+                separator: ", "
+            );
 
     public override string ToString()
     {

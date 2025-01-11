@@ -45,12 +45,16 @@ public class CompatibilityCsv
             using var row = sepWriter.NewRow();
             row[ColumnIndices.TitleIdCol].Set(compatEntry.TitleId.OrElse(string.Empty));
             row[ColumnIndices.GameNameCol].Set($"\"{compatEntry.GameName}\"");
-            row[ColumnIndices.LabelsCol].Set(compatEntry.Labels.JoinToString(';'));
+            row[ColumnIndices.LabelsCol].Set(
+                compatEntry.Labels
+                .Where(x => !x.StartsWithIgnoreCase("status"))
+                .JoinToString(';')
+            );
             row[ColumnIndices.StatusCol].Set(compatEntry.Status.ToLower());
             var le = compatEntry.LastEvent;
             row[ColumnIndices.LastUpdatedCol].Set(
                 $"{le.Year}-{le.Month:00}-{le.Day:00} " +
-                $"{le.Hour:00}:{le.Minute:00}:{le.Second:00}.000"
+                $"{le.Hour:00}:{le.Minute:00}:{le.Second:00}"
             );
         }
 

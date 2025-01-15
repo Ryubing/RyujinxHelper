@@ -1,7 +1,7 @@
 ﻿using Discord.Interactions;
 using RyuBot.Interactions;
 
-namespace Volte.Interactions.Commands.Modules;
+namespace RyuBot.Interactions.Commands.Modules;
 
 public partial class GitHubModule
 {

@@ -33,10 +33,14 @@
         <PackageReference Include="Humanizer.Core" Version="2.14.1" />
         <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="8.0.0" />
         <PackageReference Include="Octokit" Version="13.0.1" />
+        <PackageReference Include="Qmmands" Version="4.0.1-nightly-00257" />
         <PackageReference Include="Sentry" Version="4.9.0" />
         <PackageReference Include="Sep" Version="0.6.0" />
     </ItemGroup>
     <ItemGroup>
+      <Folder Include="Commands\Interactions\" />
+      <Folder Include="Commands\Text\Parsers\" />
+      <Folder Include="Commands\Text\Results\" />
       <Folder Include="Resources\" />
     </ItemGroup>
 </Project>

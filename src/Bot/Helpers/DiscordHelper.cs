@@ -96,23 +96,23 @@ public static class DiscordHelper
             var guilds = client.Guilds.Count;
 
             PrintHeader();
-            Info(LogSource.Volte, $"Currently running RyuBot V{Version.InformationVersion}.");
-            Info(LogSource.Volte, "Use this URL to invite me to your guilds:");
-            Info(LogSource.Volte, client.GetInviteUrl());
-            Info(LogSource.Volte, $"Logged in as {client.CurrentUser.Username}#{client.CurrentUser.Discriminator}");
-            Info(LogSource.Volte, $"Connected to {"guild".ToQuantity(guilds)}");
+            Info(LogSource.Bot, $"Currently running RyuBot V{Version.InformationVersion}.");
+            Info(LogSource.Bot, "Use this URL to invite me to your guilds:");
+            Info(LogSource.Bot, client.GetInviteUrl());
+            Info(LogSource.Bot, $"Logged in as {client.CurrentUser.Username}#{client.CurrentUser.Discriminator}");
+            Info(LogSource.Bot, $"Connected to {"guild".ToQuantity(guilds)}");
 
             if (Config.TryParseActivity(out var activityInfo))
             {
                 if (activityInfo.Streamer is null && activityInfo.Type != ActivityType.CustomStatus)
                 {
                     await client.SetGameAsync(activityInfo.Name, null, activityInfo.Type);
-                    Info(LogSource.Volte, $"Set {client.CurrentUser.Username}'s game to \"{Config.Game}\".");
+                    Info(LogSource.Bot, $"Set {client.CurrentUser.Username}'s game to \"{Config.Game}\".");
                 }
                 else if (activityInfo.Type != ActivityType.CustomStatus)
                 {
                     await client.SetGameAsync(activityInfo.Name, Config.FormattedStreamUrl, activityInfo.Type);
-                    Info(LogSource.Volte,
+                    Info(LogSource.Bot,
                         $"Set {client.CurrentUser.Username}'s activity to \"{activityInfo.Type}: {activityInfo.Name}\", at Twitch user {Config.Streamer}.");
                 }
             }

@@ -1,6 +1,7 @@
 ﻿using GitHubJwt;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using Octokit;
+using Qmmands;
 using RyuBot;
 using Version = RyuBot.Version;
 
@@ -18,9 +19,18 @@ public static partial class Extensions
                 LogLevel = Config.DebugEnabled || Version.IsDevelopment
                     ? LogSeverity.Debug
                     : LogSeverity.Verbose,
-                GatewayIntents = GatewayIntents.Guilds | GatewayIntents.GuildMembers,
+                GatewayIntents = GatewayIntents.Guilds | GatewayIntents.GuildMembers | GatewayIntents.MessageContent,
                 ConnectionTimeout = 10000,
                 MessageCacheSize = 0
+            }))
+            .AddSingleton(new CommandService(new CommandServiceConfiguration
+            {
+                IgnoresExtraArguments = true,
+                StringComparison = StringComparison.OrdinalIgnoreCase,
+                DefaultRunMode = RunMode.Sequential,
+                SeparatorRequirement = SeparatorRequirement.SeparatorOrWhitespace,
+                Separator = " ",
+                NullableNouns = null
             }))
             .AddSingleton(new GitHubJwtFactory(
                 new FilePrivateKeySource("data/ryujinx-helper.pem"),
@@ -44,7 +54,7 @@ public static partial class Extensions
                 var l = Assembly.GetExecutingAssembly().GetTypes()
                     .Where(IsEligibleService)
                     .Apply(ls => ls.ForEach(coll.TryAddSingleton));
-                Info(LogSource.Volte,
+                Info(LogSource.Bot,
                     $"Injected services [{l.Select(static x => x.Name.ReplaceIgnoreCase("Service", "")).JoinToString(", ")}] into the provider.");
             });
 

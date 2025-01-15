@@ -94,7 +94,7 @@ public static partial class Logger
     /// </summary>
     /// <param name="e">Exception to print.</param>
     /// <param name="src">Source to print the message from.</param>
-    public static void Error(Exception e, InvocationInfo caller, LogSource src = LogSource.Volte)
+    public static void Error(Exception e, InvocationInfo caller, LogSource src = LogSource.Bot)
         => Error(src, string.Empty, caller, e);
 
     #endregion
@@ -158,7 +158,7 @@ public static partial class Logger
     /// </summary>
     /// <param name="e">Exception to print.</param>
     public static void Error(Exception e)
-        => Error(LogSource.Volte, string.Empty, e);
+        => Error(LogSource.Bot, string.Empty, e);
 
     #endregion
 

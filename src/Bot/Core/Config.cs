@@ -30,7 +30,7 @@ public static class Config
     {
         if (!FilePath.Data.ExistsAsDirectory)
         {
-            Error(LogSource.Volte,
+            Error(LogSource.Bot,
                 $"The \"{FilePath.Data}\" directory didn't exist, so I created it for you. Please fill in the configuration!");
             FilePath.Data.Create();
             //99.9999999999% of the time the config also won't exist if this block is reached
@@ -38,7 +38,7 @@ public static class Config
         }
 
         if (CreateIfAbsent<TConfig>()) return true;
-        Error(LogSource.Volte,
+        Error(LogSource.Bot,
             $"Please fill in the configuration located at \"{Path}\"; restart me when you've done so.");
         return false;
 
@@ -69,7 +69,7 @@ public static class Config
         }
         catch (Exception e)
         {
-            Error(LogSource.Volte, e.Message, e);
+            Error(LogSource.Bot, e.Message, e);
         }
 
         return false;

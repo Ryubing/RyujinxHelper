@@ -28,7 +28,7 @@ public class LogSourceToBrush : VolteBrushConverter<LogSourceToBrush>
     public LogSourceToBrush()
     {
         BrushDefinitions = [
-            (LogSource.Volte, GetBrush(Color.LawnGreen)),
+            (LogSource.Bot, GetBrush(Color.LawnGreen)),
             (LogSource.Discord, GetBrush(Color.RoyalBlue)),
             (LogSource.Gateway, GetBrush(Color.RoyalBlue)),
             (LogSource.Service, GetBrush(Color.Gold)),

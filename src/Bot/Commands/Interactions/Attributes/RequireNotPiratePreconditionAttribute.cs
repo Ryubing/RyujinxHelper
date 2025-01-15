@@ -1,6 +1,6 @@
 ﻿using Discord.Interactions;
 
-namespace RyuBot.Commands;
+namespace RyuBot.Commands.Interactions;
 
 public class RequireNotPiratePreconditionAttribute : PreconditionAttribute
 {

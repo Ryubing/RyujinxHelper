@@ -1,7 +1,7 @@
 ﻿using System.Globalization;
 using Discord.Interactions;
 
-namespace RyuBot.Commands.Modules;
+namespace RyuBot.Commands.Interactions.Modules;
 
 public partial class CompatibilityModule
 {

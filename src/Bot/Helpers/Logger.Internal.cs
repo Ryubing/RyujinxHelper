@@ -36,9 +36,9 @@ public static partial class Logger
     {
         if (!RyujinxBot.IsHeadless) return;
         
-        Info(LogSource.Volte, Separator.Trim());
-        VolteAscii.ForEach(static ln => Info(LogSource.Volte, ln));
-        Info(LogSource.Volte, Separator.Trim());
+        Info(LogSource.Bot, Separator.Trim());
+        VolteAscii.ForEach(static ln => Info(LogSource.Bot, ln));
+        Info(LogSource.Bot, Separator.Trim());
     }
 
     private const string Side = "----------------------------------------------------------";
@@ -144,7 +144,7 @@ public static partial class Logger
         {
             LogSource.Discord => (Color.RoyalBlue, "DISCORD"),
             LogSource.Gateway => (Color.RoyalBlue, "DISCORD"),
-            LogSource.Volte => (Color.LawnGreen, "CORE"),
+            LogSource.Bot => (Color.LawnGreen, "CORE"),
             LogSource.Service => (Color.Gold, "SERVICE"),
             LogSource.Module => (Color.LimeGreen, "MODULE"),
             LogSource.Rest => (Color.Red, "REST"),

@@ -1,3 +1,5 @@
+using Qmmands;
+
 namespace RyuBot;
 
 public class RyujinxBot
@@ -66,6 +68,20 @@ public class RyujinxBot
         var sw = Stopwatch.StartNew();
         await Client.LoginAsync(TokenType.Bot, Config.Token);
         await Client.StartAsync();
+        
+        {
+            var commandService = Services.Get<CommandService>();
+
+            var addedParsers = MessageService.AddTypeParsers(commandService);
+            Info(LogSource.Bot,
+                $"Loaded TypeParsers: [{
+                    addedParsers.Select(x => x.Name.Replace("Parser", string.Empty)).JoinToString(", ")
+                }]");
+
+            var addedModules = commandService.AddModules(Assembly.GetExecutingAssembly());
+            Info(LogSource.Bot,
+                $"Loaded {addedModules.Count} modules and {addedModules.Sum(m => m.Commands.Count)} commands.");
+        }
 
         Client.RegisterVolteEventHandlers(Services);
         
@@ -78,7 +94,7 @@ public class RyujinxBot
     
     public static async Task ShutdownAsync()
     {
-        Critical(LogSource.Volte, "Bot shutdown requested; shutting down and cleaning up.");
+        Critical(LogSource.Bot, "Bot shutdown requested; shutting down and cleaning up.");
 
         await Client.SetStatusAsync(UserStatus.Invisible);
         await Client.LogoutAsync();

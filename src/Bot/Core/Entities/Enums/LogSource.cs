@@ -37,7 +37,7 @@ public enum LogSource
     /// <summary>
     ///     Indicates that this log message is from RyuBot itself.
     /// </summary>
-    Volte = 6,
+    Bot = 6,
     /// <summary>
     ///     Indicates that this log message is from Sentry.
     /// </summary>

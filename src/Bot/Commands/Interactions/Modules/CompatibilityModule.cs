@@ -1,6 +1,6 @@
 ﻿using RyuBot.Interactions;
 
-namespace RyuBot.Commands.Modules;
+namespace RyuBot.Commands.Interactions.Modules;
 
 public partial class CompatibilityModule : RyujinxBotSlashCommandModule
 {

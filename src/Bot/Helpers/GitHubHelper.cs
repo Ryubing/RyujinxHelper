@@ -15,10 +15,10 @@ public static class GitHubHelper
     public static string Format(this (string Owner, string Name) repoTuple) => $"{repoTuple.Owner}/{repoTuple.Name}";
 
     public static string FormatLabels(this PullRequest pullRequest)
-        => pullRequest.Labels.Count > 0 ? pullRequest.Labels.Select(FormatLabelName).JoinToString(", ") : "None";
-    
+        => pullRequest.Labels.FormatCollection(FormatLabelName, separator: ", ");
+
     public static string FormatLabels(this Issue issue)
-        => issue.Labels.Count > 0 ? issue.Labels.Select(FormatLabelName).JoinToString(", ") : "None";
+        => issue.Labels.FormatCollection(FormatLabelName, separator: ", ");
 
     public static string FormatLabelName(this Label lbl) => FormatLabelName(lbl.Name);
     

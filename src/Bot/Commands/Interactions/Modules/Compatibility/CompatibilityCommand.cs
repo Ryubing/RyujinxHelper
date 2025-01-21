@@ -9,24 +9,25 @@ public partial class CompatibilityModule
     [RequireNotPiratePrecondition]
     public Task<RuntimeResult> CompatibilityAsync(
         [Summary("game", "The name or title ID of the game to lookup.")]
-        [Autocomplete(typeof(GameCompatibilityNameAutocompleter))] 
+        [Autocomplete(typeof(GameCompatibilityNameAutocompleter))]
         string game,
         [Summary("public", "Post the compatibility result publicly.")]
         bool publicResult = false
-        )
+    )
     {
         var searchedForTitleId = ulong.TryParse(game, NumberStyles.HexNumber, null, out _);
-        
+
         if (!Compatibility.FindOrNull(game).TryGet(out var csvEntry))
             return BadRequest(
                 new StringBuilder()
                     .AppendLine($"Could not find a game compatibility entry for `{game}`. {
                         (searchedForTitleId ? "Try specifying a name instead of ID! " : string.Empty)
                     }".TrimEnd())
-                    .AppendLine("Please wait for the autocomplete suggestions to fill in if you aren't sure what to put!")
+                    .AppendLine(
+                        "Please wait for the autocomplete suggestions to fill in if you aren't sure what to put!")
                     .ToString()
             );
-        
+
         return Ok(CreateReplyBuilder(!publicResult)
             .WithEmbed(embed =>
             {
@@ -50,27 +51,26 @@ public partial class CompatibilityModule
 public class GameCompatibilityNameAutocompleter : AutocompleteHandler
 {
     public override Task<AutocompletionResult> GenerateSuggestionsAsync(
-        IInteractionContext context, 
+        IInteractionContext context,
         IAutocompleteInteraction autocompleteInteraction,
-        IParameterInfo parameter, 
+        IParameterInfo parameter,
         IServiceProvider services)
     {
-        var compatCsv = services.Get<CompatibilityCsvService>();
-        
         foreach (var option in autocompleteInteraction.Data.Options)
         {
-            if (option.Focused && !string.Empty.Equals(option.Value))
-            {
-                var userValue = option.Value.ToString();
-                var results = compatCsv.SearchEntries(userValue).Take(25).ToArray();
-                
-                if (results.Length > 0)
-                {
-                    return Task.FromResult(AutocompletionResult.FromSuccess(
-                        results.Select(it => new AutocompleteResult(it.GameName, it.GameName))));
-                }
-            }
+            var userValue = option.Value?.ToString();
+
+            if (!option.Focused || string.Empty.Equals(userValue)) continue;
+
+            var results = services.Get<CompatibilityCsvService>()
+                .SearchEntries(userValue).Take(25).ToArray();
+
+            if (results.Length > 0)
+                return Task.FromResult(AutocompletionResult.FromSuccess(
+                    results.Select(it => new AutocompleteResult(it.GameName, it.GameName))
+                ));
         }
+
         return Task.FromResult(AutocompletionResult.FromSuccess());
     }
 }

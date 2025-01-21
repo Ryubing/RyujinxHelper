@@ -13,7 +13,7 @@ public class LogAnalysisService : BotService
     {
         var text = await _httpClient.GetStringAsync(attachment.ProxyUrl);
 
-        return new LogAnalysis(text, this);
+        return AnalyzeLog(text);
     }
     
     public LogAnalysis AnalyzeLog(string logFileText) => new(logFileText, this);

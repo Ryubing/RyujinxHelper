@@ -18,9 +18,14 @@ public partial class CompatibilityModule
         var searchedForTitleId = ulong.TryParse(game, NumberStyles.HexNumber, null, out _);
         
         if (!Compatibility.FindOrNull(game).TryGet(out var csvEntry))
-            return BadRequest($"Could not find a game compatibility entry for `{game}`. {
-                (searchedForTitleId ? "Try specifying a name instead of ID!" : string.Empty)
-            }".TrimEnd());
+            return BadRequest(
+                new StringBuilder()
+                    .AppendLine($"Could not find a game compatibility entry for `{game}`. {
+                        (searchedForTitleId ? "Try specifying a name instead of ID! " : string.Empty)
+                    }".TrimEnd())
+                    .AppendLine("Please wait for the autocomplete suggestions to fill in if you aren't sure what to put!")
+                    .ToString()
+            );
         
         return Ok(CreateReplyBuilder(!publicResult)
             .WithEmbed(embed =>

@@ -23,7 +23,7 @@ public partial class GitHubModule
         return Ok(CreateReplyBuilder()
             .WithEmbed(embed =>
             {
-                embed.WithAuthor(issue.User.Login, issue.User.AvatarUrl, issue.HtmlUrl);
+                embed.WithAuthor(issue.User.Login, issue.User.AvatarUrl, issue.User.HtmlUrl);
                 embed.AddField("Labels", issue.FormatLabels());
                 embed.WithDescription(body.Truncate(EmbedBuilder.MaxDescriptionLength));
                 embed.WithColor(GetColorBasedOnIssueState(issue));

@@ -50,19 +50,16 @@ public partial class GitHubModule
         return Ok(CreateReplyBuilder()
             .WithEmbed(embed =>
             {
-                embed.WithAuthor(pr.User.Login, pr.User.AvatarUrl, pr.HtmlUrl);
+                embed.WithAuthor(pr.User.Login, pr.User.AvatarUrl, pr.User.HtmlUrl);
                 embed.AddField("Labels", pr.FormatLabels());
 
                 if (builds.Count > 0)
                 {
                     var buildsText = String(sb =>
                     {
-                        if (builds.Count > 0)
-                            sb.AppendLine().AppendLine()
-                                .AppendLine("## Downloads: ")
-                                .AppendLine(
-                                    "*You must have an account on GitHub and be logged in in order to download these.*")
-                                .AppendLine().AppendLine();
+                        sb.AppendLine().AppendLine()
+                            .AppendLine("## Downloads: ")
+                            .AppendLine();
 
                         foreach (var (rid, downloadUrl) in builds)
                         {

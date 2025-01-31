@@ -1,6 +1,6 @@
-﻿using GitHubJwt;
+﻿using System.Net.Http.Headers;
+using GitHubJwt;
 using Microsoft.Extensions.DependencyInjection.Extensions;
-using Octokit;
 using Qmmands;
 using RyuBot;
 using Version = RyuBot.Version;
@@ -12,7 +12,23 @@ public static partial class Extensions
     public static IServiceCollection AddAllServices(this IServiceCollection coll) =>
         coll.AddSingleton(new HttpClient
             {
-                Timeout = 10.Seconds()
+                Timeout = 10.Seconds(),
+                DefaultRequestHeaders =
+                {
+                    Accept =
+                    {
+                        new MediaTypeWithQualityHeaderValue("*/*")
+                    },
+                    UserAgent =
+                    {
+                        new ProductInfoHeaderValue("RyujinxHelper", Version.DotNetVersion.ToString())
+                    },
+                    CacheControl = new CacheControlHeaderValue
+                    {
+                        NoCache = true,
+                        MaxAge = TimeSpan.Zero
+                    }
+                }
             })
             .AddSingleton(new DiscordSocketClient(new DiscordSocketConfig
             {

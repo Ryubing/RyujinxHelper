@@ -35,6 +35,7 @@ public static partial class Extensions
                 LogLevel = Config.DebugEnabled || Version.IsDevelopment
                     ? LogSeverity.Debug
                     : LogSeverity.Verbose,
+                AlwaysDownloadUsers = true,
                 GatewayIntents = GatewayIntents.Guilds | GatewayIntents.GuildMembers | GatewayIntents.MessageContent,
                 ConnectionTimeout = 10000,
                 MessageCacheSize = 0

@@ -21,7 +21,7 @@ public class VerifierService : BotService
         var hashRequest = new HashActionRequest { Id = userId };
 
         var response = await _httpClient.PostAsJsonAsync(ApiBaseUrl, hashRequest);
-        
+
         var hashResponse = JsonSerializer.Deserialize<HashActionResponse>(
             await response.Content.ReadAsStringAsync()
         );
@@ -33,26 +33,38 @@ public class VerifierService : BotService
                 : hashResponse.Hash
         );
     }
-    
+
     public async Task<VerifyActionResponse> VerifyAsync(ulong userId, string token)
     {
         var verifyRequest = new VerifyActionRequest { Id = userId, Token = token };
 
         var response = await _httpClient.PostAsJsonAsync(ApiBaseUrl, verifyRequest);
-        
+
         return JsonSerializer.Deserialize<VerifyActionResponse>(
             await response.Content.ReadAsStringAsync()
         );
     }
-    
-    public async Task SendVerificationErrorModlogMessageAsync(SocketGuildUser member, VerifyActionResponse response)
+
+    public async Task SendVerificationModlogMessageAsync(SocketGuildUser member, VerifyActionResponse response)
     {
         if (await _client.GetChannelAsync(1318250869980004394) is not ITextChannel channel) return;
-        
-        await new EmbedBuilder()
+
+        await embed().SendToAsync(channel);
+
+        return;
+
+        EmbedBuilder embed() => new EmbedBuilder()
             .WithColor(Config.SuccessColor)
-            .WithTitle($"Verification for {member.GetEffectiveUsername()} failed")
-            .AddField("Error", $"{Enum.GetName(response.Result)} ({(int)response.Result})")
-            .SendToAsync(channel);
+            .WithTitle(response.Result is ResultCode.Success
+                ? $"Verification for {member.GetEffectiveUsername()} success"
+                : $"Verification for {member.GetEffectiveUsername()} failed")
+            .AddField(
+                response.Result is ResultCode.Success
+                    ? "Verification Place #"
+                    : "Error",
+                response.Result is ResultCode.Success
+                    ? member.Guild.Users.Count(u => u.HasRole(1334992661198930001)).Ordinalize()
+                    : $"{Enum.GetName(response.Result)} ({(int)response.Result})"
+            );
     }
 }

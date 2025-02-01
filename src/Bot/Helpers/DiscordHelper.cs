@@ -173,7 +173,7 @@ public static class DiscordHelper
         => deletable.TryDeleteAsync(RequestOptions(opts => opts.AuditLogReason = reason));
 
     public static string GetEffectiveUsername(this IGuildUser user) =>
-        user.Nickname ?? user.Username;
+        user.Nickname ?? user.DisplayName ?? user.Username;
 
     public static string GetEffectiveAvatarUrl(this IUser user, ImageFormat format = ImageFormat.Auto,
         ushort size = 128)

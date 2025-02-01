@@ -8,10 +8,12 @@ public class VerifierService : BotService
     public const string ApiBaseUrl = "https://switch.lotp.it/verifier.php";
 
     private readonly HttpClient _httpClient;
+    private readonly DiscordSocketClient _client;
 
-    public VerifierService(HttpClient httpClient)
+    public VerifierService(HttpClient httpClient, DiscordSocketClient client)
     {
         _httpClient = httpClient;
+        _client = client;
     }
 
     public async Task<(ResultCode Result, Gommon.Optional<string> Hash)> GetHashAsync(ulong userId)
@@ -32,16 +34,25 @@ public class VerifierService : BotService
         );
     }
     
-    public async Task<ResultCode> VerifyAsync(ulong userId, string token)
+    public async Task<VerifyActionResponse> VerifyAsync(ulong userId, string token)
     {
         var verifyRequest = new VerifyActionRequest { Id = userId, Token = token };
 
         var response = await _httpClient.PostAsJsonAsync(ApiBaseUrl, verifyRequest);
         
-        var verifyResponse = JsonSerializer.Deserialize<VerifyActionResponse>(
+        return JsonSerializer.Deserialize<VerifyActionResponse>(
             await response.Content.ReadAsStringAsync()
         );
-
-        return verifyResponse.Result;
+    }
+    
+    public async Task SendVerificationErrorModlogMessageAsync(SocketGuildUser member, VerifyActionResponse response)
+    {
+        if (await _client.GetChannelAsync(1318250869980004394) is not ITextChannel channel) return;
+        
+        await new EmbedBuilder()
+            .WithColor(Config.SuccessColor)
+            .WithTitle($"Verification for {member.GetEffectiveUsername()} failed")
+            .AddField("Error", $"{Enum.GetName(response.Result)} ({(int)response.Result})")
+            .SendToAsync(channel);
     }
 }

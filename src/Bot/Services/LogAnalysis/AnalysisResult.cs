@@ -1,4 +1,6 @@
-﻿namespace RyuBot.Services;
+﻿using System.Collections;
+
+namespace RyuBot.Services;
 
 public struct LogAnalysis
 {
@@ -11,9 +13,9 @@ public struct LogAnalysis
     }
     
     public string RawLogContent { get; }
-    public List<string[]> LogErrors;
+    public List<string> LogErrors;
     public HardwareInfo Hardware;
-    public EmulatorInfo Emulator;
+    public EmulatorInfo EmulatorInfo;
     public GameInfo Game;
     public Settings Settings;
 }
@@ -30,12 +32,15 @@ public class EmulatorInfo
 {
     public (RyujinxVersion VersionType, string VersionString) Version { get; set; }
     public string Firmware { get; set; }
-    public List<string> EnabledLogs { get; set; } = [];
+    public string EnabledLogs { get; set; }
 }
 
 public class GameInfo
 {
     public string Name { get; set; }
+    public string AppId { get; set; }
+    public string AppIdBids { get; set; }
+    public string BuildIDs { get; set; }
     public string Errors { get; set; }
     public string Mods { get; set; }
     public string Cheats { get; set; }

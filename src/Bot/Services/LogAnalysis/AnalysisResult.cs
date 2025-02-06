@@ -1,6 +1,4 @@
-﻿using System.Collections;
-
-namespace RyuBot.Services;
+﻿namespace RyuBot.Services;
 
 public struct LogAnalysis
 {
@@ -59,9 +57,11 @@ public class Settings
     public bool Pptc { get; set; }
     public bool ShaderCache { get; set; }
     public string VSyncMode { get; set; }
-    public bool? Hypervisor { get; set; }
+    public string Hypervisor { get; set; }
     public string ResScale { get; set; }
     public string AnisotropicFiltering { get; set; }
     public string AspectRatio { get; set; }
     public bool TextureRecompression { get; set; }
+    public string CustomVSyncInterval { get; set; }
+    public string MultiplayerMode { get; set; }
 }

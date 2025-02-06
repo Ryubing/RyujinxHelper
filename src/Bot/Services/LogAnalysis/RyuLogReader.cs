@@ -29,7 +29,8 @@ public class RyuLogReader
 
     void GetAppInfo()
     {
-        MatchCollection gameNameMatch = Regex.Matches(log.RawLogContent, @"Loader [A-Za-z]*: Application Loaded:\s([^;\n\r]*)", RegexOptions.Multiline);
+        MatchCollection gameNameMatch = Regex.Matches(log.RawLogContent,
+            @"Loader [A-Za-z]*: Application Loaded:\s([^;\n\r]*)", RegexOptions.Multiline);
         if (!gameNameMatch.None())
         {
             string gameName = gameNameMatch[-1].ToString().Trim();
@@ -54,7 +55,7 @@ public class RyuLogReader
                 string appIDFromBids;
                 string BuildIDs;
 
-                if (bidsMatch[0].ToString() is not null)
+                if (bidsMatch[0].ToString() != null)
                 {
                     appIDFromBids = bidsMatch[0].ToString().Trim().ToUpper();
                 }
@@ -62,7 +63,7 @@ public class RyuLogReader
                 {
                     appIDFromBids = "Unknown";
                 }
-                if (bidsMatch[1].ToString() is not null)
+                if (bidsMatch[1].ToString() != null)
                 {
                     // this might not work
                     BuildIDs = bidsMatch[1].ToString().Trim().ToUpper();
@@ -152,21 +153,16 @@ public class RyuLogReader
             double ramTotal = ConvertGiBtoMiB(Convert.ToDouble(ramMatch.Groups[1].Value));
             log.Hardware.Ram = $"{ramAvailable:.0f}/{ramTotal:.0f} MiB";
         }
-        else
-        {
-            log.Hardware.Ram = "Unknown";
-        }
+        else { log.Hardware.Ram = "Unknown"; }
 
         // Operating System (OS)
-        Match osMatch = Regex.Match(log.RawLogContent, @"Operating System:\s([^;\n\r]*)", RegexOptions.Multiline);
+        Match osMatch = Regex.Match(log.RawLogContent, @"Operating System:\s([^;\n\r]*)", 
+            RegexOptions.Multiline);
         if (osMatch.Success)
         {
             log.Hardware.Os = osMatch.Groups[1].Value.TrimEnd();
         }
-        else
-        {
-            log.Hardware.Os = "Unknown";
-        }
+        else { log.Hardware.Os = "Unknown"; }
 
         // GPU
         Match gpuMatch = Regex.Match(log.RawLogContent, @"PrintGpuInformation:\s([^;\n\r]*)",
@@ -176,10 +172,7 @@ public class RyuLogReader
             log.Hardware.Gpu = gpuMatch.Groups[1].Value.TrimEnd();
             // If android logs starts showing up, we can detect android GPUs here
         }
-        else
-        {
-            log.Hardware.Gpu = "Unknown";
-        }
+        else { log.Hardware.Gpu = "Unknown"; }
     }
 
     void GetEmuInfo()
@@ -197,11 +190,6 @@ public class RyuLogReader
             {
                 log.EmulatorInfo.Version = (RyujinxVersion.Canary, line.Split("\n")[-1].Trim());
             }
-            // Custom build
-            else if (LogAnalysisPatterns.CustomVersion.IsMatch(line))
-            {
-                log.EmulatorInfo.Version = (RyujinxVersion.Custom, line.Split("\n")[-1].Trim());
-            } 
             // PR build
             else if (LogAnalysisPatterns.PrVersion.IsMatch(line) || LogAnalysisPatterns.OriginalPrVersion.IsMatch(line))
             {
@@ -217,38 +205,150 @@ public class RyuLogReader
             {
                 log.EmulatorInfo.Version = (RyujinxVersion.OriginalProjectLdn, line.Split("\n")[-1].Trim());
             }
+            // Custom build
+            else
+            {
+                log.EmulatorInfo.Version = (RyujinxVersion.Custom, line.Split("\n")[-1].Trim());
+            } 
         }
         
         // Logs Enabled ?
-        Match logsMatch = Regex.Match(log.RawLogContent, @"Logs Enabled:\s([^;\n\r]*)", RegexOptions.Multiline);
+        Match logsMatch = Regex.Match(log.RawLogContent, @"Logs Enabled:\s([^;\n\r]*)", 
+            RegexOptions.Multiline);
         if (logsMatch.Success)
         {
             log.EmulatorInfo.EnabledLogs = logsMatch.Groups[1].Value.TrimEnd();
         }
-        else
-        {
-            log.EmulatorInfo.EnabledLogs = "Unknown";
-        }
+        else { log.EmulatorInfo.EnabledLogs = "Unknown"; }
         
         // Firmware
-        Match firmwareMatch = Regex.Match(log.RawLogContent, @"Firmware Version:\s([^;\n\r]*)", RegexOptions.Multiline);
+        Match firmwareMatch = Regex.Match(log.RawLogContent, @"Firmware Version:\s([^;\n\r]*)", 
+            RegexOptions.Multiline);
         if (firmwareMatch.Success)
         {
             log.EmulatorInfo.Firmware = firmwareMatch.Groups[-1].Value.Trim();
         }
-        else
-        {
-            log.EmulatorInfo.Firmware = "Unknown";
-        }
+        else { log.EmulatorInfo.Firmware = "Unknown"; }
         
     }
 
-    void GetSettingValue()
+    void GetSettings()
     {
-        Match settingMatch = Regex.Match(log.RawLogContent, @"LogValueChange:\s([^;\n\r]*)");
-        if (settingMatch.Success)
+        
+        MatchCollection settingsMatch = Regex.Matches(log.RawLogContent, @"LogValueChange:\s([^;\n\r]*)", 
+            RegexOptions.Multiline);
+        
+        foreach (string line in log.RawLogContent.Split("\n"))
         {
-            // Unfinished
+            switch (settingsMatch[0].Groups[1].Value.Trim())
+            {
+                // Resolution Scale
+                case "ResScaleCustom set to:":
+                case "ResScale set to:":
+                    log.Settings.ResScale = settingsMatch[0].Groups[2].Value.Trim();
+                    switch (log.Settings.ResScale)
+                    {
+                        case "1":
+                            log.Settings.ResScale = "Native (720p/1080p)";
+                            break;
+                        case "2":
+                            log.Settings.ResScale = "2x (1440p/2060p(4K))";
+                            break;
+                        case "3":
+                            log.Settings.ResScale = "3x (2160p(4K)/3240p)";
+                            break;
+                        case "4":
+                            log.Settings.ResScale = "4x (3240p/4320p)";
+                            break;
+                        case "-1":
+                            log.Settings.ResScale = "Custom";
+                            break;
+                    }
+                    
+                    break;
+                // Anisotropic Filtering
+                case "MaxAnisotropy set to:":
+                    log.Settings.AnisotropicFiltering = settingsMatch[0].Groups[2].Value.Trim();
+                    break;
+                // Aspect Ratio
+                case "AspectRatio set to:":
+                    log.Settings.AspectRatio = settingsMatch[0].Groups[2].Value.Trim();
+                    switch (log.Settings.AspectRatio)
+                    {
+                        case "Fixed16x9":
+                            log.Settings.AspectRatio = "16:9";
+                            break;
+                        // TODO: add more aspect ratios
+                    }
+                    
+                    break;
+                // Graphics Backend
+                case "GraphicsBackend set to:":
+                    log.Settings.GraphicsBackend = settingsMatch[0].Groups[2].Value.Trim();
+                    break;
+                // Custom VSync Interval
+                case "CustomVSyncInterval set to:":
+                    log.Settings.CustomVSyncInterval = settingsMatch[0].Groups[2].Value.Trim();
+                    break;
+                // Shader cache
+                case "EnableShaderCache set to: True":
+                    log.Settings.ShaderCache = true;
+                    break;
+                case "EnableShaderCache set to: False":
+                    log.Settings.ShaderCache = false;
+                    break;
+                // Docked or Handheld
+                case "EnableDockedMode set to: True":
+                    log.Settings.Docked = true;
+                    break;
+                case "EnableDockedMode set to: False":
+                    log.Settings.Docked = false;
+                    break;
+                // PPTC Cache
+                case "EnablePtc set to: True":
+                    log.Settings.Pptc = true;
+                    break;
+                case "EnablePtc set to: False":
+                    log.Settings.Pptc = false;
+                    break;
+                // FS Integrity check
+                case "EnableFsIntegrityChecks set to: True":
+                    log.Settings.FsIntegrityChecks = true;
+                    break;
+                case "EnableFsIntegrityChecks set to: False":
+                    log.Settings.FsIntegrityChecks = false;
+                    break;
+                // Audio Backend
+                case "AudioBackend set to:":
+                    log.Settings.AudioBackend = settingsMatch[0].Groups[2].Value.Trim();
+                    break;
+                // Memory Manager Mode
+                case "MemoryManagerMode set to:":
+                    log.Settings.MemoryManager = settingsMatch[0].Groups[2].Value.Trim();
+                    switch (log.Settings.MemoryManager)
+                    {
+                        case "HostMappedUnsafe":
+                            log.Settings.MemoryManager = "Unsafe";
+                            break;
+                        // TODO: Add more memory manager modes
+                    }
+
+                    break;
+                // Hypervisor
+                case "UseHypervisor set to:":
+                    log.Settings.Hypervisor = settingsMatch[0].Groups[2].Value.Trim();
+                    // If the OS is windows or linux, set hypervisor to 'N/A' because it's only on macos
+                    if (log.Hardware.Os.ToLower() == "windows" || log.Hardware.Os.ToLower() == "linux")
+                    {
+                        log.Settings.Hypervisor = "N/A";
+                    }
+
+                    break;
+                // Ldn Mode
+                case "MultiplayerMode set to:":
+                    log.Settings.MultiplayerMode = settingsMatch[0].Groups[2].Value.Trim();
+                    break;
+            }
         }
         
     }

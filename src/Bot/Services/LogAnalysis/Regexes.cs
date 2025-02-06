@@ -11,7 +11,6 @@ public static partial class LogAnalysisPatterns
     public static readonly Regex PrVersion = PrVersionRegex();
     public static readonly Regex OriginalPrVersion = OriginalPrVersionRegex();
     public static readonly Regex MirrorVersion = MirrorVersionRegex();
-    public static readonly Regex CustomVersion = CustomVersionRegex();
     
     [GeneratedRegex(@"^1\.2\.\d+$")]
     private static partial Regex StableVersionRegex();
@@ -33,7 +32,4 @@ public static partial class LogAnalysisPatterns
     
     [GeneratedRegex(@"^r\.(\d|\w){7}$")]
     private static partial Regex MirrorVersionRegex();
-    
-    // Greem please put a regex here idk how to do them
-    private static partial Regex CustomVersionRegex();
 }

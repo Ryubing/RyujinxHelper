@@ -4,7 +4,9 @@ namespace RyuBot.Services;
 
 public class RyuLogReader
 {
-    public LogAnalysis Log;
+    private LogAnalysis _log;
+    private Notes _notes;
+    private FatalErrors _fatalErrors;
 
     double ConvertGiBtoMiB(double GiB)
     {
@@ -14,22 +16,63 @@ public class RyuLogReader
     static bool IsHomebrew(string logFile)
     {
         Match m = Regex.Match(logFile, "Load.*Application: Loading as [Hh]omebrew");
-        if (m.Success) return true;
-        if (!m.Success) return false;
-        else return false;
+        return m.Success;
     }
 
     static bool IsUsingMetal(string logFile)
     {
         Match m = Regex.Match(logFile, "Gpu : Backend \\(Metal\\): Metal");
-        if (m.Success) return true;
-        if (!m.Success) return false;
-        else return false;
+        return m.Success;
+    }
+
+    (RyujinxVersion VersionType, string VersionString) GetEmuVersion()
+    {
+        // Ryujinx Version check
+        foreach (string line in _log.RawLogContent.Split("\n"))
+        {
+            // Greem's Stable build
+            if (LogAnalysisPatterns.StableVersion.IsMatch(line))
+            {
+                return (RyujinxVersion.Stable, line[-1].ToString().Trim());
+            }
+            
+            // Greem's Canary build
+            if (LogAnalysisPatterns.CanaryVersion.IsMatch(line))
+            {
+                return (RyujinxVersion.Canary, line[-1].ToString().Trim());
+            }
+            
+            // PR build
+            if (LogAnalysisPatterns.PrVersion.IsMatch(line) 
+                     || LogAnalysisPatterns.OriginalPrVersion.IsMatch(line))
+            {
+                return (RyujinxVersion.Pr, line[-1].ToString().Trim());
+            }
+            
+            // Original Project build
+            if (LogAnalysisPatterns.OriginalProjectVersion.IsMatch(line))
+            {
+                return (RyujinxVersion.OriginalProject, line[-1].ToString().Trim());
+            }
+            
+            // Original Project LDN build
+            if (LogAnalysisPatterns.OriginalProjectLdnVersion.IsMatch(line))
+            {
+                return (RyujinxVersion.OriginalProjectLdn, line[-1].ToString().Trim());
+            }
+            
+            if (LogAnalysisPatterns.MirrorVersion.IsMatch(line))
+            {
+                return (RyujinxVersion.Mirror, line[-1].ToString().Trim());
+            }
+        }
+        
+        return (RyujinxVersion.Custom, "1.0.0-dirty");
     }
 
     void GetAppInfo()
     {
-        MatchCollection gameNameMatch = Regex.Matches(Log.RawLogContent,
+        MatchCollection gameNameMatch = Regex.Matches(_log.RawLogContent,
             @"Loader [A-Za-z]*: Application Loaded:\s([^;\n\r]*)", RegexOptions.Multiline);
         if (!gameNameMatch.None())
         {
@@ -46,7 +89,7 @@ public class RyuLogReader
                 appID = "Unknown";
             }
 
-            MatchCollection bidsMatchAll = Regex.Matches(Log.RawLogContent,
+            MatchCollection bidsMatchAll = Regex.Matches(_log.RawLogContent,
                 @"Build ids found for (?:title|application) ([a-zA-Z0-9]*):[\n\r]*((?:\s+.*[\n\r]+)+)");
             if (!bidsMatchAll.None() && bidsMatchAll.Count > 0)
             {
@@ -55,7 +98,7 @@ public class RyuLogReader
                 string appIDFromBids;
                 string BuildIDs;
 
-                if (bidsMatch[0].ToString() != null)
+                if (bidsMatch[0].ToString() != "")
                 {
                     appIDFromBids = bidsMatch[0].ToString().Trim().ToUpper();
                 }
@@ -64,7 +107,7 @@ public class RyuLogReader
                     appIDFromBids = "Unknown";
                 }
 
-                if (bidsMatch[1].ToString() != null)
+                if (bidsMatch[1].ToString() != "")
                 {
                     // this might not work
                     BuildIDs = bidsMatch[1].ToString().Trim().ToUpper();
@@ -74,10 +117,10 @@ public class RyuLogReader
                     BuildIDs = "Unknown";
                 }
 
-                Log.Game.Name = gameName;
-                Log.Game.AppId = appID;
-                Log.Game.AppIdBids = appIDFromBids;
-                Log.Game.BuildIDs = BuildIDs;
+                _log.Game.Name = gameName;
+                _log.Game.AppId = appID;
+                _log.Game.AppIdBids = appIDFromBids;
+                _log.Game.BuildIDs = BuildIDs;
             }
         }
     }
@@ -105,7 +148,7 @@ public class RyuLogReader
         List<string> currentErrorsLines = new List<string>();
         bool errorLine = false;
 
-        foreach (string line in Log.RawLogContent.Split("\n"))
+        foreach (string line in _log.RawLogContent.Split("\n"))
         {
             if (line.IsNullOrWhitespace())
             {
@@ -129,131 +172,99 @@ public class RyuLogReader
             errors.AddRange(currentErrorsLines);
         }
 
-        Log.LogErrors = errors;
+        _log.Errors = errors;
     }
 
-    string[] _sizes = ["KB", "KiB", "MB", "MiB", "GB", "GiB"];
+    readonly string[] _sizes = ["KB", "KiB", "MB", "MiB", "GB", "GiB"];
 
     void GetHardwareInfo()
     {
         // CPU
-        Match cpuMatch = Regex.Match(Log.RawLogContent, @"CPU:\s([^;\n\r]*)", RegexOptions.Multiline);
+        Match cpuMatch = Regex.Match(_log.RawLogContent, @"CPU:\s([^;\n\r]*)", RegexOptions.Multiline);
         if (cpuMatch.Success)
         {
-            Log.Hardware.Cpu = cpuMatch.Groups[1].Value.TrimEnd();
+            _log.Hardware.Cpu = cpuMatch.Groups[1].Value.TrimEnd();
         }
         else
         {
-            Log.Hardware.Cpu = "Unknown";
+            _log.Hardware.Cpu = "Unknown";
         }
 
         // RAM
-        Match ramMatch = Regex.Match(Log.RawLogContent,
+        Match ramMatch = Regex.Match(_log.RawLogContent,
             @$"RAM: Total ([\d.]+) ({_sizes}) ; Available ([\d.]+) ({_sizes})", RegexOptions.Multiline);
         if (ramMatch.Success)
         {
             double ramAvailable = ConvertGiBtoMiB(Convert.ToDouble(ramMatch.Groups[3].Value));
             double ramTotal = ConvertGiBtoMiB(Convert.ToDouble(ramMatch.Groups[1].Value));
-            Log.Hardware.Ram = $"{ramAvailable:.0f}/{ramTotal:.0f} MiB";
+            _log.Hardware.Ram = $"{ramAvailable:.0f}/{ramTotal:.0f} MiB";
+            _log.Hardware.RamAvailable = ramAvailable.ToString("0.0");
         }
         else
         {
-            Log.Hardware.Ram = "Unknown";
+            _log.Hardware.Ram = "Unknown";
+            _log.Hardware.RamAvailable = "Unknown";
         }
 
         // Operating System (OS)
-        Match osMatch = Regex.Match(Log.RawLogContent, @"Operating System:\s([^;\n\r]*)",
+        Match osMatch = Regex.Match(_log.RawLogContent, @"Operating System:\s([^;\n\r]*)",
             RegexOptions.Multiline);
         if (osMatch.Success)
         {
-            Log.Hardware.Os = osMatch.Groups[1].Value.TrimEnd();
+            _log.Hardware.Os = osMatch.Groups[1].Value.TrimEnd();
         }
         else
         {
-            Log.Hardware.Os = "Unknown";
+            _log.Hardware.Os = "Unknown";
         }
 
         // GPU
-        Match gpuMatch = Regex.Match(Log.RawLogContent, @"PrintGpuInformation:\s([^;\n\r]*)",
+        Match gpuMatch = Regex.Match(_log.RawLogContent, @"PrintGpuInformation:\s([^;\n\r]*)",
             RegexOptions.Multiline);
         if (gpuMatch.Success)
         {
-            Log.Hardware.Gpu = gpuMatch.Groups[1].Value.TrimEnd();
+            _log.Hardware.Gpu = gpuMatch.Groups[1].Value.TrimEnd();
             // If android logs starts showing up, we can detect android GPUs here
         }
         else
         {
-            Log.Hardware.Gpu = "Unknown";
+            _log.Hardware.Gpu = "Unknown";
         }
     }
 
     void GetEmuInfo()
     {
-        // Ryujinx Version check
-        foreach (string line in Log.RawLogContent.Split("\n"))
-        {
-            // Greem's Stable build
-            if (LogAnalysisPatterns.StableVersion.IsMatch(line))
-            {
-                Log.EmulatorInfo.Version = (RyujinxVersion.Stable, line.Split("\n")[-1].Trim());
-            }
-            // Greem's Canary build
-            else if (LogAnalysisPatterns.CanaryVersion.IsMatch(line))
-            {
-                Log.EmulatorInfo.Version = (RyujinxVersion.Canary, line.Split("\n")[-1].Trim());
-            }
-            // PR build
-            else if (LogAnalysisPatterns.PrVersion.IsMatch(line) || LogAnalysisPatterns.OriginalPrVersion.IsMatch(line))
-            {
-                Log.EmulatorInfo.Version = (RyujinxVersion.Pr, line.Split("\n")[-1].Trim());
-            }
-            // Original Project build
-            else if (LogAnalysisPatterns.OriginalProjectVersion.IsMatch(line))
-            {
-                Log.EmulatorInfo.Version = (RyujinxVersion.OriginalProject, line.Split("\n")[-1].Trim());
-            }
-            // Original Project LDN build
-            else if (LogAnalysisPatterns.OriginalProjectLdnVersion.IsMatch(line))
-            {
-                Log.EmulatorInfo.Version = (RyujinxVersion.OriginalProjectLdn, line.Split("\n")[-1].Trim());
-            }
-            // Custom build
-            else
-            {
-                Log.EmulatorInfo.Version = (RyujinxVersion.Custom, line.Split("\n")[-1].Trim());
-            }
-        }
+        _log.Emulator.Version = GetEmuVersion();
 
         // Logs Enabled ?
-        Match logsMatch = Regex.Match(Log.RawLogContent, @"Logs Enabled:\s([^;\n\r]*)",
+        Match logsMatch = Regex.Match(_log.RawLogContent, @"Logs Enabled:\s([^;\n\r]*)",
             RegexOptions.Multiline);
         if (logsMatch.Success)
         {
-            Log.EmulatorInfo.EnabledLogs = logsMatch.Groups[1].Value.TrimEnd();
+            _log.Emulator.EnabledLogs = logsMatch.Groups[1].Value.TrimEnd();
         }
         else
         {
-            Log.EmulatorInfo.EnabledLogs = "Unknown";
+            _log.Emulator.EnabledLogs = "Unknown";
         }
 
         // Firmware
-        Match firmwareMatch = Regex.Match(Log.RawLogContent, @"Firmware Version:\s([^;\n\r]*)",
+        Match firmwareMatch = Regex.Match(_log.RawLogContent, @"Firmware Version:\s([^;\n\r]*)",
             RegexOptions.Multiline);
         if (firmwareMatch.Success)
         {
-            Log.EmulatorInfo.Firmware = firmwareMatch.Groups[-1].Value.Trim();
+            _log.Emulator.Firmware = firmwareMatch.Groups[-1].Value.Trim();
         }
         else
         {
-            Log.EmulatorInfo.Firmware = "Unknown";
+            _log.Emulator.Firmware = "Unknown";
         }
 
     }
 
     void GetSettings()
     {
-
-        MatchCollection settingsMatch = Regex.Matches(Log.RawLogContent, @"LogValueChange:\s([^;\n\r]*)",
+        MatchCollection settingsMatch = Regex.Matches(_log.RawLogContent, @"LogValueChange:\s([^;\n\r]*)",
             RegexOptions.Multiline);
 
         foreach (string line in settingsMatch)
@@ -263,38 +274,38 @@ public class RyuLogReader
                 // Resolution Scale
                 case "ResScaleCustom set to:":
                 case "ResScale set to:":
-                    Log.Settings.ResScale = settingsMatch[0].Groups[2].Value.Trim();
-                    switch (Log.Settings.ResScale)
+                    _log.Settings.ResScale = settingsMatch[0].Groups[2].Value.Trim();
+                    switch (_log.Settings.ResScale)
                     {
                         case "1":
-                            Log.Settings.ResScale = "Native (720p/1080p)";
+                            _log.Settings.ResScale = "Native (720p/1080p)";
                             break;
                         case "2":
-                            Log.Settings.ResScale = "2x (1440p/2060p(4K))";
+                            _log.Settings.ResScale = "2x (1440p/2060p(4K))";
                             break;
                         case "3":
-                            Log.Settings.ResScale = "3x (2160p(4K)/3240p)";
+                            _log.Settings.ResScale = "3x (2160p(4K)/3240p)";
                             break;
                         case "4":
-                            Log.Settings.ResScale = "4x (3240p/4320p(8K))";
+                            _log.Settings.ResScale = "4x (3240p/4320p(8K))";
                             break;
                         case "-1":
-                            Log.Settings.ResScale = "Custom";
+                            _log.Settings.ResScale = "Custom";
                             break;
                     }
 
                     break;
                 // Anisotropic Filtering
                 case "MaxAnisotropy set to:":
-                    Log.Settings.AnisotropicFiltering = settingsMatch[0].Groups[2].Value.Trim();
+                    _log.Settings.AnisotropicFiltering = settingsMatch[0].Groups[2].Value.Trim();
                     break;
                 // Aspect Ratio
                 case "AspectRatio set to:":
-                    Log.Settings.AspectRatio = settingsMatch[0].Groups[2].Value.Trim();
-                    switch (Log.Settings.AspectRatio)
+                    _log.Settings.AspectRatio = settingsMatch[0].Groups[2].Value.Trim();
+                    switch (_log.Settings.AspectRatio)
                     {
                         case "Fixed16x9":
-                            Log.Settings.AspectRatio = "16:9";
+                            _log.Settings.AspectRatio = "16:9";
                             break;
                         // TODO: add more aspect ratios
                     }
@@ -302,51 +313,59 @@ public class RyuLogReader
                     break;
                 // Graphics Backend
                 case "GraphicsBackend set to:":
-                    Log.Settings.GraphicsBackend = settingsMatch[0].Groups[2].Value.Trim();
+                    _log.Settings.GraphicsBackend = settingsMatch[0].Groups[2].Value.Trim();
                     break;
                 // Custom VSync Interval
                 case "CustomVSyncInterval set to:":
-                    Log.Settings.CustomVSyncInterval = settingsMatch[0].Groups[2].Value.Trim();
+                    string a = settingsMatch[0].Groups[2].Value.Trim();
+                    if (a == "False")
+                    {
+                        _log.Settings.CustomVSyncInterval = false;
+                    }
+                    else if (a == "True")
+                    {
+                        _log.Settings.CustomVSyncInterval = true;
+                    }
                     break;
                 // Shader cache
                 case "EnableShaderCache set to: True":
-                    Log.Settings.ShaderCache = true;
+                    _log.Settings.ShaderCache = true;
                     break;
                 case "EnableShaderCache set to: False":
-                    Log.Settings.ShaderCache = false;
+                    _log.Settings.ShaderCache = false;
                     break;
                 // Docked or Handheld
                 case "EnableDockedMode set to: True":
-                    Log.Settings.Docked = true;
+                    _log.Settings.Docked = true;
                     break;
                 case "EnableDockedMode set to: False":
-                    Log.Settings.Docked = false;
+                    _log.Settings.Docked = false;
                     break;
                 // PPTC Cache
                 case "EnablePtc set to: True":
-                    Log.Settings.Pptc = true;
+                    _log.Settings.Pptc = true;
                     break;
                 case "EnablePtc set to: False":
-                    Log.Settings.Pptc = false;
+                    _log.Settings.Pptc = false;
                     break;
                 // FS Integrity check
                 case "EnableFsIntegrityChecks set to: True":
-                    Log.Settings.FsIntegrityChecks = true;
+                    _log.Settings.FsIntegrityChecks = true;
                     break;
                 case "EnableFsIntegrityChecks set to: False":
-                    Log.Settings.FsIntegrityChecks = false;
+                    _log.Settings.FsIntegrityChecks = false;
                     break;
                 // Audio Backend
                 case "AudioBackend set to:":
-                    Log.Settings.AudioBackend = settingsMatch[0].Groups[2].Value.Trim();
+                    _log.Settings.AudioBackend = settingsMatch[0].Groups[2].Value.Trim();
                     break;
                 // Memory Manager Mode
                 case "MemoryManagerMode set to:":
-                    Log.Settings.MemoryManager = settingsMatch[0].Groups[2].Value.Trim();
-                    switch (Log.Settings.MemoryManager)
+                    _log.Settings.MemoryManager = settingsMatch[0].Groups[2].Value.Trim();
+                    switch (_log.Settings.MemoryManager)
                     {
                         case "HostMappedUnsafe":
-                            Log.Settings.MemoryManager = "Unsafe";
+                            _log.Settings.MemoryManager = "Unsafe";
                             break;
                         // TODO: Add more memory manager modes
                     }
@@ -354,32 +373,35 @@ public class RyuLogReader
                     break;
                 // Hypervisor
                 case "UseHypervisor set to:":
-                    Log.Settings.Hypervisor = settingsMatch[0].Groups[2].Value.Trim();
-                    // If the OS is windows or linux, set hypervisor to 'N/A' because it's only on macos
-                    if (Log.Hardware.Os.ToLower() == "windows" || Log.Hardware.Os.ToLower() == "linux")
+                    _log.Settings.Hypervisor = settingsMatch[0].Groups[2].Value.Trim();
+                    // If the OS is windows or linux, set hypervisor to 'N/A' because it's only on macOS
+                    if (_log.Hardware.Os.ToLower() == "windows" || _log.Hardware.Os.ToLower() == "linux")
                     {
-                        Log.Settings.Hypervisor = "N/A";
+                        _log.Settings.Hypervisor = "N/A";
                     }
 
                     break;
                 // Ldn Mode
                 case "MultiplayerMode set to:":
-                    Log.Settings.MultiplayerMode = settingsMatch[0].Groups[2].Value.Trim();
+                    _log.Settings.MultiplayerMode = settingsMatch[0].Groups[2].Value.Trim();
+                    break;
+                case "DramSize set to:":
+                    _log.Settings.DramSize = settingsMatch[0].Groups[2].Value.Trim();
                     break;
                 // This is just in case EVERYTHING fails
                 default:
-                    Log.Settings.ResScale = "Failed";
-                    Log.Settings.AnisotropicFiltering = "Failed";
-                    Log.Settings.AspectRatio = "Failed";
-                    Log.Settings.GraphicsBackend = "Failed";
-                    Log.Settings.CustomVSyncInterval = "Failed";
-                    Log.Settings.ShaderCache = false;
-                    Log.Settings.Docked = false;
-                    Log.Settings.Pptc = false;
-                    Log.Settings.FsIntegrityChecks = false;
-                    Log.Settings.AudioBackend = "Failed";
-                    Log.Settings.MemoryManager = "Failed";
-                    Log.Settings.Hypervisor = "Failed";
+                    _log.Settings.ResScale = "Failed";
+                    _log.Settings.AnisotropicFiltering = "Failed";
+                    _log.Settings.AspectRatio = "Failed";
+                    _log.Settings.GraphicsBackend = "Failed";
+                    _log.Settings.CustomVSyncInterval = false;
+                    _log.Settings.ShaderCache = false;
+                    _log.Settings.Docked = false;
+                    _log.Settings.Pptc = false;
+                    _log.Settings.FsIntegrityChecks = false;
+                    _log.Settings.AudioBackend = "Failed";
+                    _log.Settings.MemoryManager = "Failed";
+                    _log.Settings.Hypervisor = "Failed";
                     break;
             }
         }
@@ -387,26 +409,226 @@ public class RyuLogReader
 
     void GetMods()
     {
-        MatchCollection modsMatch = Regex.Matches(Log.RawLogContent,
+        MatchCollection modsMatch = Regex.Matches(_log.RawLogContent,
             "Found\\s(enabled)?\\s?mod\\s\\'(.+?)\\'\\s(\\[.+?\\])");
-        Log.Game.Mods += modsMatch;
+        _log.Game.Mods += modsMatch;
     }
 
     void GetCheats()
     {
-        MatchCollection cheatsMatch = Regex.Matches(Log.RawLogContent,
+        MatchCollection cheatsMatch = Regex.Matches(_log.RawLogContent,
             @"Installing cheat\s'(.+)'(?!\s\d{2}:\d{2}:\d{2}\.\d{3}\s\|E\|\sTamperMachine\sCompile)");
-        Log.Game.Cheats += cheatsMatch;
+        _log.Game.Cheats += cheatsMatch;
     }
 
     void GetAppName()
     {
-        Match appNameMatch = Regex.Match(Log.RawLogContent,
+        Match appNameMatch = Regex.Match(_log.RawLogContent,
             @"Loader [A-Za-z]*: Application Loaded:\s([^;\n\r]*)",
             RegexOptions.Multiline);
-        Log.Game.Name += appNameMatch;
+        _log.Game.Name += appNameMatch;
     }
     
+    void GetNotes()
+    {
+        string GetControllerNotes()
+        {
+            MatchCollection controllerNotesMatch = Regex.Matches(_log.RawLogContent,
+                @"Hid Configure: ([^\r\n]+)");
+            if (controllerNotesMatch.Count != 0)
+            {
+                return controllerNotesMatch.ToString();
+            }
+            else { return null; }
+        }
+
+        string GetOSNotes()
+        {
+            if (_log.Hardware.Os.ToLower().Contains("windows")
+                && !_log.Settings.GraphicsBackend.Contains("Vulkan"))
+            {
+                if (_log.Hardware.Gpu.Contains("Intel"))
+                {
+                    return _notes.IntelOpenGL;
+                } 
+                if (_log.Hardware.Gpu.Contains("AMD"))
+                {
+                    return _notes.AMDOpenGL;
+                }
+            }
+
+            if (_log.Hardware.Os.ToLower().Contains("macos") && !_log.Hardware.Cpu.Contains("Intel"))
+            {
+                return _notes.IntelMac;
+            }
+
+            return null;
+        }
+
+        string GetCpuNotes()
+        {
+            if (_log.Hardware.Cpu.ToLower().Contains("VirtualApple"))
+            {
+                return _notes.Rosetta;
+            }
+            
+            return null;
+        }
+
+        string GetLogNotes()
+        {
+            if (_log.Emulator.EnabledLogs.Contains("Debug"))
+            {
+                return _notes.DebugLogs;
+            }
+
+            if (_log.Emulator.EnabledLogs.Length < 4)
+            {
+                return _notes.MissingLogs;
+            }
+            
+            return null;
+        }
+
+        void GetSettingsNotes()
+        {
+            if (_log.Settings.AudioBackend == "Dummy")
+            {
+                _log.Notes.Add(_notes.DummyAudio);
+            } 
+            
+            if (_log.Settings.Pptc == false)
+            {
+                _log.Notes.Add(_notes.Pptc);
+            }
+            
+            if (_log.Settings.ShaderCache == false)
+            {
+                _log.Notes.Add(_notes.ShaderCache);
+            }
+            
+            if (_log.Settings.DramSize != "" && !_log.Game.Mods.Contains("4K"))
+            {
+                _log.Notes.Add(_notes.DramSize);   
+            }
+            
+            if (_log.Settings.MemoryManager == "SoftwarePageTable")
+            {
+                _log.Notes.Add(_notes.SoftwareMemory);
+            }
+            
+            if (_log.Settings.VSyncMode == "Unbounded")
+            {
+                _log.Notes.Add(_notes.VSync);
+            }
+            
+            if (_log.Settings.FsIntegrityChecks == false)
+            {
+                _log.Notes.Add(_notes.FSIntegrity);   
+            }
+            
+            if (_log.Settings.BackendThreading == false)
+            {
+                _log.Notes.Add(_notes.BackendThreadingAuto);
+            }
+            
+            if (_log.Settings.CustomVSyncInterval)
+            {
+                _log.Notes.Add(_notes.CustomRefreshRate);   
+            } 
+        }
+
+        void GetEmulatorNotes()
+        {
+            if (ContainsError(["Cache collision found"], _log.Errors))
+            {
+                _log.Errors.Add(_notes.ShaderCacheCollision);
+            } 
+                
+            if (ContainsError([
+                    "ResultFsInvalidIvfcHash",
+                    "ResultFsNonRealDataVerificationFailed",], _log.Errors))
+            {
+                _log.Errors.Add(_notes.HashError);
+            }
+                
+            if (ContainsError([
+                    "Ryujinx.Graphics.Gpu.Shader.ShaderCache.Initialize()",
+                    "System.IO.InvalidDataException: End of Central Directory record could not be found",
+                    "ICSharpCode.SharpZipLib.Zip.ZipException: Cannot find central directory",
+                ], _log.Errors))
+            {
+                _log.Errors.Add(_notes.ShaderCacheCorruption);
+            }
+                
+            if (ContainsError(["MissingKeyException"], _log.Errors))
+            {
+                _log.Errors.Add(_notes.MissingKeys);
+            }
+                
+            if (ContainsError(["ResultFsPermissionDenied"], _log.Errors))
+            {
+                _log.Errors.Add(_notes.PermissionError);
+            }
+                
+            if (ContainsError(["ResultFsTargetNotFound"], _log.Errors))
+            {
+                _log.Errors.Add(_notes.FSTargetError);
+            }
+
+            if (ContainsError(["ServiceNotImplementedException"], _log.Errors))
+            {
+                _log.Errors.Add(_notes.MissingServices);
+            }
+
+            if (ContainsError(["ErrorOutOfDeviceMemory"], _log.Errors))
+            {
+                _log.Errors.Add(_notes.VramError);
+            }
+        }
+        
+        Match latestTimestamp = Regex.Matches(_log.RawLogContent, @"(\d{2}:\d{2}:\d{2}\.\d{3})\s+?\|")[-1];
+        if (latestTimestamp.Success)
+        {
+            _log.Notes.Add("ℹ️ Time elapsed: " + latestTimestamp.Value);
+        }
+        
+        _log.Notes.Add(GetControllerNotes());
+        _log.Notes.Add(GetOSNotes());
+        _log.Notes.Add(GetCpuNotes());
+
+        if (_log.Emulator.Firmware == "Unknown" || _log.Emulator.Firmware == null
+            && _log.Game.Name != "Unknown" || _log.Game.Name == null)
+        {
+            _log.Notes.Add(_notes.Firmware);
+        }
+        
+        _log.Notes.Add(GetLogNotes());
+        GetSettingsNotes();
+        GetEmulatorNotes();
+
+        if (IsUsingMetal(_log.RawLogContent))
+        {
+            _log.Notes.Add(_notes.Metal);
+        }
+
+        var ryujinxVersion = GetEmuVersion();
+
+        if (ryujinxVersion.VersionType == RyujinxVersion.Custom)
+        {
+            _log.FatalErrors.Add(_fatalErrors.Custom);
+        } else if (ryujinxVersion.VersionType == RyujinxVersion.OriginalProjectLdn)
+        {
+            _log.FatalErrors.Add(_fatalErrors.OriginalLDN);
+        }
+        else if (ryujinxVersion.VersionType == RyujinxVersion.OriginalProject)
+        {
+            _log.FatalErrors.Add(_fatalErrors.Original);
+        } else if (ryujinxVersion.VersionType == RyujinxVersion.Mirror)
+        {
+            _log.FatalErrors.Add(_fatalErrors.Mirror);
+        }
+    }
     
 }    
     

@@ -11,9 +11,13 @@ public struct LogAnalysis
     }
     
     public string RawLogContent { get; }
-    public List<string> LogErrors;
+    public List<string> Errors;
+    public List<string> Notes;
+    // Fatal errors are errors that prevent the log from being scanned
+    public List<string> FatalErrors;
+    
     public HardwareInfo Hardware;
-    public EmulatorInfo EmulatorInfo;
+    public EmulatorInfo Emulator;
     public GameInfo Game;
     public Settings Settings;
 }
@@ -23,6 +27,7 @@ public class HardwareInfo
     public string Cpu { get; set; }
     public string Gpu { get; set; }
     public string Ram { get; set; }
+    public string RamAvailable { get; set; }
     public string Os { get; set; }
 }
 
@@ -31,6 +36,7 @@ public class EmulatorInfo
     public (RyujinxVersion VersionType, string VersionString) Version { get; set; }
     public string Firmware { get; set; }
     public string EnabledLogs { get; set; }
+    public string Timestamp { get; set; }
 }
 
 public class GameInfo
@@ -39,7 +45,6 @@ public class GameInfo
     public string AppId { get; set; }
     public string AppIdBids { get; set; }
     public string BuildIDs { get; set; }
-    public string Errors { get; set; }
     public string Mods { get; set; }
     public string Cheats { get; set; }
 }
@@ -62,6 +67,6 @@ public class Settings
     public string AnisotropicFiltering { get; set; }
     public string AspectRatio { get; set; }
     public bool TextureRecompression { get; set; }
-    public string CustomVSyncInterval { get; set; }
+    public bool CustomVSyncInterval { get; set; }
     public string MultiplayerMode { get; set; }
 }

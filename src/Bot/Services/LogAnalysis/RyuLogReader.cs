@@ -83,17 +83,9 @@ public class RyuLogReader
         if (!gameNameMatch.None())
         {
             string gameName = gameNameMatch[-1].ToString().Trim();
-
-            string appId;
+            
             Match appIdMatch = Regex.Match(gameName, @".* \[([a-zA-Z0-9]*)\]");
-            if (appIdMatch.Success)
-            {
-                appId = appIdMatch.Groups[1].Value.Trim().ToUpper();
-            }
-            else
-            {
-                appId = "Unknown";
-            }
+            string appId = appIdMatch.Success ? appIdMatch.Groups[1].Value.Trim().ToUpper() : "Unknown";
 
             MatchCollection bidsMatchAll = Regex.Matches(_log.RawLogContent,
                 @"Build ids found for (?:title|application) ([a-zA-Z0-9]*):[\n\r]*((?:\s+.*[\n\r]+)+)");
@@ -101,27 +93,11 @@ public class RyuLogReader
             {
                 // this whole thing might not work properly
                 string bidsMatch = bidsMatchAll[-1].ToString();
-                string appIdFromBids;
-                string buildIDs;
 
-                if (bidsMatch[0].ToString() != "")
-                {
-                    appIdFromBids = bidsMatch[0].ToString().Trim().ToUpper();
-                }
-                else
-                {
-                    appIdFromBids = "Unknown";
-                }
+                string appIdFromBids = bidsMatch[0].ToString() != "" ? bidsMatch[0].ToString().Trim().ToUpper() : "Unknown";
 
-                if (bidsMatch[1].ToString() != "")
-                {
-                    // this might not work
-                    buildIDs = bidsMatch[1].ToString().Trim().ToUpper();
-                }
-                else
-                {
-                    buildIDs = "Unknown";
-                }
+                // this might not work
+                string buildIDs = bidsMatch[1].ToString() != "" ? bidsMatch[1].ToString().Trim().ToUpper() : "Unknown";
 
                 _log.Game.Name = gameName;
                 _log.Game.AppId = appId;
@@ -187,14 +163,7 @@ public class RyuLogReader
     {
         // CPU
         Match cpuMatch = Regex.Match(_log.RawLogContent, @"CPU:\s([^;\n\r]*)", RegexOptions.Multiline);
-        if (cpuMatch.Success)
-        {
-            _log.Hardware.Cpu = cpuMatch.Groups[1].Value.TrimEnd();
-        }
-        else
-        {
-            _log.Hardware.Cpu = "Unknown";
-        }
+        _log.Hardware.Cpu = cpuMatch.Success ? cpuMatch.Groups[1].Value.TrimEnd() : "Unknown";
 
         // RAM
         Match ramMatch = Regex.Match(_log.RawLogContent,
@@ -215,27 +184,14 @@ public class RyuLogReader
         // Operating System (OS)
         Match osMatch = Regex.Match(_log.RawLogContent, @"Operating System:\s([^;\n\r]*)",
             RegexOptions.Multiline);
-        if (osMatch.Success)
-        {
-            _log.Hardware.Os = osMatch.Groups[1].Value.TrimEnd();
-        }
-        else
-        {
-            _log.Hardware.Os = "Unknown";
-        }
+        _log.Hardware.Os = osMatch.Success ? osMatch.Groups[1].Value.TrimEnd() : "Unknown";
 
         // GPU
         Match gpuMatch = Regex.Match(_log.RawLogContent, @"PrintGpuInformation:\s([^;\n\r]*)",
             RegexOptions.Multiline);
-        if (gpuMatch.Success)
-        {
-            _log.Hardware.Gpu = gpuMatch.Groups[1].Value.TrimEnd();
+        _log.Hardware.Gpu = gpuMatch.Success ? gpuMatch.Groups[1].Value.TrimEnd() :
             // If android logs starts showing up, we can detect android GPUs here
-        }
-        else
-        {
-            _log.Hardware.Gpu = "Unknown";
-        }
+            "Unknown";
     }
 
     void GetEmuInfo()
@@ -245,26 +201,12 @@ public class RyuLogReader
         // Logs Enabled ?
         Match logsMatch = Regex.Match(_log.RawLogContent, @"Logs Enabled:\s([^;\n\r]*)",
             RegexOptions.Multiline);
-        if (logsMatch.Success)
-        {
-            _log.Emulator.EnabledLogs = logsMatch.Groups[1].Value.TrimEnd();
-        }
-        else
-        {
-            _log.Emulator.EnabledLogs = "Unknown";
-        }
+        _log.Emulator.EnabledLogs = logsMatch.Success ? logsMatch.Groups[1].Value.TrimEnd() : "Unknown";
 
         // Firmware
         Match firmwareMatch = Regex.Match(_log.RawLogContent, @"Firmware Version:\s([^;\n\r]*)",
             RegexOptions.Multiline);
-        if (firmwareMatch.Success)
-        {
-            _log.Emulator.Firmware = firmwareMatch.Groups[-1].Value.Trim();
-        }
-        else
-        {
-            _log.Emulator.Firmware = "Unknown";
-        }
+        _log.Emulator.Firmware = firmwareMatch.Success ? firmwareMatch.Groups[-1].Value.Trim() : "Unknown";
 
     }
 
@@ -660,6 +602,15 @@ public class RyuLogReader
         }
         
     }
+
+    string GetLastError()
+    {
+        if (_log.Errors.Count > 0)
+        {
+            return _log.Errors[-1];
+        }
+        
+        return null;
+    }
     
 }    
-    

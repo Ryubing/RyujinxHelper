@@ -25,6 +25,12 @@ public class RyuLogReader
         return m.Success;
     }
 
+    static bool IsDefaultUserProfile(string logFile)
+    {
+        Match m = Regex.Match(logFile, "UserId: 00000000000000010000000000000000");
+        return m.Success;
+    }
+
     (RyujinxVersion VersionType, string VersionString) GetEmuVersion()
     {
         // Ryujinx Version check
@@ -536,7 +542,12 @@ public class RyuLogReader
             if (_log.Settings.CustomVSyncInterval)
             {
                 _log.Notes.Add(_notes.CustomRefreshRate);   
-            } 
+            }
+
+            if (_log.Settings.IgnoreMissingServices)
+            {
+                _log.Notes.Add(_notes.ServiceError);
+            }
         }
 
         void GetEmulatorNotes()
@@ -586,12 +597,30 @@ public class RyuLogReader
             {
                 _log.Errors.Add(_notes.VramError);
             }
+
+            if (ContainsError(["ResultKvdbInvalidKeyValue (2020-0005)"], _log.Errors))
+            {
+                _log.Errors.Add(_notes.SaveDataIndex);
+            }
+
+            Match gameCrashMatch =
+                Regex.Match(_log.RawLogContent, "/\\(ResultErrApplicationAborted \\(\\d{4}-\\d{4}\\)\\)/");
+
+            if (gameCrashMatch.Success)
+            {
+                _log.Errors.Add(_notes.GameCrashed);
+            }
         }
         
         Match latestTimestamp = Regex.Matches(_log.RawLogContent, @"(\d{2}:\d{2}:\d{2}\.\d{3})\s+?\|")[-1];
         if (latestTimestamp.Success)
         {
             _log.Notes.Add("ℹ️ Time elapsed: " + latestTimestamp.Value);
+        }
+
+        if (IsDefaultUserProfile(_log.RawLogContent))
+        {
+            _log.Notes.Add(_notes.DefaultProfile);
         }
         
         _log.Notes.Add(GetControllerNotes());
@@ -629,6 +658,7 @@ public class RyuLogReader
         {
             _log.FatalErrors.Add(_fatalErrors.Mirror);
         }
+        
     }
     
 }    

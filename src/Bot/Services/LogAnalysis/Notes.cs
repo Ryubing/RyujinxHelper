@@ -25,10 +25,7 @@ public class Notes
 
     public readonly string VSync = "⚠️ V-Sync disabled can cause instability like games running faster than " +
                                    "intended or longer load times.";
-
-    public readonly string IgnoreApplet =
-        "⚠️ `Ignore Applets` can cause instability like games not functioning correctly.";
-
+    
     public readonly string HashError = "🔴 Dump error detected. Investigate possible bad game/firmware dump issues.";
     public readonly string GameCrashed = "🔴 The game itself crashed, not Ryujinx.";
     public readonly string MissingKeys = "⚠️ Keys or firmware out of date, consider updating them.";

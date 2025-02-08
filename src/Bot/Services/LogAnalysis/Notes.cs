@@ -20,7 +20,7 @@ public class Notes
 
     public readonly string MissingServices = "⚠️ `Ignore Missing Services` being enabled can cause instability.";
 
-    public readonly string FSIntegrity =
+    public readonly string FsIntegrity =
         "⚠️ Disabling file integrity checks may cause corrupted dumps to not be detected.";
 
     public readonly string VSync = "⚠️ V-Sync disabled can cause instability like games running faster than " +
@@ -36,7 +36,7 @@ public class Notes
     public readonly string PermissionError = "🔴 File permission error. Consider deleting save directory and " +
                                              "allowing Ryujinx to make a new one.";
 
-    public readonly string FSTargetError = "🔴 Save not found error. Consider starting game without a save file or " +
+    public readonly string FsTargetError = "🔴 Save not found error. Consider starting game without a save file or " +
                                            "using a new save file.";
 
     public readonly string ServiceError = "⚠️ Consider enabling `Ignore Missing Services` in Ryujinx settings.";
@@ -66,7 +66,7 @@ public class FatalErrors
 {
     public readonly string Custom = "⚠️ **Custom builds are not officially supported**";
 
-    public readonly string OriginalLDN =
+    public readonly string OriginalLdn =
         "**The old Ryujinx LDN build no longer works. Please update to " +
         "[this version](<https://github.com/GreemDev/Ryujinx/releases/latest>). *Yes, it has LDN functionality.***";
 

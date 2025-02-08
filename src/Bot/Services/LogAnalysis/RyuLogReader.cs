@@ -78,15 +78,15 @@ public class RyuLogReader
         {
             string gameName = gameNameMatch[-1].ToString().Trim();
 
-            string appID;
-            Match appIDMatch = Regex.Match(gameName, @".* \[([a-zA-Z0-9]*)\]");
-            if (appIDMatch.Success)
+            string appId;
+            Match appIdMatch = Regex.Match(gameName, @".* \[([a-zA-Z0-9]*)\]");
+            if (appIdMatch.Success)
             {
-                appID = appIDMatch.Groups[1].Value.Trim().ToUpper();
+                appId = appIdMatch.Groups[1].Value.Trim().ToUpper();
             }
             else
             {
-                appID = "Unknown";
+                appId = "Unknown";
             }
 
             MatchCollection bidsMatchAll = Regex.Matches(_log.RawLogContent,
@@ -95,32 +95,32 @@ public class RyuLogReader
             {
                 // this whole thing might not work properly
                 string bidsMatch = bidsMatchAll[-1].ToString();
-                string appIDFromBids;
-                string BuildIDs;
+                string appIdFromBids;
+                string buildIDs;
 
                 if (bidsMatch[0].ToString() != "")
                 {
-                    appIDFromBids = bidsMatch[0].ToString().Trim().ToUpper();
+                    appIdFromBids = bidsMatch[0].ToString().Trim().ToUpper();
                 }
                 else
                 {
-                    appIDFromBids = "Unknown";
+                    appIdFromBids = "Unknown";
                 }
 
                 if (bidsMatch[1].ToString() != "")
                 {
                     // this might not work
-                    BuildIDs = bidsMatch[1].ToString().Trim().ToUpper();
+                    buildIDs = bidsMatch[1].ToString().Trim().ToUpper();
                 }
                 else
                 {
-                    BuildIDs = "Unknown";
+                    buildIDs = "Unknown";
                 }
 
                 _log.Game.Name = gameName;
-                _log.Game.AppId = appID;
-                _log.Game.AppIdBids = appIDFromBids;
-                _log.Game.BuildIDs = BuildIDs;
+                _log.Game.AppId = appId;
+                _log.Game.AppIdBids = appIdFromBids;
+                _log.Game.BuildIDs = buildIDs;
             }
         }
     }
@@ -411,14 +411,14 @@ public class RyuLogReader
     {
         MatchCollection modsMatch = Regex.Matches(_log.RawLogContent,
             "Found\\s(enabled)?\\s?mod\\s\\'(.+?)\\'\\s(\\[.+?\\])");
-        _log.Game.Mods += modsMatch;
+        _log.Game.Mods = modsMatch.ToString();
     }
 
     void GetCheats()
     {
         MatchCollection cheatsMatch = Regex.Matches(_log.RawLogContent,
             @"Installing cheat\s'(.+)'(?!\s\d{2}:\d{2}:\d{2}\.\d{3}\s\|E\|\sTamperMachine\sCompile)");
-        _log.Game.Cheats += cheatsMatch;
+        _log.Game.Cheats = cheatsMatch.ToString();
     }
 
     void GetAppName()
@@ -426,7 +426,7 @@ public class RyuLogReader
         Match appNameMatch = Regex.Match(_log.RawLogContent,
             @"Loader [A-Za-z]*: Application Loaded:\s([^;\n\r]*)",
             RegexOptions.Multiline);
-        _log.Game.Name += appNameMatch;
+        _log.Game.Name = appNameMatch.ToString();
     }
     
     void GetNotes()
@@ -439,10 +439,11 @@ public class RyuLogReader
             {
                 return controllerNotesMatch.ToString();
             }
-            else { return null; }
+            
+            return null;
         }
 
-        string GetOSNotes()
+        string GetOsNotes()
         {
             if (_log.Hardware.Os.ToLower().Contains("windows")
                 && !_log.Settings.GraphicsBackend.Contains("Vulkan"))
@@ -524,7 +525,7 @@ public class RyuLogReader
             
             if (_log.Settings.FsIntegrityChecks == false)
             {
-                _log.Notes.Add(_notes.FSIntegrity);   
+                _log.Notes.Add(_notes.FsIntegrity);   
             }
             
             if (_log.Settings.BackendThreading == false)
@@ -573,7 +574,7 @@ public class RyuLogReader
                 
             if (ContainsError(["ResultFsTargetNotFound"], _log.Errors))
             {
-                _log.Errors.Add(_notes.FSTargetError);
+                _log.Errors.Add(_notes.FsTargetError);
             }
 
             if (ContainsError(["ServiceNotImplementedException"], _log.Errors))
@@ -594,7 +595,7 @@ public class RyuLogReader
         }
         
         _log.Notes.Add(GetControllerNotes());
-        _log.Notes.Add(GetOSNotes());
+        _log.Notes.Add(GetOsNotes());
         _log.Notes.Add(GetCpuNotes());
 
         if (_log.Emulator.Firmware == "Unknown" || _log.Emulator.Firmware == null
@@ -619,7 +620,7 @@ public class RyuLogReader
             _log.FatalErrors.Add(_fatalErrors.Custom);
         } else if (ryujinxVersion.VersionType == RyujinxVersion.OriginalProjectLdn)
         {
-            _log.FatalErrors.Add(_fatalErrors.OriginalLDN);
+            _log.FatalErrors.Add(_fatalErrors.OriginalLdn);
         }
         else if (ryujinxVersion.VersionType == RyujinxVersion.OriginalProject)
         {

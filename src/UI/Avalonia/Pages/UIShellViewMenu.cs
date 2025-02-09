@@ -1,4 +1,6 @@
-﻿using Avalonia.Controls.Notifications;
+﻿using System.Text.Json;
+using Avalonia.Controls.Notifications;
+using Avalonia.Platform.Storage;
 using Gommon;
 using MenuFactory.Abstractions.Attributes;
 using RyuBot.Helpers;
@@ -56,5 +58,50 @@ public class ShellViewMenu
         RyujinxBotApp.Notify($"Exported cleaned CSV to {fp.Path}");
 
         return Task.CompletedTask;
+    }
+
+    [Menu("Export TitleDB", "Dev", Icon = "fa-solid fa-file-export")]
+    public static async Task ExportTitleDb()
+    {
+        var pickedFile = await RyujinxBotApp.StorageProvider.OpenFilePickerAsync(new FilePickerOpenOptions
+        {
+            AllowMultiple = false,
+            FileTypeFilter =
+            [
+                new FilePickerFileType("Nintendo Switch Online RomFS TitleDB")
+                {
+                    Patterns = ["*.titlesdb"]
+                }
+            ]
+        });
+
+        if (pickedFile.None())
+            return;
+
+        var jdoc = JsonDocument.Parse(await File.ReadAllTextAsync(pickedFile[0].Path.AbsolutePath));
+
+        Dictionary<string, List<string>> gameNamesToTitleIds = [];
+
+        foreach (var jsonProperty in jdoc.RootElement.GetProperty("titles").EnumerateObject())
+        {
+            var title = jsonProperty.Value.GetProperty("title").GetString()!;
+            
+            if (!gameNamesToTitleIds.ContainsKey(title))
+                gameNamesToTitleIds.Add(title, []);
+            
+            gameNamesToTitleIds[title].Add(jsonProperty.Name.Replace("-", "_"));
+        }
+
+        var fp = FilePath.Data / "titledb" / $"clean-{Path.GetFileName(pickedFile[0].Path.AbsolutePath)}";
+            
+        if (fp.TryGetParent(out var parent) && !parent.ExistsAsDirectory)
+            Directory.CreateDirectory(parent.Path);
+        
+        fp.WriteAllLines(gameNamesToTitleIds
+            .Select(kvp => 
+                $"{kvp.Value.Select(x => $"\"{x.ToLower()}\"").JoinToString(" or ")} => Playing(\"{kvp.Key}\"),"
+            ));
+        
+        RyujinxBotApp.Notify($"Exported TitleDB to {fp.Path}");
     }
 }

@@ -1,5 +1,6 @@
 ﻿using Avalonia;
 using Avalonia.Controls;
+using Avalonia.Controls.ApplicationLifetimes;
 using Avalonia.Controls.Notifications;
 using Avalonia.Input;
 #if DEBUG
@@ -7,6 +8,7 @@ using Avalonia.Diagnostics;
 using Avalonia.Media;
 #endif
 using Avalonia.Markup.Xaml;
+using Avalonia.Platform.Storage;
 using Avalonia.Threading;
 using Gommon;
 using Humanizer;
@@ -31,6 +33,10 @@ public class RyujinxBotApp : Application
     
 
     public static readonly KeyGesture OpenDevTools = new(Key.F4, KeyModifiers.Control);
+
+    public static IStorageProvider StorageProvider => Current!
+        .ApplicationLifetime.HardCast<IClassicDesktopStyleApplicationLifetime>()
+        .MainWindow!.StorageProvider;
 
     public override void Initialize()
     {

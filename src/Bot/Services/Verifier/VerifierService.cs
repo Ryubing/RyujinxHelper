@@ -67,4 +67,19 @@ public class VerifierService : BotService
                     : $"{Enum.GetName(response.Result)} ({(int)response.Result})"
             );
     }
+    
+    public async Task SendVerificationModlogErrorMessageAsync(string command, SocketGuildUser member, Exception e)
+    {
+        if (await _client.GetChannelAsync(1318250869980004394) is not ITextChannel channel) return;
+
+        await channel.SendMessageAsync("<@&1337959521833713715>", embed: embed().Build());
+
+        return;
+
+        EmbedBuilder embed() => new EmbedBuilder()
+            .WithColor(Config.SuccessColor)
+            .WithAuthor(member)
+            .WithTitle($"{e.GetType().AsPrettyString()} thrown in '{command}'")
+            .WithDescription($"{e.Message}\n\n{e.StackTrace}");
+    }
 }

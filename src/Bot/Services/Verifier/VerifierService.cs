@@ -56,14 +56,16 @@ public class VerifierService : BotService
         EmbedBuilder embed() => new EmbedBuilder()
             .WithColor(Config.SuccessColor)
             .WithTitle(response.Result is ResultCode.Success
-                ? $"Verification for {member.GetEffectiveUsername()} success"
-                : $"Verification for {member.GetEffectiveUsername()} failed")
+                ? "Verification success"
+                : "Verification failed")
+            .WithAuthor(member)
             .AddField(
                 response.Result is ResultCode.Success
                     ? "Verification Place #"
                     : "Error",
                 response.Result is ResultCode.Success
-                    ? member.Guild.Users.Count(u => u.HasRole(1334992661198930001)).Ordinalize()
+                    ? member.Guild.Users.Count(u => u.HasRole(1334992661198930001))
+                        .Into(count => $"{count.ToOrdinalWords(WordForm.Abbreviation)} ({count})")
                     : $"{Enum.GetName(response.Result)} ({(int)response.Result})"
             );
     }

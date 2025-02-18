@@ -29,12 +29,17 @@ public partial class VerifierModule
                     sb.AppendLine("Success! You can now get help.");
                     var verifiedMemberCount = member.Guild.Users.Count(u => u.HasRole(1334992661198930001));
                     sb.Append(
-                        $"You are the {verifiedMemberCount.Ordinalize()} user to be verified for Switch ownership.");
+                        $"You are the {verifiedMemberCount.ToOrdinalWords(WordForm.Abbreviation)} ({verifiedMemberCount}) user to be verified for Switch ownership.");
                 })),
                 ResultCode.InvalidInput => BadRequest("An input value was invalid."),
                 ResultCode.InvalidTokenLength => BadRequest("The provided token didn't match the expected length."),
                 ResultCode.TokenIsZeroes => BadRequest("Token is all zeroes."),
-                ResultCode.ExpiredToken => BadRequest("The provided token has expired."),
+                ResultCode.ExpiredToken => BadRequest(String(sb =>
+                {
+                    sb.AppendLine("The provided token has expired.");
+                    sb.Append(
+                        "If you just made the token, please be sure your Switch's time & time zone matches reality.");
+                })),
                 _ => BadRequest("Invalid token.")
             };
         }

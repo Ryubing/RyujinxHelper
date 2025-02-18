@@ -31,9 +31,12 @@ public partial class VerifierModule
                     sb.Append(
                         $"You are the {verifiedMemberCount.ToOrdinalWords(WordForm.Abbreviation)} ({verifiedMemberCount}) user to be verified for Switch ownership.");
                 })),
-                ResultCode.InvalidInput => BadRequest("An input value was invalid."),
-                ResultCode.InvalidTokenLength => BadRequest("The provided token didn't match the expected length."),
-                ResultCode.TokenIsZeroes => BadRequest("Token is all zeroes."),
+                ResultCode.InvalidInput or ResultCode.TokenIsZeroes => BadRequest("An input value was invalid."),
+                ResultCode.InvalidTokenLength => BadRequest(String(sb =>
+                {
+                    sb.AppendLine("The provided token didn't match the expected length.");
+                    sb.Append("If you just input what you got from `get-hash` then you didn't read how to use this properly.");
+                })),
                 ResultCode.ExpiredToken => BadRequest(String(sb =>
                 {
                     sb.AppendLine("The provided token has expired.");

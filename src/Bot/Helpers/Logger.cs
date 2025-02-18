@@ -14,14 +14,14 @@ public static partial class Logger
         remove => LogEventHandler.Remove(value);
     }
 
-    private static readonly Event<VolteLogEventArgs> LogEventHandler = new(enableHandlerlessQueue: true);
+    private static readonly EventWithQueue<VolteLogEventArgs> LogEventHandler = new();
 
     public static void Log(VolteLogEventArgs eventArgs)
     {
         if (!IsDebugLoggingEnabled && eventArgs.Severity is LogSeverity.Debug)
             return;
 
-        LogEventHandler.CallHandlers(eventArgs);
+        LogEventHandler.Call(eventArgs);
     }
 
     public static bool IsDebugLoggingEnabled

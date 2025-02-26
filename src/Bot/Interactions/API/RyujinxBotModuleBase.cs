@@ -34,6 +34,18 @@ public abstract class RyujinxBotModuleBase<TInteraction> : InteractionModuleBase
     
     protected OkResult<TInteraction> Ok(EmbedBuilder embed, bool ephemeral = false) 
         => new(CreateReplyBuilder(ephemeral).WithEmbeds(embed));
+    
+    protected OkResult<TInteraction> Ok(
+        ReplyBuilder<TInteraction> reply, 
+        Func<Task> afterCompletion, 
+        bool awaitCallback = true
+    ) => new(reply, afterCompletion, awaitCallback);
+
+    protected OkResult<TInteraction> Ok(string message, Func<Task> afterCompletion, bool awaitCallback = true, bool ephemeral = false)
+        => Ok(CreateReplyBuilder(ephemeral).WithEmbedFrom(message), afterCompletion, awaitCallback);
+    
+    protected OkResult<TInteraction> Ok(EmbedBuilder embed, Func<Task> afterCompletion, bool awaitCallback = true, bool ephemeral = false) 
+        => new(CreateReplyBuilder(ephemeral).WithEmbeds(embed), afterCompletion, awaitCallback);
 }
 
 #pragma warning disable CS0618 // Type or member is obsolete

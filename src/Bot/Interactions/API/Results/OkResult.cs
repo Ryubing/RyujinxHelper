@@ -4,11 +4,31 @@ public class OkResult<TInteraction> : BotResultBase where TInteraction : SocketI
 {
     public OkResult(ReplyBuilder<TInteraction> reply)
     {
-        Reply = reply;
+        _reply = reply;
+    }
+    
+    public OkResult(ReplyBuilder<TInteraction> reply, Func<Task> afterCompletion, bool awaitCallback = true) : this(reply)
+    {
+        _afterCompletion = afterCompletion;
+        _awaitCompletionCallback = awaitCallback;
     }
 
-    public readonly ReplyBuilder<TInteraction> Reply;
+    private readonly ReplyBuilder<TInteraction> _reply;
 
-    public override Task ExecuteAsync() => Reply.ExecuteAsync();
+    private readonly bool _awaitCompletionCallback;
+
+    private readonly Func<Task> _afterCompletion;
+
+    public override async Task ExecuteAsync()
+    {
+        await _reply.ExecuteAsync();
+
+        if (_afterCompletion is null) return;
+
+        if (_awaitCompletionCallback)
+            await _afterCompletion();
+        else
+            ExecuteBackgroundAsync(_afterCompletion);
+    }
 }
 

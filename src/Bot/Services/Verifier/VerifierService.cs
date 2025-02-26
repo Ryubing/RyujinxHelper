@@ -45,7 +45,25 @@ public class VerifierService : BotService
         );
     }
 
-    public async Task SendVerificationModlogMessageAsync(SocketGuildUser member, VerifyActionResponse response)
+    public async Task<int> SendVerificationResponseCompletedMessagesAsync(SocketGuildUser member, VerifyActionResponse response)
+    {
+        var verifiedMemberCount = member.Guild.Users.Count(u => u.HasRole(1334992661198930001));
+        
+        await SendVerificationWelcomeMessageAsync(member, response, verifiedMemberCount);
+        await SendVerificationModlogMessageAsync(member, response, verifiedMemberCount);
+
+        return verifiedMemberCount;
+    }
+    
+    private async Task SendVerificationWelcomeMessageAsync(SocketGuildUser member, VerifyActionResponse response, int verifiedMemberCount)
+    {
+        if (response.Result is not ResultCode.Success) return;
+        if (await _client.GetChannelAsync(1337187108002992140) is not ITextChannel channel) return;
+
+        await channel.SendMessageAsync($"# Verified Switch Owner #{verifiedMemberCount}\n\nWelcome {member.Mention} to the verified club!");
+    }
+
+    private async Task SendVerificationModlogMessageAsync(SocketGuildUser member, VerifyActionResponse response, int verifiedMemberCount)
     {
         if (await _client.GetChannelAsync(1318250869980004394) is not ITextChannel channel) return;
 
@@ -64,9 +82,8 @@ public class VerifierService : BotService
                     ? "Verification Place #"
                     : "Error",
                 response.Result is ResultCode.Success
-                    ? member.Guild.Users.Count(u => u.HasRole(1334992661198930001))
-                        .Into(count => $"{count.ToOrdinalWords(WordForm.Abbreviation)} ({count})")
-                    : $"{Enum.GetName(response.Result)} ({(int)response.Result})"
+                    ? $"{verifiedMemberCount.ToOrdinalWords(WordForm.Abbreviation)} ({verifiedMemberCount})"
+                    : $"{Enum.GetName(response.Result)} ({response.InternalResult})"
             );
     }
     

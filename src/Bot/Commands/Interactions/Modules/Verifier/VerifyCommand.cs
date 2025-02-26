@@ -17,20 +17,15 @@ public partial class VerifierModule
         {
             var response = await Verifier.VerifyAsync(Context.User.Id, token);
 
-            if (response.Result is ResultCode.Success)
-                await member.AddRoleAsync(1334992661198930001);
-
-            await Verifier.SendVerificationModlogMessageAsync(member, response);
+            var verifiedMemberCount = await Verifier.SendVerificationResponseCompletedMessagesAsync(member, response);
 
             return response.Result switch
             {
                 ResultCode.Success => Ok(String(sb =>
                 {
-                    sb.AppendLine("Success! You can now get help.");
-                    var verifiedMemberCount = member.Guild.Users.Count(u => u.HasRole(1334992661198930001));
-                    sb.Append(
-                        $"You are the {verifiedMemberCount.ToOrdinalWords(WordForm.Abbreviation)} ({verifiedMemberCount}) user to be verified for Switch ownership.");
-                })),
+                    sb.AppendLine("Success! You can now get help, and you can chat in <#1337187108002992140>.");
+                    sb.Append($"You are the {verifiedMemberCount.ToOrdinalWords(WordForm.Abbreviation)} ({verifiedMemberCount}) user to be verified for Switch ownership.");
+                }), () => member.AddRoleAsync(1334992661198930001)),
                 ResultCode.InvalidInput or ResultCode.TokenIsZeroes => BadRequest("An input value was invalid."),
                 ResultCode.InvalidTokenLength => BadRequest(String(sb =>
                 {

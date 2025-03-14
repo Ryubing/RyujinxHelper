@@ -9,6 +9,7 @@ public partial class GitHubModule
 {
     [SlashCommand("latest", "Show the download URLs for the latest release of Ryujinx.")]
     [RequireNotPiratePrecondition]
+    [RequireRyubingGuildPrecondition]
     public async Task<RuntimeResult> LatestReleaseAsync(
         [Summary("release_channel", "The release channel to look for the latest version from. Only has more options in Ryubing.")]
         [Autocomplete<LatestReleaseAutocompleter>]
@@ -18,17 +19,18 @@ public partial class GitHubModule
             return BadRequest(
                 "Unknown release channel. Please wait for the autocomplete suggestions to fill in if you aren't sure what to put!");
         
-        var isCanary = releaseChannel.EqualsIgnoreCase("Canary") && Context.Guild?.Id == 1294443224030511104;
+        var isCanary = releaseChannel.EqualsIgnoreCase("Canary");
 
         var latest = isCanary
             ? await GitHub.GetLatestCanaryAsync()
-            : await GitHub.GetLatestStableAsync(Context);
+            : await GitHub.GetLatestStableAsync();
 
         var assets = latest.Assets.Where(x =>
             !x.Name.ContainsIgnoreCase("nogui") && !x.Name.ContainsIgnoreCase("headless")
         ).ToArray();
 
-        var windows = assets.FirstOrDefault(x => x.Name.ContainsIgnoreCase("win_x64"));
+        var windowsX64 = assets.FirstOrDefault(x => x.Name.ContainsIgnoreCase("win_x64"));
+        var windowsArm64 = assets.FirstOrDefault(x => x.Name.ContainsIgnoreCase("win_arm64"));
         var linuxX64 = assets.FirstOrDefault(x => x.Name.ContainsIgnoreCase("linux_x64") && !x.Name.EndsWithIgnoreCase(".AppImage"));
         var linuxX64AppImage = assets.FirstOrDefault(x => x.Name.ContainsIgnoreCase("x64") && x.Name.EndsWithIgnoreCase(".AppImage"));
         var macOs = assets.FirstOrDefault(x => x.Name.ContainsIgnoreCase("macos_universal"));
@@ -41,10 +43,11 @@ public partial class GitHubModule
             .AppendLine(DiscordHelper.Zws).AppendLine("### Downloads");
         var downloads = 0;
         
-        applyArtifact(windows, "Windows x64");
+        applyArtifact(windowsX64, "Windows x64");
         applyArtifacts((linuxX64, linuxX64AppImage), "Linux x64");
         applyArtifact(macOs, "macOS Universal");
         applyArtifacts((linuxArm64, linuxArm64AppImage), "Linux ARM64");
+        applyArtifact(windowsArm64, "Windows ARM64");
 
         return Ok(CreateReplyBuilder()
             .WithEmbed(embed =>

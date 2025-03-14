@@ -98,12 +98,11 @@ public class GitHubService : BotService
         }
     }
 
-    public Task<Release> GetLatestStableAsync(IInteractionContext ctx)
+    public Task<Release> GetLatestStableAsync()
     {
         try
         {
-            var (owner, repoName) = GitHubHelper.GetRepo(ctx);
-            return ApiClient.Repository.Release.GetLatest(owner, repoName);
+            return ApiClient.Repository.Release.GetLatest(GitHubHelper.MainRepoOwner, "Stable-Releases");
         }
         catch
         {

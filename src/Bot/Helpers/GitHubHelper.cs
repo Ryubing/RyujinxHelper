@@ -7,11 +7,6 @@ public static class GitHubHelper
     public const string MainRepoOwner = "Ryubing";
     public const string MainRepoName = "Ryujinx";
 
-    public static (string Owner, string Name) GetRepo(IInteractionContext ctx) =>
-        Config.WhitelistGuildRepos
-            .FindValue(ctx.Guild?.Id ?? ulong.MaxValue)
-            .OrElse((MainRepoOwner, MainRepoName));
-
     public static string Format(this (string Owner, string Name) repoTuple) => $"{repoTuple.Owner}/{repoTuple.Name}";
 
     public static string FormatLabels(this PullRequest pullRequest)

@@ -75,7 +75,7 @@ public class RyujinxBotInteractionService : BotService
     }
     
     private static bool IsInAllowedGuild(SocketInteraction interaction) 
-        => Config.WhitelistGuildRepos.ContainsKey(interaction.GuildId ?? ulong.MaxValue);
+        => Config.WhitelistGuildPirateRoles.ContainsKey(interaction.GuildId ?? ulong.MaxValue);
 
     public async Task<int> ClearAllCommandsInGuildAsync(ulong guildId)
     {

@@ -59,45 +59,6 @@ public class GitHubService : BotService
         };
     }
 
-    public Task<Issue> GetIssueAsync(IInteractionContext ctx, int issueNumber)
-    {
-        try
-        {
-            var (owner, repoName) = GitHubHelper.GetRepo(ctx);
-            return ApiClient.Issue.Get(owner, repoName, issueNumber);
-        }
-        catch
-        {
-            return Task.FromResult<Issue>(null);
-        }
-    }
-
-    public Task<PullRequest> GetPullRequestAsync(IInteractionContext ctx, int prNumber)
-    { 
-        try
-        {
-            var (owner, repoName) = GitHubHelper.GetRepo(ctx);
-            return ApiClient.PullRequest.Get(owner, repoName, prNumber);
-        }
-        catch
-        {
-            return Task.FromResult<PullRequest>(null);
-        }
-    }
-
-    public Task<IReadOnlyList<IssueComment>> GetCommentsForIssueAsync(IInteractionContext ctx, int issueNumber)
-    {
-        try
-        {
-            var (owner, repoName) = GitHubHelper.GetRepo(ctx);
-            return ApiClient.Issue.Comment.GetAllForIssue(owner, repoName, issueNumber);
-        }
-        catch
-        {
-            return Task.FromResult<IReadOnlyList<IssueComment>>([]);
-        }
-    }
-
     public Task<Release> GetLatestStableAsync()
     {
         try
@@ -119,19 +80,6 @@ public class GitHubService : BotService
         catch
         {
             return Task.FromResult<Release>(null);
-        }
-    }
-    
-    public Task<Repository> GetRepositoryAsync(IInteractionContext ctx)
-    {
-        try
-        {
-            var (owner, repoName) = GitHubHelper.GetRepo(ctx);
-            return ApiClient.Repository.Get(owner, repoName);
-        }
-        catch
-        {
-            return Task.FromResult<Repository>(null);
         }
     }
 }

@@ -14,7 +14,7 @@ public class CompatibilityCsvService : BotService
     private static readonly FilePath CsvPath = FilePath.Data / "compatibility.csv";
 
     private const string DownloadUrl =
-        "https://raw.githubusercontent.com/Ryubing/Ryujinx/refs/heads/master/docs/compatibility.csv";
+        "https://git.ryujinx.app/ryubing/ryujinx/-/raw/master/docs/compatibility.csv?ref_type=heads&inline=false";
 
     public CompatibilityCsv Csv { get; private set; }
 

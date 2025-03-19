@@ -140,6 +140,10 @@ public static class Config
     public static string Token => _configuration.Token;
 
     public static long GitHubAppInstallationId => _configuration.GitHubAppInstallationId;
+
+    public static IEnumerable<ulong> WhitelistGuilds => _configuration
+        .WhitelistGuilds
+        .Select(x => x.GuildId);
     
     public static Dictionary<ulong, ulong> WhitelistGuildPirateRoles => _configuration
         .WhitelistGuilds

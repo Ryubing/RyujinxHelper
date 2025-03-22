@@ -95,9 +95,6 @@ public class LatestReleaseAutocompleter : AutocompleteHandler
         IParameterInfo parameter, 
         IServiceProvider services)
     {
-        if (!autocompleteInteraction.Data.Options.Any(option => option.Focused))
-            return Task.FromResult(AutocompletionResult.FromSuccess());
-        
         List<AutocompleteResult> result = [new("Stable", "Stable")];
 
         if (context.Guild?.Id == 1294443224030511104)

@@ -67,10 +67,14 @@ public class GameCompatibilityNameAutocompleter : AutocompleteHandler
 
             if (results.Length > 0)
                 return Task.FromResult(AutocompletionResult.FromSuccess(
-                    results.Select(it => new AutocompleteResult(it.GameName, it.GameName))
+                    results.Select(it => new AutocompleteResult(it.GameName.Truncate(100), it.FormattedTitleId))
                 ));
         }
 
-        return Task.FromResult(AutocompletionResult.FromSuccess());
+        return Task.FromResult(AutocompletionResult.FromSuccess(
+            services.Get<CompatibilityCsvService>().Csv.Entries
+                .Take(25)
+                .Select(it => new AutocompleteResult(it.GameName.Truncate(100), it.FormattedTitleId))
+        ));
     }
 }

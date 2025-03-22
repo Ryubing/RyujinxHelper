@@ -24,7 +24,7 @@ public partial class GitLabModule
         return Ok(CreateReplyBuilder(!publicResult).WithContent(Format.Url(wikiPage.Title, GetUrl(wikiPage))));
     }
 
-    private string GetUrl(WikiPage wikiPage) => $"https://git.ryujinx.app/ryubing/ryujinx/-/wikis/{wikiPage.Slug}";
+    private static string GetUrl(WikiPage wikiPage) => $"https://git.ryujinx.app/ryubing/ryujinx/-/wikis/{wikiPage.Slug}";
 }
 
 public class WikiPageAutocompleter : AutocompleteHandler

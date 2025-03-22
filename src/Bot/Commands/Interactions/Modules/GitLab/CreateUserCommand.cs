@@ -52,8 +52,10 @@ public partial class GitLabModule
                         sb.Append(Format.Code(
                             string.Join('\n',
                                 $"{Config.GitLabAuth.InstanceUrl}/users/sign_in", 
-                                $"Username: `{username}`", 
-                                $"Password: `{temporaryPassword}`", 
+                                $"__Username__:" +
+                                $"`{username}`", 
+                                $"__Password__:" +
+                                $"`{temporaryPassword}`", 
                                 "Change password when prompted."
                                 ), 
                             string.Empty));

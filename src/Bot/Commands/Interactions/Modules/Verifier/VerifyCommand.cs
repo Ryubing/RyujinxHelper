@@ -17,7 +17,7 @@ public partial class VerifierModule
         {
             var response = await Verifier.VerifyAsync(Context.User.Id, token);
 
-            var verifiedMemberCount = await Verifier.SendVerificationResponseCompletedMessagesAsync(member, response);
+            var verifiedMemberCount = await Verifier.SendVerificationResponseCompletedMessagesAsync(member, response, true);
 
             return response.Result switch
             {

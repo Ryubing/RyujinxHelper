@@ -45,9 +45,12 @@ public class VerifierService : BotService
         );
     }
 
-    public async Task<int> SendVerificationResponseCompletedMessagesAsync(SocketGuildUser member, VerifyActionResponse response)
+    public async Task<int> SendVerificationResponseCompletedMessagesAsync(SocketGuildUser member, VerifyActionResponse response, bool isInvokedBeforeRoleAdd)
     {
         var verifiedMemberCount = member.Guild.Users.Count(u => u.HasRole(1334992661198930001));
+
+        if (isInvokedBeforeRoleAdd)
+            verifiedMemberCount++;
         
         await SendVerificationWelcomeMessageAsync(member, response, verifiedMemberCount);
         await SendVerificationModlogMessageAsync(member, response, verifiedMemberCount);

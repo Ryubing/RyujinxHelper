@@ -21,10 +21,10 @@ public partial class GitLabModule
                     .ToString()
             );
 
-        return Ok(CreateReplyBuilder(!publicResult).WithContent(Format.Url(wikiPage.Title, GetUrl(wikiPage))));
+        return Ok(CreateReplyBuilder(!publicResult)
+            .WithContent($"View the `{wikiPage.Title}` wiki page {Format.Url("here", GitLabService.GetWikiPageUrl(wikiPage))}.")
+        );
     }
-
-    private static string GetUrl(WikiPage wikiPage) => $"https://git.ryujinx.app/ryubing/ryujinx/-/wikis/{wikiPage.Slug}";
 }
 
 public class WikiPageAutocompleter : AutocompleteHandler

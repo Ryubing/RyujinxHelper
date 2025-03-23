@@ -25,6 +25,8 @@ public class GitLabService : BotService
         return _cachedPages;
     }
 
+    public static string GetWikiPageUrl(WikiPage page) => $"{Config.GitLabAuth.InstanceUrl}/ryubing/ryujinx/-/wikis/{page.Slug}";
+
     public IEnumerable<WikiPage> SearchWikiPages(string searchTerm) =>
         _cachedPages.Where(x => 
             x.Slug.ContainsIgnoreCase(searchTerm) || 

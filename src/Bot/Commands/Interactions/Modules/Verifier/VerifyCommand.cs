@@ -38,6 +38,7 @@ public partial class VerifierModule
                     sb.Append(
                         "If you just made the token, please be sure your Switch's time & time zone matches reality.");
                 })),
+                ResultCode.BackendDownForMaintenance => BadRequest("The Switch verifier backend is currently down for maintenance. Try again later."),
                 _ => BadRequest("Invalid token.")
             };
         }

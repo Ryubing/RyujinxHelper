@@ -1,6 +1,6 @@
 ﻿namespace RyuBot.Services;
 
-public enum ResultCode
+public enum ResultCode : sbyte
 {
     Success,
     InvalidInput,
@@ -11,4 +11,5 @@ public enum ResultCode
     NotSwitch,
     NotConsumerDevice,
     ExpiredToken,
+    BackendDownForMaintenance = -1,
 }

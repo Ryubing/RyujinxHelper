@@ -1,5 +1,4 @@
 ﻿using Discord.Interactions;
-using NGitLab.Models;
 
 namespace RyuBot.Commands.Interactions.Modules;
 
@@ -9,37 +8,17 @@ public partial class GitLabModule
     [RequireBotOwnerPrecondition]
     public async Task<RuntimeResult> CreateUserAsync(string username, string email, string name = null)
     {
-        if (name == null)
-            name = username.Capitalize();
-
         await DeferAsync(true);
-        
-        User user;
-        
-        try
-        {
-            user = await GitLab.Client.Users.CreateAsync(new UserUpsert
-            {
-                Name = name,
-                Username = username,
-                Email = email,
-                Password = StringUtil.RandomAlphanumeric(100) // intentional
-            });
-        }
-        catch (Exception e)
-        {
-            Error(e);
-            return None();
-        }
-        
-        var temporaryPassword = StringUtil.RandomAlphanumeric(100);
 
-        GitLab.Client.Users.Update(user.Id, new UserUpsert
+        var (tempPassword, error) = await GitLab.CreateUserAsync(username, email, name);
+
+        if (error != null)
         {
-            Password = temporaryPassword 
-            // changing password after user creation causes gitlab to force the user to change their password upon first login
-            // this is why the first password is not saved, it simply gets overwritten immediately
-        });
+            Error(error);
+            return BadRequest(
+                "Failed to create user. Likely reason is the configured GitLab access token does not have administrator rights.");
+        }
+        
 
         return Ok(
             CreateReplyBuilder()
@@ -55,7 +34,7 @@ public partial class GitLabModule
                                 $"__Username__:" +
                                 $"`{username}`", 
                                 $"__Password__:" +
-                                $"`{temporaryPassword}`", 
+                                $"`{tempPassword}`", 
                                 "Change password when prompted."
                                 ), 
                             string.Empty));

@@ -25,38 +25,27 @@ public class GitLabService : BotService
         return _cachedPages;
     }
     
-    public async ValueTask<(string TempPassword, Exception Exception)> CreateUserAsync(string username, string email, string name = null)
+    public async ValueTask<Exception> CreateUserAsync(string username, string email, string name = null)
     {
         if (name == null)
             name = username.Capitalize();
-
-        User user;
         
         try
         {
-            user = await Client.Users.CreateAsync(new UserUpsert
+            await Client.Users.CreateAsync(new UserUpsert
             {
                 Name = name,
                 Username = username,
                 Email = email,
-                Password = StringUtil.RandomAlphanumeric(100) // intentional
+                ResetPassword = true
             });
         }
         catch (Exception e)
         {
-            return (string.Empty, e);
+            return e;
         }
-        
-        var temporaryPassword = StringUtil.RandomAlphanumeric(100);
-        
-        Client.Users.Update(user.Id, new UserUpsert
-        {
-            Password = temporaryPassword 
-            // changing password after user creation causes gitlab to force the user to change their password upon first login
-            // this is why the first password is not saved, it simply gets overwritten immediately
-        });
 
-        return (temporaryPassword, null);
+        return null;
     }
 
     public static string GetWikiPageUrl(WikiPage page) => $"{Config.GitLabAuth.InstanceUrl}/ryubing/ryujinx/-/wikis/{page.Slug}";

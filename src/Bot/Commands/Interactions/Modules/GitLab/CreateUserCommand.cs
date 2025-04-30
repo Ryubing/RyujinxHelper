@@ -10,13 +10,17 @@ public partial class GitLabModule
     {
         await DeferAsync(true);
 
-        var (tempPassword, error) = await GitLab.CreateUserAsync(username, email, name);
+        var error = await GitLab.CreateUserAsync(username, email, name);
 
         if (error != null)
         {
             Error(error);
-            return BadRequest(
-                "Failed to create user. Likely reason is the configured GitLab access token does not have administrator rights.");
+            return BadRequest(String(sb =>
+            {
+                sb.AppendLine("Failed to create user. Likely reason is the configured GitLab access token does not have administrator rights.");
+                sb.AppendLine(Format.Code(error.Message, string.Empty));
+
+            }));
         }
         
 
@@ -25,20 +29,7 @@ public partial class GitLabModule
                 .WithEmbed(eb =>
                 {
                     eb.WithTitle($"Created user '{username}'");
-                    eb.WithDescription(String(sb =>
-                    {
-                        sb.AppendLine("Copy and paste this and send it to the user:");
-                        sb.Append(Format.Code(
-                            string.Join('\n',
-                                $"{Config.GitLabAuth.InstanceUrl}/users/sign_in", 
-                                $"__Username__:" +
-                                $"`{username}`", 
-                                $"__Password__:" +
-                                $"`{tempPassword}`", 
-                                "Change password when prompted."
-                                ), 
-                            string.Empty));
-                    }));
+                    eb.WithDescription("If the provided email was valid, they will receive a verification email.");
                 })
         );
     }

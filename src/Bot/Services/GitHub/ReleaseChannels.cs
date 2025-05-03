@@ -37,7 +37,7 @@ public readonly struct ReleaseChannels
 }
     
 [JsonSerializable(typeof(ReleaseChannelPair))]
-partial class ReleaseChannelPairContext : JsonSerializerContext;
+internal partial class ReleaseChannelPairContext : JsonSerializerContext;
 
 internal class ReleaseChannelPair
 {

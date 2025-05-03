@@ -69,6 +69,8 @@ public class GameCompatibilityNameAutocompleter : AutocompleteHandler
                 return Task.FromResult(AutocompletionResult.FromSuccess(
                     results.Select(it => new AutocompleteResult(it.GameName.Truncate(100), it.FormattedTitleId))
                 ));
+            
+            return Task.FromResult(AutocompletionResult.FromSuccess());
         }
 
         return Task.FromResult(AutocompletionResult.FromSuccess(

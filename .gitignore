@@ -1,4 +1,5 @@
 build/
+artifacts/
 .idea/
 .vs/
 src/Bot/bin/

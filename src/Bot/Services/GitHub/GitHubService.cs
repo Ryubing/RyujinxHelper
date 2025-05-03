@@ -1,22 +1,23 @@
-﻿using Discord.Interactions;
-using GitHubJwt;
+﻿using GitHubJwt;
 using Octokit;
 
 namespace RyuBot.Services;
 
 public class GitHubService : BotService
 {
-    public GitHubClient ApiClient { get; private set; }
+    private GitHubClient ApiClient { get; set; }
+    private readonly HttpClient _http;
     private readonly PeriodicTimer _githubRefreshTimer = new(59.Minutes());
     private readonly CancellationTokenSource _cts;
     private readonly GitHubJwtFactory _jwtFactory;
 
-    private const long InstallationId = 59135375;
+    private ReleaseChannels _releaseChannels;
     
-    public GitHubService(GitHubJwtFactory jwtFactory, CancellationTokenSource cts)
+    public GitHubService(GitHubJwtFactory jwtFactory, CancellationTokenSource cts, HttpClient httpClient)
     {
         _cts = cts;
         _jwtFactory = jwtFactory;
+        _http = httpClient;
         
         if (Config.GitHubAppInstallationId is not 0)
         {
@@ -31,13 +32,18 @@ public class GitHubService : BotService
     public void Initialize(long installationId) => ExecuteBackgroundAsync(async () =>
     {
         await LoginToGithubAsync(installationId);
+        _releaseChannels = await GetReleaseChannelsAsync();
         
         while (await _githubRefreshTimer.WaitForNextTickAsync(_cts.Token))
         {
             Info(LogSource.Service, "Refreshing GitHub authentication.");
             await LoginToGithubAsync(installationId);
+            _releaseChannels = await GetReleaseChannelsAsync();
         }
     });
+
+    private async Task<ReleaseChannels> GetReleaseChannelsAsync()
+        => new(JsonSerializer.Deserialize(await _http.GetStringAsync("https://ryujinx.app/api/release-channels"), ReleaseChannelPairContext.Default.ReleaseChannelPair)); 
 
     private GitHubClient CreateTopLevelClient() =>
         new(new ProductHeaderValue("RyujinxHelper", Version.DotNetVersion.ToString()))
@@ -63,7 +69,7 @@ public class GitHubService : BotService
     {
         try
         {
-            return ApiClient.Repository.Release.GetLatest(GitHubHelper.MainRepoOwner, "Stable-Releases");
+            return ApiClient.Repository.Release.GetLatest(_releaseChannels.Stable.Owner, _releaseChannels.Stable.Repo);
         }
         catch
         {
@@ -75,7 +81,7 @@ public class GitHubService : BotService
     {
         try
         {
-            return ApiClient.Repository.Release.GetLatest(GitHubHelper.MainRepoOwner, "Canary-Releases");
+            return ApiClient.Repository.Release.GetLatest(_releaseChannels.Canary.Owner, _releaseChannels.Canary.Repo);
         }
         catch
         {

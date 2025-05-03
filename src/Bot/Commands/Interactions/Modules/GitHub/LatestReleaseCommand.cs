@@ -9,16 +9,16 @@ public partial class GitHubModule
 {
     [SlashCommand("latest", "Show the download URLs for the latest release of Ryujinx.")]
     [RequireNotPiratePrecondition]
-    [RequireRyubingGuildPrecondition]
     public async Task<RuntimeResult> LatestReleaseAsync(
-        [Summary("release_channel", "The release channel to look for the latest version from. Only has more options in Ryubing.")]
+        [Summary("release_channel",
+            "The release channel to look for the latest version from. Only has more options in Ryubing.")]
         [Autocomplete<LatestReleaseAutocompleter>]
         string releaseChannel = "Stable")
     {
         if (releaseChannel is not ("Stable" or "Canary"))
             return BadRequest(
                 "Unknown release channel. Please wait for the autocomplete suggestions to fill in if you aren't sure what to put!");
-        
+
         var isCanary = releaseChannel.EqualsIgnoreCase("Canary");
 
         var latest = isCanary
@@ -31,18 +31,22 @@ public partial class GitHubModule
 
         var windowsX64 = assets.FirstOrDefault(x => x.Name.ContainsIgnoreCase("win_x64"));
         var windowsArm64 = assets.FirstOrDefault(x => x.Name.ContainsIgnoreCase("win_arm64"));
-        var linuxX64 = assets.FirstOrDefault(x => x.Name.ContainsIgnoreCase("linux_x64") && !x.Name.EndsWithIgnoreCase(".AppImage"));
-        var linuxX64AppImage = assets.FirstOrDefault(x => x.Name.ContainsIgnoreCase("x64") && x.Name.EndsWithIgnoreCase(".AppImage"));
+        var linuxX64 = assets.FirstOrDefault(x =>
+            x.Name.ContainsIgnoreCase("linux_x64") && !x.Name.EndsWithIgnoreCase(".AppImage"));
+        var linuxX64AppImage =
+            assets.FirstOrDefault(x => x.Name.ContainsIgnoreCase("x64") && x.Name.EndsWithIgnoreCase(".AppImage"));
         var macOs = assets.FirstOrDefault(x => x.Name.ContainsIgnoreCase("macos_universal"));
-        var linuxArm64 = assets.FirstOrDefault(x => x.Name.ContainsIgnoreCase("linux_arm64") && !x.Name.EndsWithIgnoreCase(".AppImage"));
-        var linuxArm64AppImage = assets.FirstOrDefault(x => x.Name.ContainsIgnoreCase("arm64") && x.Name.EndsWithIgnoreCase(".AppImage"));
+        var linuxArm64 = assets.FirstOrDefault(x =>
+            x.Name.ContainsIgnoreCase("linux_arm64") && !x.Name.EndsWithIgnoreCase(".AppImage"));
+        var linuxArm64AppImage = assets.FirstOrDefault(x =>
+            x.Name.ContainsIgnoreCase("arm64") && x.Name.EndsWithIgnoreCase(".AppImage"));
 
         StringBuilder releaseBody = new();
         releaseBody.AppendLine(
                 $"## {Format.Url($"Ryujinx{(!isCanary ? " Stable" : string.Empty)} {latest.Name}", latest.HtmlUrl)}")
             .AppendLine(DiscordHelper.Zws).AppendLine("### Downloads");
         var downloads = 0;
-        
+
         applyArtifact(windowsX64, "Windows x64");
         applyArtifacts((linuxX64, linuxX64AppImage), "Linux x64");
         applyArtifact(macOs, "macOS Universal");
@@ -56,18 +60,18 @@ public partial class GitHubModule
                 embed.WithDescription($"{releaseBody}\n{downloads} total downloads");
                 embed.WithTimestamp(latest.CreatedAt);
             }));
-        
+
         void applyArtifact(ReleaseAsset asset, string friendlyName)
         {
-            if (asset is null) 
+            if (asset is null)
                 return;
 
             releaseBody.AppendLine($"{Format.Url(friendlyName, asset.BrowserDownloadUrl)}");
             downloads += asset.DownloadCount;
         }
-        
+
         void applyArtifacts(
-            (ReleaseAsset Normal, ReleaseAsset AppImage) asset, 
+            (ReleaseAsset Normal, ReleaseAsset AppImage) asset,
             string friendlyName)
         {
             if (asset.Normal != null)
@@ -90,18 +94,16 @@ public partial class GitHubModule
 public class LatestReleaseAutocompleter : AutocompleteHandler
 {
     public override Task<AutocompletionResult> GenerateSuggestionsAsync(
-        IInteractionContext context, 
+        IInteractionContext context,
         IAutocompleteInteraction autocompleteInteraction,
-        IParameterInfo parameter, 
+        IParameterInfo parameter,
         IServiceProvider services)
     {
-        List<AutocompleteResult> result = [new("Stable", "Stable")];
-
-        if (context.Guild?.Id == 1294443224030511104)
-        {
-            result.Add(new AutocompleteResult("Canary", "Canary"));
-        }
-
-        return Task.FromResult(AutocompletionResult.FromSuccess(result));
+        return Task.FromResult(AutocompletionResult.FromSuccess(
+            [
+                new("Stable", "Stable"),
+                new("Canary", "Canary")
+            ]
+        ));
     }
 }

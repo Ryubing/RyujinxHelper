@@ -43,7 +43,7 @@ public partial class GitHubModule
 
         StringBuilder releaseBody = new();
         releaseBody.AppendLine(
-                $"## {Format.Url($"Ryujinx{(!isCanary ? " Stable" : string.Empty)} {latest.Name}", latest.HtmlUrl)}")
+                $"## {Format.Url($"Ryujinx {latest.Name}", latest.HtmlUrl)}")
             .AppendLine(DiscordHelper.Zws).AppendLine("### Downloads");
         var downloads = 0;
 

@@ -5,6 +5,7 @@ namespace RyuBot.Commands.Interactions.Modules;
 public partial class VerifierModule
 {
     [SlashCommand("get-hash", "Get a hash for use with the Switch Verifier Homebrew.")]
+    [RequireRyubingGuildPrecondition]
     public async Task<RuntimeResult> GetHashAsync()
     {
         await DeferAsync(true);

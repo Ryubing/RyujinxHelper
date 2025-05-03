@@ -7,4 +7,7 @@ namespace RyuBot.Commands.Interactions.Modules;
 public partial class GitLabModule : RyujinxBotSlashCommandModule
 {
     public GitLabService GitLab { get; set; }
+    
+    // :Angryreaction:
+    public GitHubService GitHub { get; set; }
 }

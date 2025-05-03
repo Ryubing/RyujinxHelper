@@ -12,7 +12,7 @@ public partial class GitHubModule
     public async Task<RuntimeResult> LatestReleaseAsync(
         [Summary("release_channel",
             "The release channel to look for the latest version from. Only has more options in Ryubing.")]
-        [Autocomplete<LatestReleaseAutocompleter>]
+        [Autocomplete<ReleaseChannelAutocompleter>]
         string releaseChannel = "Stable")
     {
         if (releaseChannel is not ("Stable" or "Canary"))
@@ -88,22 +88,5 @@ public partial class GitHubModule
             else if (asset.Normal != null)
                 releaseBody.AppendLine();
         }
-    }
-}
-
-public class LatestReleaseAutocompleter : AutocompleteHandler
-{
-    public override Task<AutocompletionResult> GenerateSuggestionsAsync(
-        IInteractionContext context,
-        IAutocompleteInteraction autocompleteInteraction,
-        IParameterInfo parameter,
-        IServiceProvider services)
-    {
-        return Task.FromResult(AutocompletionResult.FromSuccess(
-            [
-                new("Stable", "Stable"),
-                new("Canary", "Canary")
-            ]
-        ));
     }
 }

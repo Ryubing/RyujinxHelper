@@ -26,32 +26,3 @@ public partial class GitLabModule
         );
     }
 }
-
-public class WikiPageAutocompleter : AutocompleteHandler
-{
-    public override Task<AutocompletionResult> GenerateSuggestionsAsync(
-        IInteractionContext context,
-        IAutocompleteInteraction autocompleteInteraction,
-        IParameterInfo parameter,
-        IServiceProvider services)
-    {
-        foreach (var option in autocompleteInteraction.Data.Options)
-        {
-            var userValue = option.Value?.ToString();
-
-            if (!option.Focused || string.Empty.Equals(userValue)) continue;
-
-            var results = services.Get<GitLabService>()
-                .SearchWikiPages(userValue).Take(5).ToArray();
-
-            if (results.Length > 0)
-                return Task.FromResult(AutocompletionResult.FromSuccess(
-                    results.Select(it => new AutocompleteResult(it.Title, it.Slug))
-                ));
-        }
-
-        return Task.FromResult(AutocompletionResult.FromSuccess(
-            services.Get<GitLabService>().GetWikiPages().Select(it => new AutocompleteResult(it.Title, it.Slug))
-        ));
-    }
-}

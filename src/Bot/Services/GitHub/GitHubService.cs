@@ -64,6 +64,30 @@ public class GitHubService : BotService
             Credentials = new Credentials(installationToken.Token)
         };
     }
+    
+    public Task<Release> GetStableReleaseAsync(string tag)
+    {
+        try
+        {
+            return ApiClient.Repository.Release.Get(_releaseChannels.Stable.Owner, _releaseChannels.Stable.Repo, tag);
+        }
+        catch
+        {
+            return Task.FromResult<Release>(null);
+        }
+    }
+    
+    public Task<Release> GetCanaryReleaseAsync(string tag)
+    {
+        try
+        {
+            return ApiClient.Repository.Release.Get(_releaseChannels.Canary.Owner, _releaseChannels.Canary.Repo, tag);
+        }
+        catch
+        {
+            return Task.FromResult<Release>(null);
+        }
+    }
 
     public Task<Release> GetLatestStableAsync()
     {

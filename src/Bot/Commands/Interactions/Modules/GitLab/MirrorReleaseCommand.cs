@@ -38,9 +38,18 @@ public partial class GitLabModule
             var linuxArm64AppImage = assets.FirstOrDefault(x =>
                 x.Name.ContainsIgnoreCase("arm64") && x.Name.EndsWithIgnoreCase(".AppImage"));
 
-            List<ReleaseLink> gitlabAssetLinks = [];
-
-            applyArtifacts(windowsX64, windowsArm64, linuxX64, linuxX64AppImage, macOs, linuxArm64, linuxArm64AppImage);
+            
+            var gitlabAssetLinks = Collections.NewArray(
+                    windowsX64, windowsArm64, linuxX64, linuxX64AppImage, macOs, linuxArm64, linuxArm64AppImage)
+                .Where(x => x is not null)
+                .Select(x => new ReleaseLink
+                {
+                    External = true,
+                    LinkType = ReleaseLinkType.Package,
+                    Name = x.Name,
+                    Url = x.BrowserDownloadUrl
+                })
+                .ToArray();
 
             var gitlabRelease = await GitLab.Client.GetReleases(project).CreateAsync(new ReleaseCreate
             {
@@ -50,28 +59,12 @@ public partial class GitLabModule
                 ReleasedAt = githubRelease.CreatedAt.DateTime,
                 Assets = new ReleaseAssetsInfo
                 {
-                    Count = gitlabAssetLinks.Count,
-                    Links = gitlabAssetLinks.ToArray()
+                    Count = gitlabAssetLinks.Length,
+                    Links = gitlabAssetLinks
                 }
             });
 
             return Ok($"Release mirrored successfully. View it {Format.Url("here", $"{Config.GitLabAuth.InstanceUrl}/{project}/-/releases/{gitlabRelease.TagName}")}.");
-            
-            void applyArtifacts(params ReleaseAsset[] rs)
-            {
-                foreach (var asset in rs)
-                {
-                    if (asset is null) continue;
-            
-                    gitlabAssetLinks.Add(new ReleaseLink
-                    {
-                        External = true,
-                        LinkType = ReleaseLinkType.Package, 
-                        Name = asset.Name,
-                        Url = asset.BrowserDownloadUrl
-                    });
-                }
-            }
         }
         catch (Exception e)
         {

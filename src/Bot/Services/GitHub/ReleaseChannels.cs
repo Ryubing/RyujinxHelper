@@ -1,4 +1,5 @@
 ﻿using System.Text.Json.Serialization;
+using Octokit;
 
 namespace RyuBot.Services;
 
@@ -27,8 +28,11 @@ public readonly struct ReleaseChannels
 
         public override string ToString() => $"{Owner}/{Repo}";
 
-        public string GetLatestReleaseApiUrl() =>
-            $"https://api.github.com/repos/{ToString()}/releases/latest";
+        public Task<Release> GetLatestReleaseAsync(GitHubClient ghc)
+            => ghc.Repository.Release.GetLatest(Owner, Repo);
+
+        public Task<Release> GetReleaseAsync(GitHubClient ghc, string tag)
+            => ghc.Repository.Release.Get(Owner, Repo, tag);
     }
 }
     

@@ -69,7 +69,7 @@ public class GitHubService : BotService
     {
         try
         {
-            return ApiClient.Repository.Release.Get(_releaseChannels.Stable.Owner, _releaseChannels.Stable.Repo, tag);
+            return _releaseChannels.Stable.GetReleaseAsync(ApiClient, tag);
         }
         catch
         {
@@ -81,7 +81,7 @@ public class GitHubService : BotService
     {
         try
         {
-            return ApiClient.Repository.Release.Get(_releaseChannels.Canary.Owner, _releaseChannels.Canary.Repo, tag);
+            return _releaseChannels.Canary.GetReleaseAsync(ApiClient, tag);
         }
         catch
         {
@@ -93,7 +93,7 @@ public class GitHubService : BotService
     {
         try
         {
-            return ApiClient.Repository.Release.GetLatest(_releaseChannels.Stable.Owner, _releaseChannels.Stable.Repo);
+            return _releaseChannels.Stable.GetLatestReleaseAsync(ApiClient);
         }
         catch
         {
@@ -105,7 +105,7 @@ public class GitHubService : BotService
     {
         try
         {
-            return ApiClient.Repository.Release.GetLatest(_releaseChannels.Canary.Owner, _releaseChannels.Canary.Repo);
+            return _releaseChannels.Canary.GetLatestReleaseAsync(ApiClient);
         }
         catch
         {

@@ -19,7 +19,6 @@ public partial class GitLabModule
             {
                 sb.AppendLine("Failed to create user. Likely reason is the configured GitLab access token does not have administrator rights.");
                 sb.AppendLine(Format.Code(error.Message, string.Empty));
-
             }));
         }
         

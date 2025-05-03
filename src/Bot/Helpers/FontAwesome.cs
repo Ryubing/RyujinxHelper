@@ -31,7 +31,7 @@ public readonly record struct FontAwesomeIcon
     public readonly string Name;
     public readonly IconVariant DefaultVariant;
         
-    public string Format(IconVariant variant = IconVariant.Regular) => $"fa-{Enum.GetName(variant)?.ToLower() ?? "regular"} fa-{Name}";
+    public string Format(IconVariant? variant = null) => $"fa-{Enum.GetName(variant ?? DefaultVariant)?.ToLower() ?? "regular"} fa-{Name}";
         
     public string Solid => Format(IconVariant.Solid);
     public string Regular => Format();

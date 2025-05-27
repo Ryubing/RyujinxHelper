@@ -1,26 +1,51 @@
 ﻿using Discord.Interactions;
 using NGitLab.Models;
-using Octokit;
 
 namespace RyuBot.Commands.Interactions.Modules;
 
 public partial class GitLabModule
 {
     [SlashCommand("mirror-release", "Mirrors a release from GitHub onto the GitLab.")]
-    [RequireBotOwnerPrecondition]
+    [RequireProjectMaintainerPrecondition]
     public async Task<RuntimeResult> MirrorReleaseAsync(
-        [Autocomplete<ReleaseChannelAutocompleter>]
+        [Autocomplete<AuthorizedReleaseChannelAutocompleter>]
+        [Summary("release_channel", "The source of the release.")]
         string releaseChannel,
-        string version,
-        string project = "ryubing/ryujinx")
+        [Autocomplete<TargetProjectAutocompleter>]
+        [Summary(description: "The target GitLab project of the mirrored release.")]
+        string project,
+        [Summary(description: "The raw version string of the tag of the release.")]
+        string version)
     {
         await DeferAsync(true);
 
         try
         {
-            var githubRelease = releaseChannel.EqualsIgnoreCase("Canary")
-                ? await GitHub.GetCanaryReleaseAsync(version)
-                : await GitHub.GetStableReleaseAsync(version);
+            if (!AuthorizedReleaseChannelAutocompleter.CanMirror(Context.User.Id, releaseChannel))
+                return BadRequest("You are not able to mirror releases from this GitHub repository.");
+            
+            if (!TargetProjectAutocompleter.CanTarget(Context.User.Id, project))
+                return BadRequest("You are not able to perform operations on this GitLab project.");
+
+            var githubRelease = Context.User.Id switch
+            {
+                RequireProjectMaintainerPreconditionAttribute.GreemDev =>
+                    releaseChannel.EqualsIgnoreCase("Canary")
+                        ? await GitHub.GetCanaryReleaseAsync(version)
+                        : releaseChannel.EqualsIgnoreCase("Stable")
+                            ? await GitHub.GetStableReleaseAsync(version)
+                            : null,
+                RequireProjectMaintainerPreconditionAttribute.Keaton => 
+                    releaseChannel.EqualsIgnoreCase(GitHubService.KenjinxReleases)
+                        ? await GitHub.GetKenjinxReleaseAsync(version)
+                        : releaseChannel.EqualsIgnoreCase(GitHubService.KenjinxAndroidReleases)
+                            ? await GitHub.GetKenjinxAndroidReleaseAsync(version)
+                            : null,
+                _ => null
+            };
+
+            if (githubRelease is null)
+                return BadRequest("How did you reach this part of the code, there's like 2 checks before this?");
 
             var assets = githubRelease.Assets.Where(x =>
                 !x.Name.ContainsIgnoreCase("nogui") && !x.Name.ContainsIgnoreCase("headless")
@@ -37,10 +62,16 @@ public partial class GitLabModule
                 x.Name.ContainsIgnoreCase("linux_arm64") && !x.Name.EndsWithIgnoreCase(".AppImage"));
             var linuxArm64AppImage = assets.FirstOrDefault(x =>
                 x.Name.ContainsIgnoreCase("arm64") && x.Name.EndsWithIgnoreCase(".AppImage"));
+            
+            var androidApk = assets.FirstOrDefault(x => x.Name.EndsWithIgnoreCase(".apk"));
 
             
             var gitlabAssetLinks = Collections.NewArray(
-                    windowsX64, windowsArm64, linuxX64, linuxX64AppImage, macOs, linuxArm64, linuxArm64AppImage)
+                    windowsX64, windowsArm64, 
+                    linuxX64, linuxX64AppImage, 
+                    macOs, 
+                    linuxArm64, linuxArm64AppImage, 
+                    androidApk)
                 .Where(x => x is not null)
                 .Select(x => new ReleaseLink
                 {

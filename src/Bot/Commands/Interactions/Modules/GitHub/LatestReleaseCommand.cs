@@ -1,7 +1,5 @@
 ﻿using Discord.Interactions;
 using Octokit;
-using RyuBot.Commands.Interactions;
-using RyuBot.Interactions;
 
 namespace RyuBot.Commands.Interactions.Modules;
 
@@ -13,17 +11,31 @@ public partial class GitHubModule
         [Summary("release_channel",
             "The release channel to look for the latest version from. Only has more options in Ryubing.")]
         [Autocomplete<ReleaseChannelAutocompleter>]
-        string releaseChannel = "Stable")
+        string releaseChannel = "default")
     {
-        if (releaseChannel is not ("Stable" or "Canary"))
+        if (releaseChannel is "default") 
+            releaseChannel = (Context.Channel as INestedChannel)?.CategoryId is 1372043401540665376 
+                ? GitHubService.KenjinxReleases // Kenji-NX category default
+                : "Stable"; // Everywhere else default
+        
+        var latest = (Context.Channel as INestedChannel)?.CategoryId switch
+        {
+            1372043401540665376 => 
+                releaseChannel.EqualsIgnoreCase(GitHubService.KenjinxReleases) 
+                    ? await GitHub.GetLatestKenjinxReleaseAsync()
+                    : releaseChannel.EqualsIgnoreCase(GitHubService.KenjinxAndroidReleases) 
+                        ? await GitHub.GetLatestKenjinxAndroidReleaseAsync()
+                        : null,
+            _ => releaseChannel.EqualsIgnoreCase("Canary")
+                    ? await GitHub.GetLatestCanaryAsync()
+                    : releaseChannel.EqualsIgnoreCase("Stable")
+                        ? await GitHub.GetLatestStableAsync()
+                        : null
+        };
+        
+        if (latest is null)
             return BadRequest(
-                "Unknown release channel. Please wait for the autocomplete suggestions to fill in if you aren't sure what to put!");
-
-        var isCanary = releaseChannel.EqualsIgnoreCase("Canary");
-
-        var latest = isCanary
-            ? await GitHub.GetLatestCanaryAsync()
-            : await GitHub.GetLatestStableAsync();
+                $"Unknown release channel {releaseChannel}. Please wait for the autocomplete suggestions to fill in if you aren't sure what to put!");
 
         var assets = latest.Assets.Where(x =>
             !x.Name.ContainsIgnoreCase("nogui") && !x.Name.ContainsIgnoreCase("headless")
@@ -40,19 +52,22 @@ public partial class GitHubModule
             x.Name.ContainsIgnoreCase("linux_arm64") && !x.Name.EndsWithIgnoreCase(".AppImage"));
         var linuxArm64AppImage = assets.FirstOrDefault(x =>
             x.Name.ContainsIgnoreCase("arm64") && x.Name.EndsWithIgnoreCase(".AppImage"));
+        
+        var androidApk = assets.FirstOrDefault(x => x.Name.EndsWithIgnoreCase(".apk"));
 
         StringBuilder releaseBody = new();
         releaseBody.AppendLine(
-                $"## {Format.Url($"Ryujinx {latest.Name}".Trim(), latest.HtmlUrl)}")
+                $"## {Format.Url($"{(releaseChannel.ContainsIgnoreCase("kenji") ? "Kenji-NX" : "Ryujinx")} {latest.Name}".Trim(), latest.HtmlUrl)}")
             .AppendLine(DiscordHelper.Zws).AppendLine("### Downloads");
         var downloads = 0;
-
+        
         applyArtifact(windowsX64, "Windows x64");
         applyArtifacts((linuxX64, linuxX64AppImage), "Linux x64");
         applyArtifact(macOs, "macOS Universal");
         applyArtifacts((linuxArm64, linuxArm64AppImage), "Linux ARM64");
         applyArtifact(windowsArm64, "Windows ARM64");
-
+        applyArtifact(androidApk, "Android APK");
+        
         return Ok(CreateReplyBuilder()
             .WithEmbed(embed =>
             {

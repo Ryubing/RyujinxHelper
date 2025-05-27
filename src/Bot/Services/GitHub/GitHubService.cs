@@ -112,4 +112,59 @@ public class GitHubService : BotService
             return Task.FromResult<Release>(null);
         }
     }
+    
+    public Task<Release> GetLatestKenjinxReleaseAsync()
+    {
+        try
+        {
+            var parts = KenjinxReleases.Split('/');
+            return ApiClient.Repository.Release.GetLatest(parts[0], parts[1]);
+        }
+        catch
+        {
+            return Task.FromResult<Release>(null);
+        }
+    }
+    
+    public Task<Release> GetLatestKenjinxAndroidReleaseAsync()
+    {
+        try
+        {
+            var parts = KenjinxAndroidReleases.Split('/');
+            return ApiClient.Repository.Release.GetLatest(parts[0], parts[1]);
+        }
+        catch
+        {
+            return Task.FromResult<Release>(null);
+        }
+    }
+    
+    public Task<Release> GetKenjinxReleaseAsync(string tag)
+    {
+        try
+        {
+            var parts = KenjinxReleases.Split('/');
+            return ApiClient.Repository.Release.Get(parts[0], parts[1], tag);
+        }
+        catch
+        {
+            return Task.FromResult<Release>(null);
+        }
+    }
+    
+    public Task<Release> GetKenjinxAndroidReleaseAsync(string tag)
+    {
+        try
+        {
+            var parts = KenjinxAndroidReleases.Split('/');
+            return ApiClient.Repository.Release.Get(parts[0], parts[1], tag);
+        }
+        catch
+        {
+            return Task.FromResult<Release>(null);
+        }
+    }
+
+    public const string KenjinxReleases = "Kenji-NX/Releases";
+    public const string KenjinxAndroidReleases = "Kenji-NX/Android-Releases";
 }

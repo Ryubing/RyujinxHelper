@@ -3,9 +3,9 @@ using Octokit;
 
 namespace RyuBot.Services;
 
-public readonly struct ReleaseChannels
+public readonly struct GitHubReleaseChannels
 {
-    internal ReleaseChannels(ReleaseChannelPair channelPair)
+    internal GitHubReleaseChannels(ReleaseChannelPair channelPair)
     {
         Stable = new Channel(channelPair.Stable);
         Canary = new Channel(channelPair.Canary);

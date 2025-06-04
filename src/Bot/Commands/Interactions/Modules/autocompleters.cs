@@ -2,6 +2,23 @@
 
 namespace RyuBot.Commands.Interactions.Modules;
 
+public class GitLabReleaseChannelAutocompleter : AutocompleteHandler
+{
+    public override Task<AutocompletionResult> GenerateSuggestionsAsync(
+        IInteractionContext context,
+        IAutocompleteInteraction autocompleteInteraction,
+        IParameterInfo parameter,
+        IServiceProvider services)
+    {
+        return Task.FromResult(AutocompletionResult.FromSuccess(
+            [
+                new("Stable", "Stable"),
+                new("Canary", "Canary")
+            ]
+        ));
+    }
+}
+
 public class ReleaseChannelAutocompleter : AutocompleteHandler
 {
     public override Task<AutocompletionResult> GenerateSuggestionsAsync(

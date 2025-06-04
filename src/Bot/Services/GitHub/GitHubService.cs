@@ -11,7 +11,7 @@ public class GitHubService : BotService
     private readonly CancellationTokenSource _cts;
     private readonly GitHubJwtFactory _jwtFactory;
 
-    private ReleaseChannels _releaseChannels;
+    private GitHubReleaseChannels _gitHubReleaseChannels;
     
     public GitHubService(GitHubJwtFactory jwtFactory, CancellationTokenSource cts, HttpClient httpClient)
     {
@@ -32,17 +32,17 @@ public class GitHubService : BotService
     public void Initialize(long installationId) => ExecuteBackgroundAsync(async () =>
     {
         await LoginToGithubAsync(installationId);
-        _releaseChannels = await GetReleaseChannelsAsync();
+        _gitHubReleaseChannels = await GetReleaseChannelsAsync();
         
         while (await _githubRefreshTimer.WaitForNextTickAsync(_cts.Token))
         {
             Info(LogSource.Service, "Refreshing GitHub authentication.");
             await LoginToGithubAsync(installationId);
-            _releaseChannels = await GetReleaseChannelsAsync();
+            _gitHubReleaseChannels = await GetReleaseChannelsAsync();
         }
     });
 
-    private async Task<ReleaseChannels> GetReleaseChannelsAsync()
+    private async Task<GitHubReleaseChannels> GetReleaseChannelsAsync()
         => new(JsonSerializer.Deserialize(await _http.GetStringAsync("https://ryujinx.app/api/release-channels"), ReleaseChannelPairContext.Default.ReleaseChannelPair)); 
 
     private GitHubClient CreateTopLevelClient() =>
@@ -69,7 +69,7 @@ public class GitHubService : BotService
     {
         try
         {
-            return _releaseChannels.Stable.GetReleaseAsync(ApiClient, tag);
+            return _gitHubReleaseChannels.Stable.GetReleaseAsync(ApiClient, tag);
         }
         catch
         {
@@ -81,7 +81,7 @@ public class GitHubService : BotService
     {
         try
         {
-            return _releaseChannels.Canary.GetReleaseAsync(ApiClient, tag);
+            return _gitHubReleaseChannels.Canary.GetReleaseAsync(ApiClient, tag);
         }
         catch
         {
@@ -93,7 +93,7 @@ public class GitHubService : BotService
     {
         try
         {
-            return _releaseChannels.Stable.GetLatestReleaseAsync(ApiClient);
+            return _gitHubReleaseChannels.Stable.GetLatestReleaseAsync(ApiClient);
         }
         catch
         {
@@ -105,7 +105,7 @@ public class GitHubService : BotService
     {
         try
         {
-            return _releaseChannels.Canary.GetLatestReleaseAsync(ApiClient);
+            return _gitHubReleaseChannels.Canary.GetLatestReleaseAsync(ApiClient);
         }
         catch
         {

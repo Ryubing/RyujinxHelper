@@ -61,8 +61,8 @@ public class AuthorizedReleaseChannelAutocompleter : AutocompleteHandler
         {
             RequireProjectMaintainerPreconditionAttribute.Keaton,
             [
-                new("Kenji-NX/Releases", "Kenji-NX")
-                //new("Kenji-NX Android", "kenji-nx/ryujinx")
+                new("Kenji-NX/Releases", GitHubService.KenjinxReleases),
+                new("Kenji-NX Android", GitHubService.KenjinxAndroidReleases)
             ]
         }
     };

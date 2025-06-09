@@ -51,4 +51,4 @@ jobs:
           omitBodyDuringUpdate: true
           owner: Ryubing
           repo: RyujinxHelper
-          token: ${{ secrets.RELEASE_TOKEN }}
+          token: ${{ secrets.GITHUB_TOKEN }}

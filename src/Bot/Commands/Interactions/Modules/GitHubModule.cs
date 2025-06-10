@@ -9,6 +9,9 @@ public partial class GitHubModule : RyujinxBotSlashCommandModule
     public static readonly Color MergedColor = new(0x8957E5);
     public static readonly Color ClosedColor = new(0xDA3633);
     
+    // :Angryreaction:
+    public GitLabService GitLab { get; set; }
+    
     public GitHubService GitHub { get; set; }
     
     private static Color GetColorBasedOnIssueState(Issue issue) =>

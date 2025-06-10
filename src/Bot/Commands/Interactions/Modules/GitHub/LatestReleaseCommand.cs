@@ -53,9 +53,7 @@ public partial class GitHubModule
             .FirstOrDefault(x => x.AssetName.EndsWithIgnoreCase("arm64.AppImage"));
 
         StringBuilder releaseBody = new();
-        releaseBody.AppendLine(
-                $"## {Format.Url($"Ryujinx {latest.Name}".Trim(), latest.Links.Self)}")
-            .AppendLine(DiscordHelper.Zws).AppendLine("### Downloads");
+        releaseBody.AppendLine(DiscordHelper.Zws).AppendLine("### Downloads");
         
         applyArtifact(windowsX64, "Windows x64");
         applyArtifacts((linuxX64, linuxX64AppImage), "Linux x64");
@@ -66,7 +64,8 @@ public partial class GitHubModule
         return Ok(CreateReplyBuilder()
             .WithEmbed(embed =>
             {
-                embed.WithAuthor(latest.Author.Name, latest.Author.AvatarUrl, latest.Links.Self);
+                embed.WithTitle($"Ryujinx {latest.Name}".Trim()).WithUrl(latest.Links.Self);
+                embed.WithAuthor(latest.Author.Name, latest.Author.AvatarUrl);
                 embed.WithDescription(releaseBody);
                 embed.WithTimestamp(latest.CreatedAt);
             }));
@@ -128,9 +127,7 @@ public partial class GitHubModule
         var androidApk = assets.FirstOrDefault(x => x.Name.EndsWithIgnoreCase(".apk"));
 
         StringBuilder releaseBody = new();
-        releaseBody.AppendLine(
-                $"## {Format.Url($"Kenji-NX {latest.Name}".Trim(), latest.HtmlUrl)}")
-            .AppendLine(DiscordHelper.Zws).AppendLine("### Downloads");
+        releaseBody.AppendLine(DiscordHelper.Zws).AppendLine("### Downloads");
         var downloads = 0;
         
         applyArtifact(windowsX64, "Windows x64");
@@ -143,7 +140,8 @@ public partial class GitHubModule
         return Ok(CreateReplyBuilder()
             .WithEmbed(embed =>
             {
-                embed.WithAuthor(latest.Author.Login, latest.Author.AvatarUrl, latest.HtmlUrl);
+                embed.WithTitle($"Kenji-NX {latest.Name}".Trim()).WithUrl(latest.HtmlUrl);
+                embed.WithAuthor(latest.Author.Login, latest.Author.AvatarUrl, latest.Author.HtmlUrl);
                 embed.WithDescription($"{releaseBody}\n{downloads} total downloads");
                 embed.WithTimestamp(latest.CreatedAt);
             }));

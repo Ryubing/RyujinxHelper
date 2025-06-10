@@ -14,5 +14,5 @@ A simple bot based on Volte.
     </tr>
 </table>
 
-| **Prefix**: $ | **Lead:** [@GreemDev](https://github.com/GreemDev) | **Lang:** C# | **Library:** [Discord.Net](https://github.com/discord-net/Discord.Net) | [Discord Guild](https://discord.gg/ryujinx) |
-|---------------|----------------------------------------------------|--------------|------------------------------------------------------------------------|---------------------------------------------|
+|**Lang:** C# | **Library:** [Discord.Net](https://github.com/discord-net/Discord.Net) | [Discord Guild](https://discord.gg/ryujinx) |
+|-------------|------------------------------------------------------------------------|---------------------------------------------|

@@ -6,6 +6,7 @@
   <Folder Name="/Solution Files/">
     <File Path=".github\workflows\main.yml" />
     <File Path="build.sh" />
+    <File Path="README.md" />
   </Folder>
   <Project Path="src\Bot\RyuBot.csproj" Type="Classic C#">
     <Configuration Solution="Debug|x64" Project="Debug|Any CPU" />

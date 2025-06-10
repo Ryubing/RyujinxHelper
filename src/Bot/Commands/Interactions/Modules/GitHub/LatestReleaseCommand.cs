@@ -37,21 +37,20 @@ public partial class GitHubModule
             return BadRequest(
                 $"Unknown release channel {rc}. Please wait for the autocomplete suggestions to fill in if you aren't sure what to put!");
 
-        var assets = latest.Assets.Links.Where(x =>
-            !x.AssetName.ContainsIgnoreCase("nogui") && !x.AssetName.ContainsIgnoreCase("headless")
-        ).ToArray();
-
-        var windowsX64 = assets.FirstOrDefault(x => x.AssetName.ContainsIgnoreCase("win_x64"));
-        var windowsArm64 = assets.FirstOrDefault(x => x.AssetName.ContainsIgnoreCase("win_arm64"));
-        var linuxX64 = assets.FirstOrDefault(x =>
-            x.AssetName.ContainsIgnoreCase("linux_x64") && !x.AssetName.EndsWithIgnoreCase(".AppImage"));
-        var linuxX64AppImage =
-            assets.FirstOrDefault(x => x.AssetName.ContainsIgnoreCase("x64") && x.AssetName.EndsWithIgnoreCase(".AppImage"));
-        var macOs = assets.FirstOrDefault(x => x.AssetName.ContainsIgnoreCase("macos_universal"));
-        var linuxArm64 = assets.FirstOrDefault(x =>
-            x.AssetName.ContainsIgnoreCase("linux_arm64") && !x.AssetName.EndsWithIgnoreCase(".AppImage"));
-        var linuxArm64AppImage = assets.FirstOrDefault(x =>
-            x.AssetName.ContainsIgnoreCase("arm64") && x.AssetName.EndsWithIgnoreCase(".AppImage"));
+        var windowsX64 = latest.Assets.Links
+            .FirstOrDefault(x => x.AssetName.ContainsIgnoreCase("win_x64"));
+        var windowsArm64 = latest.Assets.Links
+            .FirstOrDefault(x => x.AssetName.ContainsIgnoreCase("win_arm64"));
+        var linuxX64 = latest.Assets.Links
+            .FirstOrDefault(x => x.AssetName.ContainsIgnoreCase("linux_x64"));
+        var linuxX64AppImage = latest.Assets.Links
+            .FirstOrDefault(x => x.AssetName.EndsWithIgnoreCase("x64.AppImage"));
+        var macOs = latest.Assets.Links
+            .FirstOrDefault(x => x.AssetName.ContainsIgnoreCase("macos_universal"));
+        var linuxArm64 = latest.Assets.Links
+            .FirstOrDefault(x => x.AssetName.ContainsIgnoreCase("linux_arm64"));
+        var linuxArm64AppImage = latest.Assets.Links
+            .FirstOrDefault(x => x.AssetName.EndsWithIgnoreCase("arm64.AppImage"));
 
         StringBuilder releaseBody = new();
         releaseBody.AppendLine(

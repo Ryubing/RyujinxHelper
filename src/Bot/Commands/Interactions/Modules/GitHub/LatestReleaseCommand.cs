@@ -52,8 +52,6 @@ public partial class GitHubModule
             x.AssetName.ContainsIgnoreCase("linux_arm64") && !x.AssetName.EndsWithIgnoreCase(".AppImage"));
         var linuxArm64AppImage = assets.FirstOrDefault(x =>
             x.AssetName.ContainsIgnoreCase("arm64") && x.AssetName.EndsWithIgnoreCase(".AppImage"));
-        
-        var androidApk = assets.FirstOrDefault(x => x.AssetName.EndsWithIgnoreCase(".apk"));
 
         StringBuilder releaseBody = new();
         releaseBody.AppendLine(
@@ -65,7 +63,6 @@ public partial class GitHubModule
         applyArtifact(macOs, "macOS Universal");
         applyArtifacts((linuxArm64, linuxArm64AppImage), "Linux ARM64");
         applyArtifact(windowsArm64, "Windows ARM64");
-        applyArtifact(androidApk, "Android APK");
         
         return Ok(CreateReplyBuilder()
             .WithEmbed(embed =>

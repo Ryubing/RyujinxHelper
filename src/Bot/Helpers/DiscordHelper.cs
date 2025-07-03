@@ -1,3 +1,4 @@
+using JetBrains.Annotations;
 using RyuBot.Interactions;
 
 namespace RyuBot.Helpers;
@@ -45,14 +46,8 @@ public static class DiscordHelper
         if (user is not SocketGuildUser sgu) return null;
         
         return sgu.Roles
-            .Where(x => !requireColor || x.HasColor())
+            .Where(x => !requireColor || x.HasColor)
             .MaxBy(static x => x.Position);
-    }
-    
-    public static bool TryGetSpotifyStatus(this IUser user, out SpotifyGame spotify)
-    {
-        spotify = user.Activities.FirstOrDefault(x => x is SpotifyGame).Cast<SpotifyGame>();
-        return spotify != null;
     }
         
     public static string ToMarkdownTimestamp(long unixSeconds, char timestampType)
@@ -83,9 +78,6 @@ public static class DiscordHelper
         
     public static string GetInviteUrl(this IDiscordClient client, long permissions)
         => $"https://discord.com/oauth2/authorize?client_id={client.CurrentUser.Id}&permissions={permissions}&scope=bot%20applications.commands";
-
-    public static SocketUser GetOwner(this BaseSocketClient client)
-        => client.GetUser(Config.Owner);
     
     public static void RegisterVolteEventHandlers(this DiscordSocketClient client, ServiceProvider provider)
     {
@@ -172,18 +164,24 @@ public static class DiscordHelper
     public static Task<bool> TryDeleteAsync(this IDeletable deletable, string reason)
         => deletable.TryDeleteAsync(RequestOptions(opts => opts.AuditLogReason = reason));
 
-    public static string GetEffectiveUsername(this IGuildUser user) =>
-        user.Nickname ?? user.DisplayName ?? user.Username;
-
     public static string GetEffectiveAvatarUrl(this IUser user, ImageFormat format = ImageFormat.Auto,
         ushort size = 128)
         => user.GetAvatarUrl(format, size) ?? user.GetDefaultAvatarUrl();
 
-    public static bool HasAttachments(this IMessage message)
-        => message.Attachments.Count != 0;
+    extension(BaseSocketClient client)
+    {
+        [CanBeNull] public SocketUser BotOwner => client.GetUser(Config.Owner);
+    }
+    
+    extension(IGuildUser user)
+    {
+        public string EffectiveDisplayName => user.Nickname ?? user.DisplayName ?? user.Username;
+    }
 
-    public static bool HasColor(this IRole role)
-        => role.Color.RawValue != 0;
+    extension(IRole role)
+    {
+        public bool HasColor => role.Color.RawValue != 0;
+    }
 
     public static EmbedBuilder WithDescription(this EmbedBuilder e, StringBuilder sb)
         => e.WithDescription(sb.ToString());

@@ -58,5 +58,5 @@ public abstract class VolteBrushConverter<TConverter> : IValueConverter where TC
 
     protected IBrush GetBrush(Color color) => Brush.Parse(color.ToHexadecimalString());
 
-    protected IBrush GetBrush(Discord.Color color) => Brush.Parse(color.ToHexadecimalString());
+    protected IBrush GetBrush(Discord.Color color) => Brush.Parse(color.ToHexadecimalString(""));
 }

@@ -34,16 +34,8 @@ public static partial class Extensions
     }
     
     public static string ToHexadecimalString(this Color color, 
-        string prefix = "#")
-    {
-        return $"{color.R:X2}{color.G:X2}{color.B:X2}";
-    }
-    
-    public static bool ExistsInAny<T>(this T @this, params IEnumerable<T>[] collections) 
-        => collections.Any(x => x.Contains(@this));
-
-    public static string CalculateUptime(this Process process)
-        => (DateTime.Now - process.StartTime).Humanize(3);
+        string prefix = "#") =>
+        $"{prefix}{color.R:X2}{color.G:X2}{color.B:X2}";
 
     public static Task<IUserMessage> SendFileToAsync(this Stream stream,
         ITextChannel channel, string filename, string text = null, bool isTts = false, Embed embed = null,

@@ -19,7 +19,7 @@ public static partial class Logger
             => LogEventHandler.Call(new VolteLogEventArgs
             {
                 Source = LogSource.Sentry,
-                Severity = logLevel.ToSeverity(),
+                Severity = logLevel.Severity,
                 Message = message?.Format(args),
                 Error = exception
             });
@@ -169,8 +169,9 @@ public static partial class Logger
 
     public static string P(this string input, int padding = 10) => string.Intern(input.PadRight(padding));
 
-    public static LogSeverity ToSeverity(this SentryLevel sentryLevel) =>
-        sentryLevel switch
+    extension(SentryLevel sentryLevel)
+    {
+        public LogSeverity Severity => sentryLevel switch
         {
             SentryLevel.Debug => LogSeverity.Debug,
             SentryLevel.Info => LogSeverity.Info,
@@ -179,9 +180,11 @@ public static partial class Logger
             SentryLevel.Fatal => LogSeverity.Critical,
             _ => throw new ArgumentOutOfRangeException(nameof(sentryLevel), sentryLevel, null)
         };
+    }
 
-    public static SentryLevel ToSentryLevel(this LogSeverity severity) =>
-        severity switch
+    extension(LogSeverity severity)
+    {
+        public SentryLevel Sentry => severity switch
         {
             LogSeverity.Critical => SentryLevel.Fatal,
             LogSeverity.Error => SentryLevel.Error,
@@ -191,4 +194,5 @@ public static partial class Logger
             LogSeverity.Debug => SentryLevel.Debug,
             _ => throw new ArgumentOutOfRangeException(nameof(severity), severity, null)
         };
+    }
 }

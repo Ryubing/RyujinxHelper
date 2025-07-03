@@ -51,15 +51,11 @@ public static class Extensions
         => new EmbedBuilder().WithDescription(content ?? string.Empty)
             .WithColor(userMessage.Author.Cast<SocketGuildUser>()?.GetHighestRole()?.Color ?? Config.SuccessColor);
 
-    extension(IComponentInteraction interaction)
-    {
-        public MessageComponentId CustomId => interaction.Data.CustomId;
-    }
+    public static MessageComponentId GetId(this IComponentInteraction interaction)
+        => interaction.Data.CustomId;
     
-    extension(SocketInteractionContext<SocketMessageComponent> ctx)
-    {
-        public MessageComponentId CustomId => ctx.Interaction.Data.CustomId;
-    }
+    public static MessageComponentId GetId(this SocketInteractionContext<SocketMessageComponent> ctx)
+        => ctx.Interaction.Data.CustomId;
     
     public static ReplyBuilder<TInteraction> CreateReplyBuilder<TInteraction>(
         this SocketInteractionContext<TInteraction> context,

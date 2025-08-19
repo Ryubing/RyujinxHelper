@@ -130,12 +130,12 @@ public class ReplyBuilder<TInteraction> where TInteraction : SocketInteraction
         => WithButtons(buttons.ToArray());
 
     public ReplyBuilder<TInteraction> WithButtons(params ButtonBuilder[] buttons)
-        => WithActionRows(buttons.Select(static x => x.Build()).AsActionRow());
+        => WithActionRows(buttons.AsActionRow());
 
 
     public ReplyBuilder<TInteraction> WithSelectMenu(SelectMenuBuilder menu)
     {
-        ActionRows.Add(new ActionRowBuilder().AddComponent(menu.Build()));
+        ActionRows.Add(new ActionRowBuilder().AddComponent(menu));
         return this;
     }
 

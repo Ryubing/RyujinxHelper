@@ -10,7 +10,7 @@
     </PropertyGroup>
     <ItemGroup>
         <PackageReference Condition="'$(Configuration)' == 'Debug'" Include="Avalonia.Diagnostics" Version="11.1.2" />
-        <PackageReference Include="ConfigFactory.Avalonia" Version="0.4.2" />
+        <PackageReference Include="ConfigFactory.Avalonia" Version="0.4.3" />
         <PackageReference Include="Avalonia" Version="11.1.2" />
         <PackageReference Include="Avalonia.Desktop" Version="11.1.2" />
         <PackageReference Include="Avalonia.Themes.Fluent" Version="11.1.2" />

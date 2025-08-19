@@ -7,6 +7,11 @@ public partial class VerifierModule
     [SlashCommand("get-hash", "Get a hash for use with the Switch Verifier Homebrew.")]
     public async Task<RuntimeResult> GetHashAsync()
     {
+        if (Context.User is not SocketGuildUser member) return None();
+
+        if (member.HasRole(VerifierService.VerifiedSwitchOwnerRoleId))
+            return BadRequest("You are already verified.");
+
         await DeferAsync(true);
 
         var response = await Verifier.GetHashAsync(Context.User.Id);

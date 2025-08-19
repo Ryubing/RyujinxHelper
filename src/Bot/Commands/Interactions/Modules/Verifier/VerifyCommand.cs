@@ -10,7 +10,10 @@ public partial class VerifierModule
         string token)
     {
         if (Context.User is not SocketGuildUser member) return None();
-        
+
+        if (member.HasRole(VerifierService.VerifiedSwitchOwnerRoleId))
+            return BadRequest("You are already verified.");
+
         await DeferAsync(true);
 
         try
@@ -23,9 +26,9 @@ public partial class VerifierModule
             {
                 ResultCode.Success => Ok(String(sb =>
                 {
-                    sb.AppendLine("Success! You can now get help, and you can chat in <#1337187108002992140>.");
+                    sb.AppendLine($"Success! You can now get help, and you can chat in <#{VerifierService.VerifiedClubChannelId}>.");
                     sb.Append($"You are the {verifiedMemberCount.ToOrdinalWords(WordForm.Abbreviation)} ({verifiedMemberCount}) user to be verified for Switch ownership.");
-                }), () => member.AddRoleAsync(1334992661198930001)),
+                }), () => member.AddRoleAsync(VerifierService.VerifiedSwitchOwnerRoleId)),
                 ResultCode.InvalidInput or ResultCode.TokenIsZeroes => BadRequest("An input value was invalid."),
                 ResultCode.InvalidTokenLength => BadRequest(String(sb =>
                 {

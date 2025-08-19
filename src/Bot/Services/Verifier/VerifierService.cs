@@ -1,10 +1,14 @@
 ﻿using System.Net.Http.Json;
-using Optional = Gommon.Optional;
+
 
 namespace RyuBot.Services;
 
 public class VerifierService : BotService
 {
+    public const ulong VerifiedClubChannelId = 1337187108002992140;
+    public const ulong VerifierErrorNotificationRoleId = 1337959521833713715;
+    public const ulong VerifiedSwitchOwnerRoleId = 1334992661198930001;
+
     public const string ApiBaseUrl = "https://switch.lotp.it/verifier.php";
 
     private readonly HttpClient _httpClient;
@@ -47,7 +51,7 @@ public class VerifierService : BotService
 
     public async Task<int> SendVerificationResponseCompletedMessagesAsync(SocketGuildUser member, VerifyActionResponse response, bool isInvokedBeforeRoleAdd)
     {
-        var verifiedMemberCount = member.Guild.Users.Count(u => u.HasRole(1334992661198930001));
+        var verifiedMemberCount = member.Guild.Users.Count(u => u.HasRole(VerifiedSwitchOwnerRoleId));
 
         if (isInvokedBeforeRoleAdd)
             verifiedMemberCount++;
@@ -61,14 +65,14 @@ public class VerifierService : BotService
     private async Task SendVerificationWelcomeMessageAsync(SocketGuildUser member, VerifyActionResponse response, int verifiedMemberCount)
     {
         if (response.Result is not ResultCode.Success) return;
-        if (await _client.GetChannelAsync(1337187108002992140) is not ITextChannel channel) return;
+        if (await _client.GetChannelAsync(VerifiedClubChannelId) is not ITextChannel channel) return;
 
         await channel.SendMessageAsync($"# Verified Switch Owner #{verifiedMemberCount}\n\nWelcome {member.Mention} to the verified club!");
     }
 
     private async Task SendVerificationModlogMessageAsync(SocketGuildUser member, VerifyActionResponse response, int verifiedMemberCount)
     {
-        if (await _client.GetChannelAsync(1318250869980004394) is not ITextChannel channel) return;
+        if (await _client.GetChannelAsync(VerifiedClubChannelId) is not ITextChannel channel) return;
 
         await embed().SendToAsync(channel);
 
@@ -92,9 +96,9 @@ public class VerifierService : BotService
     
     public async Task SendVerificationModlogErrorMessageAsync(string command, SocketGuildUser member, Exception e)
     {
-        if (await _client.GetChannelAsync(1318250869980004394) is not ITextChannel channel) return;
+        if (await _client.GetChannelAsync(VerifiedClubChannelId) is not ITextChannel channel) return;
 
-        await channel.SendMessageAsync("<@&1337959521833713715>", embed: embed().Build());
+        await channel.SendMessageAsync($"<@&{VerifierErrorNotificationRoleId}>", embed: embed().Build());
 
         return;
 

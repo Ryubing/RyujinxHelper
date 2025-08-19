@@ -6,6 +6,7 @@ namespace RyuBot.Services;
 public class VerifierService : BotService
 {
     public const ulong VerifiedClubChannelId = 1337187108002992140;
+    public const ulong ModLogChannelId = 1318250869980004394;
     public const ulong VerifierErrorNotificationRoleId = 1337959521833713715;
     public const ulong VerifiedSwitchOwnerRoleId = 1334992661198930001;
 
@@ -72,7 +73,7 @@ public class VerifierService : BotService
 
     private async Task SendVerificationModlogMessageAsync(SocketGuildUser member, VerifyActionResponse response, int verifiedMemberCount)
     {
-        if (await _client.GetChannelAsync(VerifiedClubChannelId) is not ITextChannel channel) return;
+        if (await _client.GetChannelAsync(ModLogChannelId) is not ITextChannel channel) return;
 
         await embed().SendToAsync(channel);
 
@@ -96,7 +97,7 @@ public class VerifierService : BotService
     
     public async Task SendVerificationModlogErrorMessageAsync(string command, SocketGuildUser member, Exception e)
     {
-        if (await _client.GetChannelAsync(VerifiedClubChannelId) is not ITextChannel channel) return;
+        if (await _client.GetChannelAsync(ModLogChannelId) is not ITextChannel channel) return;
 
         await channel.SendMessageAsync($"<@&{VerifierErrorNotificationRoleId}>", embed: embed().Build());
 

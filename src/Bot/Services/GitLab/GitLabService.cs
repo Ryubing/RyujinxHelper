@@ -1,5 +1,7 @@
 ﻿using NGitLab;
 using NGitLab.Models;
+using Ryujinx.Systems.Update.Client;
+using Ryujinx.Systems.Update.Common;
 
 namespace RyuBot.Services;
 
@@ -8,12 +10,14 @@ public class GitLabService : BotService
     private readonly PeriodicTimer _gitlabRefreshTimer = new(12.Hours());
     private readonly CancellationTokenSource _cts;
     private readonly HttpClient _http;
+    private readonly UpdateClient _updateClient;
     
     private IWikiClient _ryubingWikiClient;
 
-    private GitLabReleaseChannels _releaseChannels;
+    private Dictionary<string, VersionCacheSource> _releaseChannels;
 
     private WikiPage[] _cachedPages;
+    public WikiPage[] WikiPages => _cachedPages ?? [];
     
     public GitLabClient Client { get; } = new(Config.GitLabAuth.InstanceUrl, Config.GitLabAuth.AccessToken);
 
@@ -27,11 +31,11 @@ public class GitLabService : BotService
         
         ExecuteBackgroundAsync(async () =>
         {
-            _releaseChannels = await GitLabReleaseChannels.GetAsync(_http);
+            _releaseChannels = await _updateClient.QueryCacheSourcesAsync();
             while (await _gitlabRefreshTimer.WaitForNextTickAsync(_cts.Token))
             {
                 Info(LogSource.Service, "Refreshing GitLab release channels.");
-                _releaseChannels = await GitLabReleaseChannels.GetAsync(_http);
+                _releaseChannels = await _updateClient.QueryCacheSourcesAsync();
             }
         });
     } 
@@ -40,11 +44,16 @@ public class GitLabService : BotService
     {
         _http = httpClient;
         _cts = cancellationTokenSource;
-    }
-
-    public WikiPage[] GetWikiPages()
-    {
-        return _cachedPages;
+        
+        _updateClient = UpdateClient.Builder()
+            .WithLogger((format, fmtArgs, caller) =>
+            {
+                Info(
+                    LogSource.Service, 
+                    fmtArgs.Length is 0 ? format : format.Format(fmtArgs),
+                    InvocationInfo.CurrentMember(caller)
+                    );
+            });
     }
     
     public async ValueTask<Exception> CreateUserAsync(string username, string email, string name = null)
@@ -74,7 +83,7 @@ public class GitLabService : BotService
     {
         try
         {
-            return _releaseChannels.Stable.GetLatestReleaseAsync(_http);
+            return GitLabApi.GetLatestReleaseAsync(_http, _releaseChannels["stable"].Id);
         }
         catch
         {
@@ -86,7 +95,7 @@ public class GitLabService : BotService
     {
         try
         {
-            return _releaseChannels.Canary.GetLatestReleaseAsync(_http);
+            return GitLabApi.GetLatestReleaseAsync(_http, _releaseChannels["canary"].Id);
         }
         catch
         {

@@ -20,6 +20,8 @@
         <PackageReference Include="OneOf" Version="3.0.271" />
         <PackageReference Include="Projektanker.Icons.Avalonia" Version="9.4.0" />
         <PackageReference Include="Projektanker.Icons.Avalonia.FontAwesome" Version="9.4.0"/>
+        <PackageReference Include="Ryujinx.Systems.Update.Common" Version="1.0.44" />
+        <PackageReference Include="Ryujinx.UpdateClient" Version="1.0.44" />
         
         <ProjectReference Include="..\Bot\RyuBot.csproj" />
     </ItemGroup>

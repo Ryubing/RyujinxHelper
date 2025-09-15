@@ -151,7 +151,7 @@ public class WikiPageAutocompleter : AutocompleteHandler
         }
 
         return Task.FromResult(AutocompletionResult.FromSuccess(
-            services.Get<GitLabService>().GetWikiPages().Select(it => new AutocompleteResult(it.Title, it.Slug))
+            services.Get<GitLabService>().WikiPages.Select(it => new AutocompleteResult(it.Title, it.Slug))
         ));
     }
 }

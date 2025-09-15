@@ -58,7 +58,7 @@ public static class UnixHelper
         var argVal = string.Empty;
         var lastChar = new char();
 
-        foreach (var (token, index) in input.WithIndex())
+        foreach (var (index, token) in input.Index())
         {
             switch (token)
             {

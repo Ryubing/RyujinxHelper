@@ -9,6 +9,7 @@ public static partial class LogAnalysisPatterns
     public static readonly Regex OriginalProjectVersion = OriginalProjectVersionRegex();
     public static readonly Regex OriginalProjectLdnVersion = OriginalProjectLdnVersionRegex();
     public static readonly Regex PrVersion = PrVersionRegex();
+    public static readonly Regex OriginalPrVersion = OriginalPrVersionRegex();
     public static readonly Regex MirrorVersion = MirrorVersionRegex();
     
     [GeneratedRegex(@"^1\.2\.\d+$")]
@@ -25,6 +26,9 @@ public static partial class LogAnalysisPatterns
     
     [GeneratedRegex(@"^1\.2\.\d\+([a-f]|\d){7}$")]
     private static partial Regex PrVersionRegex();
+    
+    [GeneratedRegex(@"^1\.1\.\d\+([a-f]|\d){7}$")]
+    private static partial Regex OriginalPrVersionRegex();
     
     [GeneratedRegex(@"^r\.(\d|\w){7}$")]
     private static partial Regex MirrorVersionRegex();

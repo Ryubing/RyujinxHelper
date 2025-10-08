@@ -83,7 +83,7 @@ public class RyujinxBot
                 $"Loaded {addedModules.Count} modules and {addedModules.Sum(m => m.Commands.Count)} commands.");
         }
 
-        Client.RegisterVolteEventHandlers(Services);
+        Client.RegisterEventHandlers(Services);
         
         Services.Get<CompatibilityCsvService>().Init();
         ExecuteBackgroundAsync(Services.Get<GitLabService>().InitAsync);

@@ -2,7 +2,7 @@
 
 namespace RyuBot.Commands.Text;
 
-public abstract class VolteTypeParser<T> : TypeParser<T>
+public abstract class ParameterUnawareTypeParser<T> : TypeParser<T>
 {
     public abstract ValueTask<TypeParserResult<T>> ParseAsync(string value, BotContext ctx);
 

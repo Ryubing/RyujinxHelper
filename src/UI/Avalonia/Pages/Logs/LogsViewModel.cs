@@ -15,15 +15,15 @@ public partial class LogsViewModel : ObservableObject
 {
     private const byte MaxLogsInMemory = 200;
 
-    private readonly object _logSync = new();
+    private readonly Lock _logSync = new();
 
     public required LogsView? View { get; init; }
 
     public required int LogsClearAmount { get; init; }
 
-    [ObservableProperty] private ObservableCollection<VolteLog> _logs = [];
+    [ObservableProperty] private ObservableCollection<LogModel> _logs = [];
 
-    [ObservableProperty] private VolteLog? _selected;
+    [ObservableProperty] private LogModel? _selected;
 
     public LogsViewModel() => Logger.Event += Receive;
 
@@ -34,7 +34,7 @@ public partial class LogsViewModel : ObservableObject
         Logger.Event -= PageManager.Shared.GetViewModel<LogsViewModel>().Receive;
     }
 
-    private void Receive(VolteLogEventArgs eventArgs)
+    private void Receive(LogEventArgs eventArgs)
     {
         if (eventArgs is
             {
@@ -49,7 +49,7 @@ public partial class LogsViewModel : ObservableObject
         {
             IfNeededRemoveLast(LogsClearAmount);
             
-            Logs.Add(new VolteLog(eventArgs));
+            Logs.Add(new LogModel(eventArgs));
                 
             Lambda.Try(() => Dispatcher.UIThread.Invoke(() => View?.Viewer?.ScrollToEnd()));
 

@@ -4,7 +4,7 @@ using Qmmands;
 namespace RyuBot.Commands.Text;
 
 [InjectTypeParser]
-public partial class TimeSpanParser : VolteTypeParser<TimeSpan>
+public partial class TimeSpanParser : ParameterUnawareTypeParser<TimeSpan>
 {
     public override ValueTask<TypeParserResult<TimeSpan>> ParseAsync(string value, BotContext _) => Parse(value);
         

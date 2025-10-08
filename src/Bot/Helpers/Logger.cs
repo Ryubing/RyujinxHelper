@@ -8,15 +8,15 @@ namespace RyuBot.Helpers;
 
 public static partial class Logger
 {
-    public static event Action<VolteLogEventArgs> Event
+    public static event Action<LogEventArgs> Event
     {
         add => LogEventHandler.Add(value);
         remove => LogEventHandler.Remove(value);
     }
 
-    private static readonly EventWithQueue<VolteLogEventArgs> LogEventHandler = new();
+    private static readonly EventWithQueue<LogEventArgs> LogEventHandler = new();
 
-    public static void Log(VolteLogEventArgs eventArgs)
+    public static void Log(LogEventArgs eventArgs)
     {
         if (!IsDebugLoggingEnabled && eventArgs.Severity is LogSeverity.Debug)
             return;
@@ -173,7 +173,7 @@ public static partial class Logger
         client.Log += m =>
         {
             if (!m.Message.ContainsAnyIgnoreCase(_ignoredLogMessages))
-                Log(new VolteLogEventArgs(m));
+                Log(new LogEventArgs(m));
 
             return Task.CompletedTask;
         };

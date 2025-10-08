@@ -13,7 +13,7 @@ public static partial class Logger
             => Version.IsDevelopment || logLevel is not SentryLevel.Debug;
             
         public void Log(SentryLevel logLevel, string message, Exception exception = null, params object[] args)
-            => LogEventHandler.Call(new VolteLogEventArgs
+            => LogEventHandler.Call(new LogEventArgs
             {
                 Source = LogSource.Sentry,
                 Severity = logLevel.ToSeverity(),
@@ -22,7 +22,7 @@ public static partial class Logger
             });
     }
 
-    private static readonly string[] VolteAscii =
+    private static readonly string[] AsciiHeader =
         new Figlet().ToAscii("RyuBot").ConcreteValue.Split("\n", StringSplitOptions.RemoveEmptyEntries);
         
     static Logger() => FilePath.Logs.Create();
@@ -34,7 +34,7 @@ public static partial class Logger
         if (!RyujinxBot.IsHeadless) return;
         
         Info(LogSource.Bot, Separator.Trim());
-        VolteAscii.ForEach(static ln => Info(LogSource.Bot, ln));
+        AsciiHeader.ForEach(static ln => Info(LogSource.Bot, ln));
         Info(LogSource.Bot, Separator.Trim());
     }
 
@@ -62,7 +62,7 @@ public static partial class Logger
     }
     
     public static void Log(LogSeverity s, LogSource from, string message, Exception e = null, InvocationInfo caller = default) =>
-        Log(new VolteLogEventArgs
+        Log(new LogEventArgs
         {
             Severity = s,
             Source = from,

@@ -4,7 +4,7 @@ using RyuBot.Commands.Text;
 namespace RyuBot.Commands.Text;
 
 [InjectTypeParser(true)]
-public sealed class BooleanParser : VolteTypeParser<bool>
+public sealed class BooleanParser : ParameterUnawareTypeParser<bool>
 {
     private static string[] _trueValues =
     [

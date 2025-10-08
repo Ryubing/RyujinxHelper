@@ -47,7 +47,7 @@
                 </Flyout>
             </ListBox.ContextFlyout>
             <ListBox.ItemTemplate>
-                <DataTemplate DataType="{x:Type local:VolteLog}">
+                <DataTemplate DataType="{x:Type local:LogModel}">
                     <Grid ColumnDefinitions="Auto,Auto,*,Auto" Margin="5">
                         <TextBlock Grid.Column="0"
                                    FontFamily="{StaticResource JetBrainsMono}"

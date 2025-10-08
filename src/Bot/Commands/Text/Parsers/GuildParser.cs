@@ -3,7 +3,7 @@
 namespace RyuBot.Commands.Text;
 
 [InjectTypeParser]
-public sealed class GuildParser : VolteTypeParser<SocketGuild>
+public sealed class GuildParser : ParameterUnawareTypeParser<SocketGuild>
 {
     public override ValueTask<TypeParserResult<SocketGuild>> ParseAsync(string value, BotContext ctx) =>
         Parse(value, ctx);

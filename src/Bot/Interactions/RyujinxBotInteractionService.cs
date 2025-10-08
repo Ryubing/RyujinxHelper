@@ -57,7 +57,7 @@ public class RyujinxBotInteractionService : BotService
 
         _backing.Log += logMessage =>
         {
-            Log(new VolteLogEventArgs(logMessage));
+            Log(new LogEventArgs(logMessage));
             return Task.CompletedTask;
         };
 

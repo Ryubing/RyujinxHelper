@@ -4,7 +4,7 @@ using Qmmands;
 namespace RyuBot.Commands.Text;
 
 [InjectTypeParser]
-public sealed class ColorParser : VolteTypeParser<Color>
+public sealed class ColorParser : ParameterUnawareTypeParser<Color>
 {
     public override ValueTask<TypeParserResult<Color>> ParseAsync(string value, BotContext _) => Parse(value);
         

@@ -87,7 +87,7 @@ public static class DiscordHelper
     public static SocketUser GetOwner(this BaseSocketClient client)
         => client.GetUser(Config.Owner);
     
-    public static void RegisterVolteEventHandlers(this DiscordSocketClient client, ServiceProvider provider)
+    public static void RegisterEventHandlers(this DiscordSocketClient client, ServiceProvider provider)
     {
         Listen(client);
 

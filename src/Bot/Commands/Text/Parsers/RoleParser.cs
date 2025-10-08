@@ -3,7 +3,7 @@ using Qmmands;
 namespace RyuBot.Commands.Text;
 
 [InjectTypeParser]
-public sealed class RoleParser : VolteTypeParser<SocketRole>
+public sealed class RoleParser : ParameterUnawareTypeParser<SocketRole>
 {
     public override ValueTask<TypeParserResult<SocketRole>> ParseAsync(string value, BotContext ctx) =>
         Parse(value, ctx);

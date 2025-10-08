@@ -8,7 +8,7 @@ using RyuBot.Helpers;
 
 namespace RyuBot.UI.Avalonia.Pages;
 
-public record struct VolteLog
+public record struct LogModel
 {
     private static readonly int LongestSeverity = Enum.GetValues<LogSeverity>()
         .Max(sev => Enum.GetName(sev)!.Length);
@@ -19,7 +19,7 @@ public record struct VolteLog
     private static readonly int SeverityPadding = (int)(LongestSeverity * 1.33);
     private static readonly int SourcePadding = (int)(LongestSource * 1.85);
 
-    public VolteLog(VolteLogEventArgs eventData)
+    public LogModel(LogEventArgs eventData)
     {
         Severity = eventData.Severity;
         Source = eventData.Source;

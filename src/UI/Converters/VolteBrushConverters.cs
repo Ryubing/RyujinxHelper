@@ -8,7 +8,7 @@ using Color = System.Drawing.Color;
 
 namespace RyuBot.UI.Converters;
 
-public class LogSeverityToBrush : VolteBrushConverter<LogSeverityToBrush>
+public class LogSeverityToBrush : DictionaryMappingBrushConverter<LogSeverityToBrush>
 {
     public LogSeverityToBrush()
     {
@@ -23,7 +23,7 @@ public class LogSeverityToBrush : VolteBrushConverter<LogSeverityToBrush>
     }
 }
 
-public class LogSourceToBrush : VolteBrushConverter<LogSourceToBrush>
+public class LogSourceToBrush : DictionaryMappingBrushConverter<LogSourceToBrush>
 {
     public LogSourceToBrush()
     {
@@ -41,7 +41,7 @@ public class LogSourceToBrush : VolteBrushConverter<LogSourceToBrush>
     }
 }
 
-public abstract class VolteBrushConverter<TConverter> : IValueConverter where TConverter : IValueConverter, new()
+public abstract class DictionaryMappingBrushConverter<TConverter> : IValueConverter where TConverter : IValueConverter, new()
 {
     private static readonly Lazy<TConverter> _shared = new(() => new());
     public static TConverter Shared => _shared.Value;

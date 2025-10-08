@@ -5,7 +5,7 @@ namespace RyuBot;
 
 public static class Config
 {
-    private static IVolteConfig _configuration;
+    private static IBotConfig _configuration;
 
     public static readonly JsonSerializerOptions JsonOptions = CreateSerializerOptions(true);
     public static readonly JsonSerializerOptions MinifiedJsonOptions = CreateSerializerOptions(false);
@@ -26,7 +26,7 @@ public static class Config
     private static bool IsValidConfig() 
         => Path.ExistsAsFile && !Path.ReadAllText().IsNullOrEmpty();
 
-    public static bool StartupChecks<TConfig>() where TConfig : IVolteConfig, new()
+    public static bool StartupChecks<TConfig>() where TConfig : IBotConfig, new()
     {
         if (!FilePath.Data.ExistsAsDirectory)
         {
@@ -44,7 +44,7 @@ public static class Config
 
     }
         
-    public static bool CreateIfAbsent<TConfig>() where TConfig : IVolteConfig, new()
+    public static bool CreateIfAbsent<TConfig>() where TConfig : IBotConfig, new()
     {
         if (IsValidConfig()) return true;
         _configuration = new TConfig
@@ -76,14 +76,14 @@ public static class Config
         return false;
     }
 
-    public static void Load<TConfig>() where TConfig : IVolteConfig, new()
+    public static void Load<TConfig>() where TConfig : IBotConfig, new()
     {
         _ = CreateIfAbsent<TConfig>();
         if (IsValidConfig())
             _configuration = JsonSerializer.Deserialize<TConfig>(Path.ReadAllText(), JsonOptions);                    
     }
 
-    public static bool Reload<TConfig>() where TConfig : IVolteConfig
+    public static bool Reload<TConfig>() where TConfig : IBotConfig
     {
         try
         {
@@ -97,7 +97,7 @@ public static class Config
         }
     }
     
-    public static bool Edit<TConfig>(TConfig newConfig) where TConfig : IVolteConfig
+    public static bool Edit<TConfig>(TConfig newConfig) where TConfig : IBotConfig
     {
         try
         {
@@ -171,7 +171,7 @@ public static class Config
     public static EnabledFeatures EnabledFeatures => _configuration?.EnabledFeatures;
 }
 
-public struct HeadlessBotConfig : IVolteConfig
+public struct HeadlessBotConfig : IBotConfig
 {
     [JsonPropertyName("discord_token")]
     public string Token { get; set; }
@@ -213,7 +213,7 @@ public struct HeadlessBotConfig : IVolteConfig
     public EnabledFeatures EnabledFeatures { get; set; }
 }
 
-public interface IVolteConfig
+public interface IBotConfig
 {
     [JsonPropertyName("discord_token")]
     public string Token { get; set; }

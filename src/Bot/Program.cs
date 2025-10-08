@@ -8,7 +8,7 @@ public static class Program
     
     private static async Task Main(string[] args)
     {
-        //this is the entrypoint for command-line volte, so log to the console. the UI will have its own log.
+        //this is the entrypoint for command-line, so log to the console. the UI will have its own log.
         OutputLogToStandardOut(); 
         
         if (!UnixHelper.TryParseNamedArguments(args, out var output))

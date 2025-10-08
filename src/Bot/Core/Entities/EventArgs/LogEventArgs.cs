@@ -1,14 +1,12 @@
-﻿using RyuBot.Helpers;
-
-namespace RyuBot.Entities;
+﻿namespace RyuBot.Entities;
 
 #nullable enable
 
-public struct VolteLogEventArgs
+public struct LogEventArgs
 {
-    public VolteLogEventArgs() { }
+    public LogEventArgs() { }
 
-    public VolteLogEventArgs(DiscordLogMessage logMessage)
+    public LogEventArgs(DiscordLogMessage logMessage)
     {
         Severity = logMessage.Severity;
         Source = LogSources.Parse(logMessage.Source);

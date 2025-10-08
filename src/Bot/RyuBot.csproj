@@ -8,8 +8,8 @@
         <RuntimeIdentifiers>linux-arm64</RuntimeIdentifiers>
         <Authors>GreemDev</Authors>
         <Company>Polyhaze</Company>
-        <PackageProjectUrl>https://github.com/Polyhaze/Volte</PackageProjectUrl>
-        <RepositoryUrl>https://github.com/Polyhaze/Volte</RepositoryUrl>
+        <PackageProjectUrl>https://github.com/Ryubing/RyujinxHelper</PackageProjectUrl>
+        <RepositoryUrl>https://github.com/Ryubing/RyujinxHelper</RepositoryUrl>
         <Copyright>MIT</Copyright>
         <Version>1.0.0.0</Version> <!-- actual version number -->
         <InformationalVersion>Dev Build</InformationalVersion> <!-- release/dev build --> 

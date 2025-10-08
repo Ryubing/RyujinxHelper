@@ -5,14 +5,19 @@ namespace RyuBot.Services;
 public class CompatibilityCsvService : BotService
 {
     private readonly HttpClient _client;
+    private readonly CancellationTokenSource _cts;
 
-    public CompatibilityCsvService(HttpClient httpClient)
+    public CompatibilityCsvService(
+        CancellationTokenSource cancellationTokenSource, 
+        HttpClient httpClient)
     {
+        _cts = cancellationTokenSource;
         _client = httpClient;
     }
 
     private static readonly FilePath CsvPath = FilePath.Data / "compatibility.csv";
-
+    private static readonly PeriodicTimer RefreshTimer = new(1.Days());
+    
     private const string DownloadUrl =
         "https://git.ryujinx.app/ryubing/ryujinx/-/raw/master/docs/compatibility.csv?ref_type=heads&inline=false";
 
@@ -36,13 +41,21 @@ public class CompatibilityCsvService : BotService
             x.TitleId.Check(it => it.ContainsIgnoreCase(nameOrTitleId))
         );
 
+    public void Init() =>
+        ExecuteBackgroundAsync(async () =>
+        {
+            await RefreshLoop();
+            while (await RefreshTimer.WaitForNextTickAsync(_cts.Token))
+                await RefreshLoop();
+        });
 
-    public async Task InitAsync()
+
+    public async Task RefreshLoop()
     {
         try
         {
             var text = await _client.GetStringAsync(DownloadUrl);
-            Info(LogSource.Service, "Compatibility CSV downloaded.");
+            Info(LogSource.Service, "Compatibility downloaded & in-memory cache updated.");
 
             Csv = new CompatibilityCsv(Sep.Reader().FromText(text));
             CsvPath.WriteAllText(text);

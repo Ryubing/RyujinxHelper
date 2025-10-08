@@ -85,8 +85,8 @@ public class RyujinxBot
 
         Client.RegisterVolteEventHandlers(Services);
         
-        await Services.Get<CompatibilityCsvService>().InitAsync();
-        ExecuteBackground(Services.Get<GitLabService>().Init);
+        Services.Get<CompatibilityCsvService>().Init();
+        ExecuteBackgroundAsync(Services.Get<GitLabService>().InitAsync);
         
         sw.Stop();
 

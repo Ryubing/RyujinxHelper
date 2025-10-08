@@ -21,7 +21,7 @@ public class GitLabService : BotService
     
     public GitLabClient Client { get; } = new(Config.GitLabAuth.InstanceUrl, Config.GitLabAuth.AccessToken);
 
-    public void Init()
+    public async Task InitAsync()
     {
         _ryubingWikiClient = Client.GetWikiClient(new ProjectId("ryubing/ryujinx"));
 
@@ -29,15 +29,12 @@ public class GitLabService : BotService
         
         Info(LogSource.Service, $"Cached {_cachedPages.Length} wiki pages.");
         
-        ExecuteBackgroundAsync(async () =>
+        _releaseChannels = await _updateClient.QueryCacheSourcesAsync();
+        while (await _gitlabRefreshTimer.WaitForNextTickAsync(_cts.Token))
         {
+            Info(LogSource.Service, "Refreshing GitLab release channels.");
             _releaseChannels = await _updateClient.QueryCacheSourcesAsync();
-            while (await _gitlabRefreshTimer.WaitForNextTickAsync(_cts.Token))
-            {
-                Info(LogSource.Service, "Refreshing GitLab release channels.");
-                _releaseChannels = await _updateClient.QueryCacheSourcesAsync();
-            }
-        });
+        }
     } 
 
     public GitLabService(HttpClient httpClient, CancellationTokenSource cancellationTokenSource)

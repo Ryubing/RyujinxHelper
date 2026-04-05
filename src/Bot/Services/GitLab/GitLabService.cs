@@ -14,7 +14,7 @@ public class GitLabService : BotService
     
     private IWikiClient _ryubingWikiClient;
 
-    private Dictionary<string, VersionCacheSource> _releaseChannels;
+    private CacheSourceMapping _releaseChannels;
 
     private WikiPage[] _cachedPages;
     public WikiPage[] WikiPages => _cachedPages ?? [];
@@ -79,23 +79,23 @@ public class GitLabService : BotService
     public void DeleteCanaryTag(string version)
     {
         Client
-            .GetRepository(_releaseChannels["canary"].Id)
+            .GetRepository(_releaseChannels.Canary!.Id)
             .Tags
             .Delete(version);
             //not async for some ungodly reason
     }
 
     public Task<bool> DeleteCanaryPackageAsync(GitLabProjectPackageJsonResponse model)
-        => GitLabApi.DeletePackageAsync(_http, _releaseChannels["canary"].Id, model.Id);
+        => GitLabApi.DeletePackageAsync(_http, _releaseChannels.Canary!.Id, model.Id);
 
     public Task<GitLabProjectPackageJsonResponse> GetCanaryPackageAsync(string version)
-        => GitLabApi.FindMatchingPackageAsync(_http, _releaseChannels["canary"].Id, model => model.Name is "Ryubing-Canary" && model.Version == version);
+        => GitLabApi.FindMatchingPackageAsync(_http, _releaseChannels.Canary!.Id, model => model.Name is "Ryubing-Canary" && model.Version == version);
     
     public Task<GitLabReleaseJsonResponse> GetLatestStableAsync()
     {
         try
         {
-            return GitLabApi.GetLatestReleaseAsync(_http, _releaseChannels["stable"].Id);
+            return GitLabApi.GetLatestReleaseAsync(_http, _releaseChannels.Stable!.Id);
         }
         catch
         {
@@ -107,7 +107,7 @@ public class GitLabService : BotService
     {
         try
         {
-            return GitLabApi.GetLatestReleaseAsync(_http, _releaseChannels["canary"].Id);
+            return GitLabApi.GetLatestReleaseAsync(_http, _releaseChannels.Canary!.Id);
         }
         catch
         {

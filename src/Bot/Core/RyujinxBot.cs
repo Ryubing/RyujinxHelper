@@ -26,7 +26,7 @@ public class RyujinxBot
         var sw = await LoginAsync(cts);
         if (sw is null)
             return;
-        
+
         try
         {
             SetAppStatus($"Logged in, took {sw.Elapsed.Humanize(2)}.",
@@ -43,16 +43,16 @@ public class RyujinxBot
             await ShutdownAsync();
         }
     }
-    
+
 
     public static async Task<Stopwatch> LoginAsync(Gommon.Optional<CancellationTokenSource> cts = default)
     {
-        if (!Config.StartupChecks<HeadlessBotConfig>()) 
+        if (!Config.StartupChecks<HeadlessBotConfig>())
             return null;
 
         Config.Load<HeadlessBotConfig>();
 
-        if (!Config.IsValidToken()) 
+        if (!Config.IsValidToken())
             return null;
 
         LogFileRestartNotice();
@@ -61,6 +61,8 @@ public class RyujinxBot
             .AddSingleton(cts.OrElse(new CancellationTokenSource()))
             .BuildServiceProvider();
 
+        Services.Get<CompatibilityCsvService>().Populate().Init();
+
         Client = Services.Get<DiscordSocketClient>();
         Cts = Services.Get<CancellationTokenSource>();
 
@@ -68,7 +70,7 @@ public class RyujinxBot
         var sw = Stopwatch.StartNew();
         await Client.LoginAsync(TokenType.Bot, Config.Token);
         await Client.StartAsync();
-        
+
         {
             var commandService = Services.Get<CommandService>();
 
@@ -84,15 +86,14 @@ public class RyujinxBot
         }
 
         Client.RegisterEventHandlers(Services);
-        
-        Services.Get<CompatibilityCsvService>().Init();
+
         ExecuteBackgroundAsync(Services.Get<GitLabService>().InitAsync);
-        
+
         sw.Stop();
 
         return sw;
     }
-    
+
     public static async Task ShutdownAsync()
     {
         Critical(LogSource.Bot, "Bot shutdown requested; shutting down and cleaning up.");

@@ -19,7 +19,7 @@ public class CompatibilityCsvService : BotService
     private static readonly PeriodicTimer RefreshTimer = new(1.Days());
     
     private const string DownloadUrl =
-        "https://git.ryujinx.app/ryubing/ryujinx/-/raw/master/docs/compatibility.csv?ref_type=heads&inline=false";
+        "https://legacy.git.ryujinx.app/ryubing/ryujinx/-/raw/master/docs/compatibility.csv?ref_type=heads&inline=false";
 
     public CompatibilityCsv Csv { get; private set; }
 
@@ -44,11 +44,15 @@ public class CompatibilityCsvService : BotService
     public void Init() =>
         ExecuteBackgroundAsync(async () =>
         {
-            await RefreshLoop();
             while (await RefreshTimer.WaitForNextTickAsync(_cts.Token))
                 await RefreshLoop();
         });
 
+    public CompatibilityCsvService Populate()
+    {
+        RefreshLoop().GetAwaiter().GetResult();
+        return this;
+    }
 
     public async Task RefreshLoop()
     {

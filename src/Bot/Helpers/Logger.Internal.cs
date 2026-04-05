@@ -25,14 +25,14 @@ public static partial class Logger
     private static readonly string[] AsciiHeader =
         new Figlet().ToAscii("RyuBot").ConcreteValue.Split("\n", StringSplitOptions.RemoveEmptyEntries);
         
-    static Logger() => FilePath.Logs.Create();
+    static Logger() => FilePath.Logs.CreateAsDirectory();
         
     private static readonly object LogSync = new();
     
     internal static void PrintHeader()
     {
         if (!RyujinxBot.IsHeadless) return;
-        
+
         Info(LogSource.Bot, Separator.Trim());
         AsciiHeader.ForEach(static ln => Info(LogSource.Bot, ln));
         Info(LogSource.Bot, Separator.Trim());
@@ -121,7 +121,7 @@ public static partial class Logger
     }
 
     public static FilePath GetLogFilePath(DateTime date) 
-        => new FilePath("logs") / string.Intern($"{date.Year}-{date.Month}-{date.Day}.log");
+        => FilePath.Logs / string.Intern($"{date.Year}-{date.Month}-{date.Day}.log");
 
     private static void Append(string m, Color c)
     {

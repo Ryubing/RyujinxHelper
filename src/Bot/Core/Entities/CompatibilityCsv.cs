@@ -80,7 +80,7 @@ public class CompatibilityEntry
         Labels = !string.IsNullOrWhiteSpace(labelsStr) 
             ? labelsStr.Split(';') 
             : [];
-        
+
         Status = colStr(row[indices.Status]).Capitalize();
 
         if (DateTime.TryParse(colStr(row[indices.LastUpdated]), out var dt))

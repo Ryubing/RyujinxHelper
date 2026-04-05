@@ -15,6 +15,7 @@ using Humanizer;
 using MenuFactory;
 using MenuFactory.Abstractions;
 using RyuBot.Entities;
+using RyuBot.Helpers;
 using RyuBot.UI.Avalonia.Pages;
 using RyuBot.UI.Helpers;
 
@@ -63,9 +64,9 @@ public class RyujinxBotApp : Application
     {
         if (AvaloniaHelper.TryGetDesktop(out var desktop))
         {
-            var shelLView = new UIShellView();
+            var shellView = new UIShellView();
 
-            XamlRoot = desktop.MainWindow = shelLView;
+            XamlRoot = desktop.MainWindow = shellView;
             
             desktop.MainWindow.Loaded += (_, _) => _notificationManager = new(XamlRoot)
             {
@@ -76,7 +77,7 @@ public class RyujinxBotApp : Application
 
             MenuFactory = new AvaloniaMenuFactory(XamlRoot);
             MenuFactory.AddMenuGroup<ShellViewMenu>();
-            shelLView.MainMenu.ItemsSource = MenuFactory.Items;
+            shellView.MainMenu.ItemsSource = MenuFactory.Items;
             
             desktop.MainWindow.Closing += (_, _) =>
             {
@@ -86,7 +87,11 @@ public class RyujinxBotApp : Application
             
             TaskScheduler.UnobservedTaskException += (_, eventArgs) =>
             {
-                NotifyError(eventArgs.Exception);
+                foreach (var err in eventArgs.Exception.InnerExceptions)
+                {
+                    NotifyError(err);
+                    Logger.Error(err);
+                }
                 eventArgs.SetObserved();
             };
 

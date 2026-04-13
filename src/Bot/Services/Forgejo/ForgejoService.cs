@@ -20,8 +20,7 @@ public class ForgejoService : BotService
 
     public async Task InitAsync()
     {
-        _cachedPages = Client.Repository.ListWikiPagesAsync("projects", "Ryubing")
-            .Result.ToArray();
+        _cachedPages = await Client.Repository.ListWikiPagesAsync("projects", "Ryubing");
 
         Info(LogSource.Service, $"Cached {_cachedPages.Length} wiki pages.");
 

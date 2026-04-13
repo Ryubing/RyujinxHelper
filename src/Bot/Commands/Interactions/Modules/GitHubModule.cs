@@ -10,7 +10,7 @@ public partial class GitHubModule : RyujinxBotSlashCommandModule
     public static readonly Color ClosedColor = new(0xDA3633);
     
     // :Angryreaction:
-    public GitLabService GitLab { get; set; }
+    public ForgejoService ForgejoService { get; set; }
     
     public GitHubService GitHub { get; set; }
     

@@ -152,7 +152,7 @@ public static class Config
             x => x.PirateRoleId
         );
 
-    public static GitLabAuth GitLabAuth => _configuration.GitLab;
+    public static ForgejoAuth ForgejoAuth => _configuration.Forgejo;
 
     public static string SentryDsn => _configuration.SentryDsn;
 
@@ -185,8 +185,8 @@ public struct HeadlessBotConfig : IBotConfig
     [JsonPropertyName("guild_info")]
     public GuildConfig[] WhitelistGuilds { get; set; }
     
-    [JsonPropertyName("gitlab_info")]
-    public GitLabAuth GitLab { get; set; }
+    [JsonPropertyName("forgejo_info")]
+    public ForgejoAuth Forgejo { get; set; }
 
     [JsonPropertyName("bot_owner")]
     public ulong Owner { get; set; }
@@ -227,8 +227,8 @@ public interface IBotConfig
     [JsonPropertyName("guild_info")]
     public GuildConfig[] WhitelistGuilds { get; set; }
     
-    [JsonPropertyName("gitlab_info")]
-    public GitLabAuth GitLab { get; set; }
+    [JsonPropertyName("forgejo_info")]
+    public ForgejoAuth Forgejo { get; set; }
     
     [JsonPropertyName("bot_owner")]
     public ulong Owner { get; set; }

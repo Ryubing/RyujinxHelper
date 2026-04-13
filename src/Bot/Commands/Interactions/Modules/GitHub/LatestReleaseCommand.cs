@@ -1,5 +1,6 @@
 ﻿using Discord.Interactions;
 using Octokit;
+using Release = ForgejoApiClient.Api.Release;
 
 namespace RyuBot.Commands.Interactions.Modules;
 
@@ -28,32 +29,32 @@ public partial class GitHubModule
     private async Task<RuntimeResult> LatestRyubingReleaseAsync(string rc)
     {
         var latest = rc.EqualsIgnoreCase("Canary")
-            ? await GitLab.GetLatestCanaryAsync()
+            ? await ForgejoService.GetLatestCanaryAsync()
             : rc.EqualsIgnoreCase("Stable")
-                ? await GitLab.GetLatestStableAsync()
+                ? await ForgejoService.GetLatestStableAsync()
                 : null;
         
         if (latest is null)
             return BadRequest(
                 $"Unknown release channel {rc}. Please wait for the autocomplete suggestions to fill in if you aren't sure what to put!");
 
-        var windowsX64 = latest.Assets.Links
-            .FirstOrDefault(x => x.AssetName.ContainsIgnoreCase("win_x64"));
-        var windowsArm64 = latest.Assets.Links
-            .FirstOrDefault(x => x.AssetName.ContainsIgnoreCase("win_arm64"));
-        var linuxX64 = latest.Assets.Links
-            .FirstOrDefault(x => x.AssetName.ContainsIgnoreCase("linux_x64"));
-        var linuxX64AppImage = latest.Assets.Links
-            .FirstOrDefault(x => x.AssetName.EndsWithIgnoreCase("x64.AppImage"));
-        var macOs = latest.Assets.Links
-            .FirstOrDefault(x => x.AssetName.ContainsIgnoreCase("macos_universal"));
-        var linuxArm64 = latest.Assets.Links
-            .FirstOrDefault(x => x.AssetName.ContainsIgnoreCase("linux_arm64"));
-        var linuxArm64AppImage = latest.Assets.Links
-            .FirstOrDefault(x => x.AssetName.EndsWithIgnoreCase("arm64.AppImage"));
+        var windowsX64 = latest.assets?
+            .FirstOrDefault(x => x.name.ContainsIgnoreCase("win_x64"));
+        var windowsArm64 = latest.assets?
+            .FirstOrDefault(x => x.name.ContainsIgnoreCase("win_arm64"));
+        var linuxX64 = latest.assets?
+            .FirstOrDefault(x => x.name.ContainsIgnoreCase("linux_x64"));
+        var linuxX64AppImage = latest.assets?
+            .FirstOrDefault(x => x.name.EndsWithIgnoreCase("x64.AppImage"));
+        var macOs = latest.assets?
+            .FirstOrDefault(x => x.name.ContainsIgnoreCase("macos_universal"));
+        var linuxArm64 = latest.assets?
+            .FirstOrDefault(x => x.name.ContainsIgnoreCase("linux_arm64"));
+        var linuxArm64AppImage = latest.assets?
+            .FirstOrDefault(x => x.name.EndsWithIgnoreCase("arm64.AppImage"));
 
         StringBuilder releaseBody = new();
-        releaseBody.AppendLine(DiscordHelper.Zws).AppendLine("### Downloads");
+        releaseBody.Append($"Total downloads: {latest.assets?.Sum(x => x.download_count ?? 0) ?? 0}").AppendLine(DiscordHelper.Zws).AppendLine("### Links");
         
         applyArtifact(windowsX64, "Windows x64");
         applyArtifacts((linuxX64, linuxX64AppImage), "Linux x64");
@@ -64,32 +65,32 @@ public partial class GitHubModule
         return Ok(CreateReplyBuilder()
             .WithEmbed(embed =>
             {
-                embed.WithTitle($"Ryujinx {latest.Name}".Trim()).WithUrl(latest.Links.Self);
-                embed.WithAuthor(latest.Author.Name, latest.Author.AvatarUrl);
+                embed.WithTitle($"Ryujinx {latest.name}".Trim()).WithUrl(latest.html_url);
+                embed.WithAuthor(latest.author!.login_name, latest.author.avatar_url);
                 embed.WithDescription(releaseBody);
-                embed.WithTimestamp(latest.CreatedAt);
+                embed.WithTimestamp(latest.created_at ?? DateTimeOffset.Now);
             }));
 
-        void applyArtifact(GitLabReleaseJsonResponse.AssetLink asset, string friendlyName)
+        void applyArtifact(ForgejoApiClient.Api.Attachment asset, string friendlyName)
         {
             if (asset is null)
                 return;
 
-            releaseBody.AppendLine($"{Format.Url(friendlyName, asset.Url)}");
+            releaseBody.AppendLine($"{Format.Url(friendlyName, asset.browser_download_url)}");
         }
 
         void applyArtifacts(
-            (GitLabReleaseJsonResponse.AssetLink Normal, GitLabReleaseJsonResponse.AssetLink AppImage) asset,
+            (ForgejoApiClient.Api.Attachment Normal, ForgejoApiClient.Api.Attachment AppImage) asset,
             string friendlyName)
         {
             if (asset.Normal != null)
             {
-                releaseBody.Append($"{Format.Url(friendlyName, asset.Normal.Url)} ");
+                releaseBody.Append($"{Format.Url(friendlyName, asset.Normal.browser_download_url)} ");
             }
 
             if (asset.AppImage != null)
             {
-                releaseBody.AppendLine($"({Format.Url("AppImage", asset.AppImage.Url)})");
+                releaseBody.AppendLine($"({Format.Url("AppImage", asset.AppImage.browser_download_url)})");
             }
             else if (asset.Normal != null)
                 releaseBody.AppendLine();

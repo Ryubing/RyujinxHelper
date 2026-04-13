@@ -87,7 +87,7 @@ public class RyujinxBot
 
         Client.RegisterEventHandlers(Services);
 
-        ExecuteBackgroundAsync(Services.Get<GitLabService>().InitAsync);
+        ExecuteBackgroundAsync(Services.Get<ForgejoService>().InitAsync);
 
         sw.Stop();
 

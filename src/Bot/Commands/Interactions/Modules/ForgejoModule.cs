@@ -3,10 +3,10 @@ using RyuBot.Interactions;
 
 namespace RyuBot.Commands.Interactions.Modules;
 
-[Group("gitlab", "Gitlab access & administration commands.")]
-public partial class GitLabModule : RyujinxBotSlashCommandModule
+[Group("forgejo", "Forgejo access & administration commands.")]
+public partial class ForgejoModule : RyujinxBotSlashCommandModule
 {
-    public GitLabService GitLab { get; set; }
+    public ForgejoService Forgejo { get; set; }
     
     // :Angryreaction:
     public GitHubService GitHub { get; set; }

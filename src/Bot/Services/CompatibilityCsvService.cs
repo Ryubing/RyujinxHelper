@@ -19,7 +19,7 @@ public class CompatibilityCsvService : BotService
     private static readonly PeriodicTimer RefreshTimer = new(1.Days());
     
     private const string DownloadUrl =
-        "https://legacy.git.ryujinx.app/ryubing/ryujinx/-/raw/master/docs/compatibility.csv?ref_type=heads&inline=false";
+        "https://git.ryujinx.app/projects/Ryubing/raw/branch/master/docs/compatibility.csv";
 
     public CompatibilityCsv Csv { get; private set; }
 

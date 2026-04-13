@@ -141,17 +141,17 @@ public class WikiPageAutocompleter : AutocompleteHandler
 
             if (!option.Focused || string.Empty.Equals(userValue)) continue;
 
-            var results = services.Get<GitLabService>()
+            var results = services.Get<ForgejoService>()
                 .SearchWikiPages(userValue).Take(5).ToArray();
 
             if (results.Length > 0)
                 return Task.FromResult(AutocompletionResult.FromSuccess(
-                    results.Select(it => new AutocompleteResult(it.Title, it.Slug))
+                    results.Select(it => new AutocompleteResult(it.title, it.sub_url))
                 ));
         }
 
         return Task.FromResult(AutocompletionResult.FromSuccess(
-            services.Get<GitLabService>().WikiPages.Select(it => new AutocompleteResult(it.Title, it.Slug))
+            services.Get<ForgejoService>().WikiPages.Select(it => new AutocompleteResult(it.title, it.sub_url))
         ));
     }
 }

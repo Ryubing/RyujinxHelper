@@ -16,13 +16,16 @@ public class ForgejoService : BotService
     private WikiPageMetaData[] _cachedPages;
     public WikiPageMetaData[] WikiPages => _cachedPages ?? [];
 
-    public ForgejoClient Client { get; } = new(new Uri(Config.ForgejoAuth.InstanceUrl), Config.ForgejoAuth.AccessToken);
+    public ForgejoClient Client { get; }
 
     public async Task InitAsync()
     {
-        _cachedPages = await Client.Repository.ListWikiPagesAsync("projects", "Ryubing");
+        if (Client != null)
+        {
+            _cachedPages = await Client.Repository.ListWikiPagesAsync("projects", "Ryubing");
 
-        Info(LogSource.Service, $"Cached {_cachedPages.Length} wiki pages.");
+            Info(LogSource.Service, $"Cached {_cachedPages.Length} wiki pages.");
+        }
 
         _releaseChannels = await _updateClient.QueryCacheSourcesAsync();
         while (await _rcRefreshTimer.WaitForNextTickAsync(_cts.Token))
@@ -34,6 +37,15 @@ public class ForgejoService : BotService
 
     public ForgejoService(CancellationTokenSource cancellationTokenSource)
     {
+        try
+        {
+            Client = new(new Uri(Config.ForgejoAuth.InstanceUrl), Config.ForgejoAuth.AccessToken);
+        }
+        catch (NullReferenceException)
+        {
+            Error(LogSource.Service, "Forgejo auth info not found; not initializing ForgejoClient");
+        }
+        
         _cts = cancellationTokenSource;
 
         _updateClient = UpdateClient.Builder()
@@ -63,7 +75,7 @@ public class ForgejoService : BotService
 
         return null;
     }
-    
+
     public Task<Release> GetLatestStableAsync()
     {
         try

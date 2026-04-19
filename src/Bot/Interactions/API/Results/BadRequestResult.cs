@@ -16,7 +16,7 @@ public class BadRequestResult<TInteraction> : BotResultBase where TInteraction :
     }
 
     public override Task ExecuteAsync() =>
-        Context.CreateReplyBuilder(true)
+        Context.CreateReply(true)
             .WithDeferral(DidDefer)
             .WithEmbed(e =>
                 e.WithTitle("No can do, partner.")

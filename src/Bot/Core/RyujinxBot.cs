@@ -88,6 +88,7 @@ public class RyujinxBot
         Client.RegisterEventHandlers(Services);
 
         ExecuteBackgroundAsync(Services.Get<ForgejoService>().InitAsync);
+        Services.Get<DataService>().Init();
 
         sw.Stop();
 

@@ -1,4 +1,5 @@
 ﻿using Discord.Interactions;
+using RyuBot.Commands.Interactions.Modules;
 using RyuBot.Entities;
 using RyuBot.Helpers;
 using RyuBot.Interactions.Results;
@@ -24,6 +25,24 @@ public class RyujinxBotInteractionService : BotService
                 : LogSeverity.Verbose,
             InteractionCustomIdDelimiters = [MessageComponentId.Separator]
         });
+
+        client.ModalSubmitted += async modal =>
+        {
+            var customId = new MessageComponentId(modal.Data.CustomId);
+            if (customId.Identifier is "account" && customId.Action is "request")
+            {
+                await ForgejoModule.RespondToAccountRequestModalAsync(modal, customId, provider);
+            }
+        };
+
+        client.ButtonExecuted += async button =>
+        {
+            var customId = new MessageComponentId(button.Data.CustomId);
+            if (customId.Identifier is "account" && customId.Action is "request" && customId.TrailingContent is "deny" or "accept")
+            {
+                await ForgejoModule.RespondToJudgementAsync(button, customId, provider);
+            }
+        };
 
         {
             client.SlashCommandExecuted += async interaction =>
@@ -102,8 +121,8 @@ public class RyujinxBotInteractionService : BotService
 #if DEBUG
                 await _backing.RegisterCommandsToGuildAsync(DiscordHelper.DevGuildId);
 #else
-            await Config.WhitelistGuilds
-                .ForEachAsync(id => _backing.RegisterCommandsToGuildAsync(id));
+                await Config.WhitelistGuilds
+                    .ForEachAsync(id => _backing.RegisterCommandsToGuildAsync(id));
 #endif
             }
             catch (Exception e)
@@ -144,7 +163,7 @@ public class RyujinxBotInteractionService : BotService
                 await botResult.ExecuteAsync();
                 break;
             case PreconditionResult unmetPreconditionResult:
-                await context.CreateReplyBuilder(true)
+                await context.CreateReply(true)
                     .WithEmbed(e =>
                         e.WithTitle(unmetPreconditionResult.ErrorReason)
                             .WithColor(Color.DarkRed)

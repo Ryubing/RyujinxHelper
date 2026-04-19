@@ -19,7 +19,7 @@ public abstract class RyujinxBotModuleBase<TInteraction> : InteractionModuleBase
 
     protected ReplyBuilder<TInteraction> CreateReplyBuilder(
         bool ephemeral = false
-    ) => Context.CreateReplyBuilder(ephemeral, DidDefer);
+    ) => Context.CreateReply(ephemeral, DidDefer);
     
     public bool IsInGuild() => Context.Guild != null;
     
@@ -34,6 +34,18 @@ public abstract class RyujinxBotModuleBase<TInteraction> : InteractionModuleBase
     
     protected OkResult<TInteraction> Ok(EmbedBuilder embed, bool ephemeral = false) 
         => new(CreateReplyBuilder(ephemeral).WithEmbeds(embed));
+    
+    protected OkResult<TInteraction> Ok(Modal modal) 
+        => new(CreateReplyBuilder().WithModal(modal));
+    
+    protected OkResult<TInteraction> Ok(ModalBuilder modal) 
+        => new(CreateReplyBuilder().WithModal(modal));
+    
+    protected OkResult<TInteraction> Ok(Action<ModalBuilder> modal) 
+        => new(CreateReplyBuilder().WithModal(modal));
+    
+    protected OkResult<TInteraction> Ok(Func<ModalBuilder, ModalBuilder> modal) 
+        => new(CreateReplyBuilder().WithModal(modal));
     
     protected OkResult<TInteraction> Ok(
         ReplyBuilder<TInteraction> reply, 

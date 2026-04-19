@@ -26,6 +26,7 @@ public class ReplyBuilder<TInteraction> where TInteraction : SocketInteraction
 
     public string? Content { get; private set; }
     public HashSet<Embed> Embeds { get; } = [];
+    public Modal? Modal { get; private set; }
     public bool IsTts { get; private set; }
     public bool IsEphemeral { get; private set; }
     public bool ShouldFollowup { get; private set; }
@@ -33,9 +34,11 @@ public class ReplyBuilder<TInteraction> where TInteraction : SocketInteraction
     public AllowedMentions AllowedMentions { get; private set; } = AllowedMentions.None;
     public Task UpdateOrNoopTask => _updateTask ?? Task.CompletedTask;
     private Task? _updateTask;
-    public HashSet<ActionRowBuilder> ActionRows { get; } = [];
+    public HashSet<ActionRowBuilder>? ActionRows { get; private set; } = [];
 
     public ReplyBuilder(SocketInteractionContext<TInteraction> ctx) => Context = ctx;
+    
+    public ReplyBuilder(TInteraction interaction) => Context = new SocketInteractionContext<TInteraction>(RyujinxBot.Client, interaction);
 
     public ReplyBuilder<TInteraction> WithContent(string content)
     {
@@ -116,12 +119,30 @@ public class ReplyBuilder<TInteraction> where TInteraction : SocketInteraction
 
     public ReplyBuilder<TInteraction> WithComponent(ComponentBuilder builder) 
         => WithActionRows(builder.ActionRows);
+    
+    public ReplyBuilder<TInteraction> WithNoActionRows()
+    {
+        ActionRows = null;
+        return this;
+    }
 
     public ReplyBuilder<TInteraction> WithActionRows(params ActionRowBuilder[] actionRows)
     {
-        actionRows.ForEach(row => ActionRows.Add(row));
+        actionRows.ForEach(row => (ActionRows ??= []).Add(row));
         return this;
     }
+    
+    public ReplyBuilder<TInteraction> WithModal(Modal modal)
+    {
+        Modal = modal;
+        return this;
+    }
+
+    public ReplyBuilder<TInteraction> WithModal(ModalBuilder modal) => WithModal(modal.Build());
+    
+    public ReplyBuilder<TInteraction> WithModal(Action<ModalBuilder> modalBuilder) => WithModal(new ModalBuilder().Apply(modalBuilder).Build());
+    
+    public ReplyBuilder<TInteraction> WithModal(Func<ModalBuilder, ModalBuilder> modalBuilder) => WithModal(new ModalBuilder().Into(modalBuilder).Build());
 
     public ReplyBuilder<TInteraction> WithActionRows(IEnumerable<ActionRowBuilder> actionRows)
         => WithActionRows(actionRows.ToArray());
@@ -154,8 +175,15 @@ public class ReplyBuilder<TInteraction> where TInteraction : SocketInteraction
             msg.Content = opt(Content);
             msg.AllowedMentions = opt(AllowedMentions);
             msg.Embeds = opt(Embeds.ToArray());
-            if (ActionRows.Count > 0)
-                msg.Components = opt(new ComponentBuilder().AddActionRows(ActionRows).Build());
+
+            if (ActionRows is null)
+            {
+                msg.Components = opt(new ComponentBuilder().Build());
+            }
+            else if (ActionRows.Count > 0)
+            {
+                msg.Components = opt(CreateComponent());
+            }
         }, options)
             .ThenApply(_ => UpdateOrNoopTask);
 
@@ -168,13 +196,27 @@ public class ReplyBuilder<TInteraction> where TInteraction : SocketInteraction
     }
 
     public Task RespondAsync(RequestOptions? options = null)
-        => Context.Interaction.RespondAsync(Content, Embeds.ToArray(), IsTts, IsEphemeral,
-                AllowedMentions, new ComponentBuilder().AddActionRows(ActionRows).Build(), options: options)
+    {
+        if (Modal != null)
+        {
+            return Context.Interaction.RespondWithModalAsync(Modal, options)
+                .Then(() => UpdateOrNoopTask);
+        }
+
+        return Context.Interaction.RespondAsync(Content, Embeds.ToArray(), IsTts, IsEphemeral,
+                AllowedMentions, CreateComponent(), options: options)
             .Then(() => UpdateOrNoopTask);
+    }
 
 
     public Task<RestFollowupMessage> FollowupAsync(RequestOptions? options = null)
         => Context.Interaction.FollowupAsync(Content, Embeds.ToArray(), IsTts, IsEphemeral,
-                AllowedMentions, new ComponentBuilder().AddActionRows(ActionRows).Build(), options: options)
+                AllowedMentions, CreateComponent(), options: options)
             .ThenApply(_ => UpdateOrNoopTask);
+
+
+    private MessageComponent CreateComponent() =>
+        ActionRows != null 
+            ? new ComponentBuilder().AddActionRows(ActionRows).Build() 
+            : new ComponentBuilder().Build();
 }

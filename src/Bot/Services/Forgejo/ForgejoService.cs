@@ -1,5 +1,7 @@
 ﻿using ForgejoApiClient;
 using ForgejoApiClient.Api;
+using RyuBot.Services.Forgejo;
+using RyuBot.Services.Forgejo.Models;
 using Ryujinx.Systems.Update.Client;
 using Ryujinx.Systems.Update.Common;
 
@@ -17,6 +19,7 @@ public class ForgejoService : BotService
     public WikiPageMetaData[] WikiPages => _cachedPages ?? [];
 
     public ForgejoClient Client { get; }
+    public IHttpClientProxy Http { get; }
 
     public async Task InitAsync()
     {
@@ -40,12 +43,13 @@ public class ForgejoService : BotService
         try
         {
             Client = new(new Uri(Config.ForgejoAuth.InstanceUrl), Config.ForgejoAuth.AccessToken);
+            Http = ForgejoApi.CreateHttpClient(Config.ForgejoAuth.InstanceUrl, Config.ForgejoAuth.AccessToken);
         }
         catch (NullReferenceException)
         {
-            Error(LogSource.Service, "Forgejo auth info not found; not initializing ForgejoClient");
+            Error(LogSource.Service, "Forgejo auth info not found; not initializing Forgejo API functionality");
         }
-        
+
         _cts = cancellationTokenSource;
 
         _updateClient = UpdateClient.Builder()
@@ -58,6 +62,12 @@ public class ForgejoService : BotService
                     );
             });
     }
+
+    public ForgejoPaginatedEndpoint<ForgejoUser> ListUsers() =>
+        Http.Paginate<ForgejoUser>(builder => builder
+            .WithBaseUrl("api/v1/admin/users")
+            .WithJsonContentParser(ForgejoUserSerializerContext.Default.IEnumerableForgejoUser)
+        );
 
     public async ValueTask<Exception> CreateUserAsync(string username, string email, string name = null)
     {

@@ -187,6 +187,16 @@ public static class DiscordHelper
 
     public static EmbedBuilder WithDescription(this EmbedBuilder e, StringBuilder sb)
         => e.WithDescription(sb.ToString());
+
+    public static EmbedBuilder WithAuthorFrom(this EmbedBuilder e, Embed embed)
+    {
+        if (embed.Author is { } author)
+        {
+            return e.WithAuthor(author.Name, author.IconUrl, author.Url);
+        }
+
+        return e;
+    }
 }
 
 public enum TimestampType : sbyte

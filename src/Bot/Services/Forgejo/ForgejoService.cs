@@ -14,7 +14,7 @@ public class ForgejoService : BotService
         .ToReadOnlyDictionary(x => x.Id, x => x);
 
     private readonly PeriodicTimer _rcRefreshTimer = new(12.Hours());
-    private readonly PeriodicTimer _userCacheRefreshTimer = new(10.Minutes());
+    private readonly PeriodicTimer _userCacheRefreshTimer = new(12.Hours());
     private readonly CancellationTokenSource _cts;
     private readonly UpdateClient _updateClient;
 

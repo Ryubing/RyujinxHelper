@@ -9,4 +9,7 @@ public sealed class EnabledFeatures
 {
     [JsonPropertyName("log_to_file")]
     public bool LogToFile { get; set; } = true;
+    
+    [JsonPropertyName("account_requesting")]
+    public bool AccountRequesting { get; set; } = false;
 }

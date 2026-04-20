@@ -10,7 +10,7 @@ public partial class ForgejoModule
     {
         await DeferAsync(true);
 
-        var error = await Forgejo.CreateUserAsync(username, email, name);
+        var (createdUser, error) = await Forgejo.CreateUserAsync(username, email, name);
 
         if (error != null)
         {
@@ -21,13 +21,13 @@ public partial class ForgejoModule
                 sb.AppendLine(Format.Code(error.Message, string.Empty));
             }));
         }
-        
 
         return Ok(
             CreateReplyBuilder()
                 .WithEmbed(eb =>
                 {
-                    eb.WithTitle($"Created user '{username}'");
+                    eb.WithTitle($"Created user '{createdUser.login}'");
+                    eb.WithUrl($"{Config.ForgejoAuth.InstanceUrl.TrimEnd('/')}/admin/users/{createdUser.id!.Value}");
                     eb.WithDescription("If the provided email was valid, they will receive a verification email.");
                 })
         );

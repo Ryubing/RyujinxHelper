@@ -7,12 +7,36 @@ namespace RyuBot.Commands.Interactions.Modules;
 
 public partial class ForgejoModule
 {
+    public DataService Persistency { get; set; }
+    
+    
     public const ulong RequestFeedId = 1495304560808296559;
 
-    [SlashCommand("request-account", "Request an account on the Ryubing Forgejo. Please do not spam this.")]
+    [SlashCommand("request-account", "Request an account on the Ryubing Forgejo. Only usable once.")]
     [RequireRyubingGuildPrecondition]
-    public Task<RuntimeResult> RequestAccountAsync()
+    public async Task<RuntimeResult> RequestAccountAsync()
     {
+        if (!(Config.EnabledFeatures?.AccountRequesting ?? false))
+        {
+            return BadRequest(
+                "Account requesting has been disabled by the bot administrator. Most likely reason is server maintenance.");
+        }
+
+        if (Persistency.HasAlreadyRequestedAccount(Context.User.Id))
+        {
+            return BadRequest("You cannot request another account.");
+        }
+
+        if (IsInGuild())
+        {
+            var requestingUser = await Context.Guild.HardCast<IGuild>().GetUserAsync(Context.User.Id);
+
+            if (requestingUser.RoleIds.Any(x => x is 1488287503872954378)) // Forgejo User role
+            {
+                return BadRequest("You cannot request another account.");
+            }
+        }
+
         return Ok(modal => modal
             .WithTitle("Request Account on our Forgejo")
             .WithCustomId(new MessageComponentId("account", "request", Context.User.Id))
@@ -54,9 +78,7 @@ public partial class ForgejoModule
             return;
         }
 
-        ForgejoUser[] users = await forgejo.ListUsers().GetAllAsync().Then(x => x?.ToArray()) ?? [];
-
-        if (ForgejoUser.IsEmailAlreadyRegistered(users, data.Email))
+        if (forgejo.IsEmailAlreadyRegistered(data.Email))
         {
             await badRequest(
                     $"The email address `{data.Email}` is already registered to a Forgejo user. If this is your email, click 'Forgot password' on the Forgejo sign in page then check your inbox.")
@@ -64,7 +86,7 @@ public partial class ForgejoModule
             return;
         }
 
-        if (ForgejoUser.IsNameTaken(users, data.Username))
+        if (forgejo.IsNameTaken(data.Username))
         {
             await badRequest($"The name `{data.Username}` is taken. Please try another one.").ExecuteAsync();
             return;
@@ -83,7 +105,7 @@ public partial class ForgejoModule
             .SendMessageAsync(embed: new EmbedBuilder()
                     .WithColor(Color.Blue)
                     .WithTitle("Account Request")
-                    .WithAuthor(requestingUser.Username, requestingUser.GetEffectiveAvatarUrl())
+                    .WithAuthor(requestingUser.Username, requestingUser.GetEffectiveAvatarUrl(), $"https://discord.com/users/{requestorId}")
                     .AddField("Username", data.Username, true)
                     .AddField("Email", Format.Spoiler(data.Email), true)
                     .AddField("Reason for requesting account", Format.Code(data.Reason, string.Empty)).Build(),
@@ -133,7 +155,7 @@ public partial class ForgejoModule
         {
             if (persistency.GetAccountRequestFor(requestorId, out var request))
             {
-                var error = await forgejo.CreateUserAsync(request.DesiredUsername, request.Email);
+                var (createdUser, error) = await forgejo.CreateUserAsync(request.DesiredUsername, request.Email);
 
                 if (error != null)
                 {
@@ -150,6 +172,7 @@ public partial class ForgejoModule
                     await component.CreateReply(deferred: true)
                         .WithEmbeds(component.Message.Embeds.First().ToEmbedBuilder()
                             .WithColor(Color.Green)
+                            .WithUrl($"{Config.ForgejoAuth.InstanceUrl.TrimEnd('/')}/admin/users/{createdUser.id!.Value}")
                             .WithFooter("This request was granted.")
                         )
                         .WithNoActionRows()

@@ -41,8 +41,6 @@
     </ItemGroup>
     <ItemGroup>
       <Folder Include="Commands\Interactions\" />
-      <Folder Include="Commands\Text\Parsers\" />
-      <Folder Include="Commands\Text\Results\" />
       <Folder Include="Resources\" />
     </ItemGroup>
 </Project>

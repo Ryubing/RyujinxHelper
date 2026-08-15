@@ -36,7 +36,7 @@ public static partial class Extensions
                     ? LogSeverity.Debug
                     : LogSeverity.Verbose,
                 AlwaysDownloadUsers = true,
-                GatewayIntents = GatewayIntents.Guilds | GatewayIntents.GuildMembers | GatewayIntents.MessageContent,
+                GatewayIntents = GatewayIntents.Guilds | GatewayIntents.GuildMembers,
                 ConnectionTimeout = 10000,
                 MessageCacheSize = 0
             }))

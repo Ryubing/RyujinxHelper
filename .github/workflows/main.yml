@@ -17,6 +17,8 @@ on:
       - '.gitattributes'
 
 concurrency: release
+permissions:
+  contents: write
 
 env:
   BASE_VERSION: "1.0"
